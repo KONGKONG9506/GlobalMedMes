@@ -1,8 +1,8 @@
-package com.globalmed.mes.mes_api.userrole.controller;
+package com.globalmed.mes.mes_api.user.userrole.controller;
 
-import com.globalmed.mes.mes_api.userrole.domain.UserRoleEntity;
-import com.globalmed.mes.mes_api.userrole.dto.UserRoleDto;
-import com.globalmed.mes.mes_api.userrole.service.UserRoleService;
+import com.globalmed.mes.mes_api.user.userrole.domain.UserRoleEntity;
+import com.globalmed.mes.mes_api.user.userrole.dto.UserRoleDto;
+import com.globalmed.mes.mes_api.user.userrole.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

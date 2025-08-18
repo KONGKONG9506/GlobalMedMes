@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.userrole.dto;
+package com.globalmed.mes.mes_api.user.userrole.dto;
 
 
 import lombok.*;

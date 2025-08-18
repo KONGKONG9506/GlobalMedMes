@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.userrole.domain;
+package com.globalmed.mes.mes_api.user.userrole.domain;
 import com.globalmed.mes.mes_api.user.domain.UserEntity;
 import com.globalmed.mes.mes_api.role.domain.RoleEntity;
 import jakarta.persistence.*;

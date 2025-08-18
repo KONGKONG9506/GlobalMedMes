@@ -1,8 +1,8 @@
-package com.globalmed.mes.mes_api.rolemenu.controller;
+package com.globalmed.mes.mes_api.menu.rolemenu.controller;
 
-import com.globalmed.mes.mes_api.rolemenu.domain.RoleMenuEntity;
-import com.globalmed.mes.mes_api.rolemenu.dto.RoleMenuDto;
-import com.globalmed.mes.mes_api.rolemenu.service.RoleMenuService;
+import com.globalmed.mes.mes_api.menu.rolemenu.domain.RoleMenuEntity;
+import com.globalmed.mes.mes_api.menu.rolemenu.dto.RoleMenuDto;
+import com.globalmed.mes.mes_api.menu.rolemenu.service.RoleMenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

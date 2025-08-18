@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.rolemenu.domain;
+package com.globalmed.mes.mes_api.menu.rolemenu.domain;
 
 import com.globalmed.mes.mes_api.role.domain.RoleEntity;
 import com.globalmed.mes.mes_api.menu.domain.MenuEntity;

@@ -1,7 +1,7 @@
-package com.globalmed.mes.mes_api.rolemenu.service;
+package com.globalmed.mes.mes_api.menu.rolemenu.service;
 
-import com.globalmed.mes.mes_api.rolemenu.domain.RoleMenuEntity;
-import com.globalmed.mes.mes_api.rolemenu.repository.RoleMenuRepository;
+import com.globalmed.mes.mes_api.menu.rolemenu.domain.RoleMenuEntity;
+import com.globalmed.mes.mes_api.menu.rolemenu.repository.RoleMenuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

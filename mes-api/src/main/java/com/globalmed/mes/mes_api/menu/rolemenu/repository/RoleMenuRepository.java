@@ -1,7 +1,7 @@
-package com.globalmed.mes.mes_api.rolemenu.repository;
+package com.globalmed.mes.mes_api.menu.rolemenu.repository;
 
 
-import com.globalmed.mes.mes_api.rolemenu.domain.RoleMenuEntity;
+import com.globalmed.mes.mes_api.menu.rolemenu.domain.RoleMenuEntity;
 import com.globalmed.mes.mes_api.role.domain.RoleEntity;
 import com.globalmed.mes.mes_api.menu.domain.MenuEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

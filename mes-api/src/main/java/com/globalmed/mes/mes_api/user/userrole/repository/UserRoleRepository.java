@@ -1,6 +1,6 @@
-package com.globalmed.mes.mes_api.userrole.repository;
+package com.globalmed.mes.mes_api.user.userrole.repository;
 
-import com.globalmed.mes.mes_api.userrole.domain.UserRoleEntity;
+import com.globalmed.mes.mes_api.user.userrole.domain.UserRoleEntity;
 import com.globalmed.mes.mes_api.user.domain.UserEntity;
 import com.globalmed.mes.mes_api.role.domain.RoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

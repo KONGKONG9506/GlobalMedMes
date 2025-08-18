@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.rolemenu.dto;
+package com.globalmed.mes.mes_api.menu.rolemenu.dto;
 
 import lombok.*;
 
