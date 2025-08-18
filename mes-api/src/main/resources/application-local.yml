@@ -13,6 +13,7 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC           # DB-UTC 일치
+    open-in-view: false            # open-in-view가 true(defalut)일시 성능에 영향이 있을 수 있음
 logging:
   level:
     root: INFO

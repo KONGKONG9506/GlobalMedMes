@@ -36,7 +36,15 @@ public class LoginController {
         Optional<UserEntity> userOpt = userService.findByUsername(request.getUsername());
 
         if (userOpt.isPresent() && encoder.matches(request.getPassword(), userOpt.get().getPasswordHash())) {
-            String token = jwtProvider.createToken(userOpt.get().getUsername());
+            UserEntity user = userOpt.get();
+
+            // JWT 발급
+            String token = jwtProvider.createToken(user.getUsername());
+
+            // 세션에 사용자 정보 저장 (2시간 유지)
+            session.setAttribute("USER", user);
+            session.setMaxInactiveInterval(60 * 60 * 2);
+
             return new LoginResponse(true, token, "Login success");
         } else {
             log.error("Login failed for username='{}': user found={}, password match={}",
