@@ -1,43 +1,24 @@
 package com.globalmed.mes.mes_api.role.controller;
 
-import com.globalmed.mes.mes_api.role.domain.RoleEntity;
-import com.globalmed.mes.mes_api.role.dto.RoleDto;
-import com.globalmed.mes.mes_api.role.service.RoleService;
+import com.globalmed.mes.mes_api.user.userrole.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/user-roles")
 @RequiredArgsConstructor
 public class RoleController {
 
-    private final RoleService roleService;
+    private final UserRoleService userRoleService;
 
-    // 모든 Role 조회
-    @GetMapping
-    public List<RoleDto> getAllRoles() {
-        return roleService.findAll().stream()
-                .map(r -> new RoleDto(
-                        r.getRoleId(),
-                        r.getRoleCode(),
-                        r.getRoleName(),
-                        r.getDescription()
-                ))
-                .collect(Collectors.toList());
-    }
-
-    // Role 생성
-    @PostMapping
-    public RoleDto createRole(@RequestBody RoleEntity roleEntity) {
-        RoleEntity saved = roleService.save(roleEntity);
-        return new RoleDto(
-                saved.getRoleId(),
-                saved.getRoleCode(),
-                saved.getRoleName(),
-                saved.getDescription()
-        );
+    /** 로그인한 사용자의 역할 조회 */
+    @GetMapping("/my")
+    public ResponseEntity<List<String>> getMyRoles(@AuthenticationPrincipal String username) {
+        List<String> roles = userRoleService.getRolesByUsername(username);
+        return ResponseEntity.ok(roles);
     }
 }

@@ -1,13 +1,18 @@
 package com.globalmed.mes.mes_api.menu.rolemenu.repository;
 
+
 import com.globalmed.mes.mes_api.menu.rolemenu.domain.RoleMenuEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface RoleMenuRepository extends JpaRepository<RoleMenuEntity, Long> {
-    List<RoleMenuEntity> findByRole_RoleId(Long roleId);
-    List<RoleMenuEntity> findByMenu_MenuId(Long menuId);
-    Optional<RoleMenuEntity> findByRole_RoleIdAndMenu_MenuId(Long roleId, Long menuId);
+
+    @Query("SELECT rm FROM RoleMenuEntity rm " +
+            "WHERE rm.role.roleCode IN :roles " +
+            "AND rm.allowRead = 1 " +
+            "AND rm.isDeleted = 0")
+    List<RoleMenuEntity> findByRoleCodesWithRead(@Param("roles") List<String> roles);
 }

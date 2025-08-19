@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtProvider {
@@ -36,12 +37,13 @@ public class JwtProvider {
         }
     }
 
-    public String createToken(String userName) {
+    public String createToken(String userName, List<String> roles) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMs);
 
         return Jwts.builder()
                 .subject(userName)
+                .claim("roles", roles) // DB에서 가져온 권한 목록
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(signingKey)
@@ -68,5 +70,13 @@ public class JwtProvider {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+    public List<String> getRoles(String token) {
+        return Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("roles", List.class);
     }
 }

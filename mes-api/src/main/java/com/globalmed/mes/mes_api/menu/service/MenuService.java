@@ -13,15 +13,8 @@ import java.util.Optional;
 public class MenuService {
     private final MenuRepository menuRepository;
 
-    public Optional<MenuEntity> findByMenuCode(String menuCode) {
-        return menuRepository.findByMenuCode(menuCode);
-    }
-
-    public MenuEntity save(MenuEntity menu) {
-        return menuRepository.save(menu);
-    }
-
-    public List<MenuEntity> getAllMenus() {
-        return menuRepository.findAll();
+    /** 활성화된 메뉴만 조회 */
+    public List<MenuEntity> getActiveMenus() {
+        return menuRepository.findByIsActiveAndIsDeleted((byte)1, (byte)0);
     }
 }

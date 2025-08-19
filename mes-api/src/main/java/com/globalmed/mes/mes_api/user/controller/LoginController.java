@@ -1,11 +1,14 @@
 package com.globalmed.mes.mes_api.user.controller;
 
+import com.globalmed.mes.mes_api.role.domain.RoleEntity;
 import com.globalmed.mes.mes_api.user.domain.UserEntity;
 import com.globalmed.mes.mes_api.user.dto.LockResponse;
 import com.globalmed.mes.mes_api.user.dto.LoginRequest;
 import com.globalmed.mes.mes_api.user.dto.LoginResponse;
 import com.globalmed.mes.mes_api.user.service.JwtProvider;
 import com.globalmed.mes.mes_api.user.service.UserService;
+import com.globalmed.mes.mes_api.user.userrole.domain.UserRoleEntity;
+import com.globalmed.mes.mes_api.user.userrole.service.UserRoleService;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -27,6 +31,7 @@ public class LoginController {
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final BCryptPasswordEncoder encoder;
+    private final UserRoleService userRoleService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
@@ -53,8 +58,9 @@ public class LoginController {
         if (encoder.matches(request.getPassword(), user.getPasswordHash())) {
             // 성공: 실패횟수 초기화
             userService.resetFailedAttempts(user);
+            List<String> roles = userRoleService.getRolesByUserId(user.getUserId());
             // JWT 발급
-            String token = jwtProvider.createToken(user.getUsername());
+            String token = jwtProvider.createToken(user.getUsername(), roles);
 
             // 세션에 사용자 정보 저장 (2시간 유지)
             session.setAttribute("USER", user);

@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.user.userrole.service;
 
+import com.globalmed.mes.mes_api.user.service.UserService;
 import com.globalmed.mes.mes_api.user.userrole.domain.UserRoleEntity;
 import com.globalmed.mes.mes_api.user.userrole.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,21 +12,22 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserRoleService {
+
     private final UserRoleRepository userRoleRepository;
+    private final UserService userService; // 추가
 
-    public UserRoleEntity save(UserRoleEntity userRole) {
-        return userRoleRepository.save(userRole);
+    /** userId 기준으로 역할 코드 목록 반환 */
+    public List<String> getRolesByUserId(String userId) {
+        return userRoleRepository.findByUser_UserId(userId)
+                .stream()
+                .map(ur -> ur.getRole().getRoleCode())
+                .toList();
     }
 
-    public List<UserRoleEntity> findByUserId(String userId) {
-        return userRoleRepository.findByUser_UserId(userId);
-    }
-
-    public List<UserRoleEntity> findByRoleId(Long roleId) {
-        return userRoleRepository.findByRole_RoleId(roleId);
-    }
-
-    public Optional<UserRoleEntity> findByUserIdAndRoleId(String userId, Long roleId) {
-        return userRoleRepository.findByUser_UserIdAndRole_RoleId(userId, roleId);
+    /** username 기준으로 역할 코드 목록 반환 */
+    public List<String> getRolesByUsername(String username) {
+        return userService.findByUsername(username)
+                .map(user -> getRolesByUserId(user.getUserId()))
+                .orElse(List.of()); // 사용자 없으면 빈 리스트 반환
     }
 }
