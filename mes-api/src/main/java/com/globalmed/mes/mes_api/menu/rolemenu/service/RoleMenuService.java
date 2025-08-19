@@ -8,21 +8,24 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class RoleMenuService {
     private final RoleMenuRepository roleMenuRepository;
-
-    public Optional<RoleMenuEntity> findByRoleAndMenu(com.globalmed.mes.mes_api.role.domain.RoleEntity role,
-                                                      com.globalmed.mes.mes_api.menu.domain.MenuEntity menu) {
-        return roleMenuRepository.findByRoleAndMenu(role, menu);
-    }
 
     public RoleMenuEntity save(RoleMenuEntity roleMenu) {
         return roleMenuRepository.save(roleMenu);
     }
 
-    public List<RoleMenuEntity> findAll() {
-        return roleMenuRepository.findAll();
+    public List<RoleMenuEntity> findByRoleId(Long roleId) {
+        return roleMenuRepository.findByRole_RoleId(roleId);
+    }
+
+    public List<RoleMenuEntity> findByMenuId(Long menuId) {
+        return roleMenuRepository.findByMenu_MenuId(menuId);
+    }
+
+    public Optional<RoleMenuEntity> findByRoleIdAndMenuId(Long roleId, Long menuId) {
+        return roleMenuRepository.findByRole_RoleIdAndMenu_MenuId(roleId, menuId);
     }
 }

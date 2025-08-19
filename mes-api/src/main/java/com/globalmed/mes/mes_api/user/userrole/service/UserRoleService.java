@@ -8,21 +8,24 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class UserRoleService {
     private final UserRoleRepository userRoleRepository;
-
-    public Optional<UserRoleEntity> findByUserAndRole(com.globalmed.mes.mes_api.user.domain.UserEntity user,
-                                                      com.globalmed.mes.mes_api.role.domain.RoleEntity role) {
-        return userRoleRepository.findByUserAndRole(user, role);
-    }
 
     public UserRoleEntity save(UserRoleEntity userRole) {
         return userRoleRepository.save(userRole);
     }
 
-    public List<UserRoleEntity> findAll() {
-        return userRoleRepository.findAll();
+    public List<UserRoleEntity> findByUserId(String userId) {
+        return userRoleRepository.findByUser_UserId(userId);
+    }
+
+    public List<UserRoleEntity> findByRoleId(Long roleId) {
+        return userRoleRepository.findByRole_RoleId(roleId);
+    }
+
+    public Optional<UserRoleEntity> findByUserIdAndRoleId(String userId, Long roleId) {
+        return userRoleRepository.findByUser_UserIdAndRole_RoleId(userId, roleId);
     }
 }

@@ -16,6 +16,8 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
+    public static final int MAX_FAILED_ATTEMPTS = 3;   // 최대 실패 횟수
+    private static final int LOCK_TIME_MINUTES = 1;   // 잠금 시간 (분)
 
 //    public boolean register(UserEntity user) {
 //        if (userRepository.existsByUsername(user.getUsername())) {
@@ -46,5 +48,42 @@ public class UserService {
     public UserEntity getUserById(String id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found: " + id));
+    }
+    /** 로그인 성공 시 실패 횟수 초기화 및 마지막 로그인 시간 갱신 */
+    public void resetFailedAttempts(UserEntity user) {
+        user.setFailedLoginCount(0);
+        user.setLockedUntil(null);
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    /** 로그인 실패 시 횟수 증가 및 필요시 계정 잠금 */
+    public void increaseFailedAttempts(UserEntity user) {
+        int newFailCount = user.getFailedLoginCount() + 1;
+        user.setFailedLoginCount(newFailCount);
+
+        if (newFailCount >= MAX_FAILED_ATTEMPTS) {
+            user.setLockedUntil(LocalDateTime.now().plusMinutes(LOCK_TIME_MINUTES));
+        }
+
+        userRepository.save(user);
+    }
+
+    /** 계정이 잠겨있는지 확인 */
+    public boolean isAccountLocked(UserEntity user) {
+        if (user.getLockedUntil() != null) {
+            LocalDateTime now = LocalDateTime.now();
+            if (user.getLockedUntil().isAfter(now)) {
+                // 아직 잠겨 있음
+                return true;
+            } else {
+                // 잠금 해제 시점 지남 → 초기화
+                user.setLockedUntil(null);
+                user.setFailedLoginCount(0);
+                userRepository.save(user);
+                return false;
+            }
+        }
+        return false;
     }
 }
