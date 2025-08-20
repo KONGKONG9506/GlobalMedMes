@@ -12,7 +12,7 @@
 
 ## 1. 필수 설치
 - Java 17
-- Node 18 / pnpm
+- Node 18 / vite 5.4.10 / pnpm
 - Docker Desktop(WSL2 활성)
 
 버전 확인

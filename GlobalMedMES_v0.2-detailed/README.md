@@ -6,7 +6,6 @@ MESA-11 기반 스텐트 제조 스마트 MES. v1 시나리오(로그인→지�
 
 - 00_Overview
   - docs/00_Overview/OnePager.md — 프로젝트 한 장 요약(목표/범위/일정/성공기준)
-  - docs/00_Overview/SuccessCriteria.md — 성공 기준(DoD) 상세 표
 - 10_Architecture
   - docs/10_Architecture/ADRs.md — 아키텍처 결정 기록(UTC, RESTRICT, code_id 등 불변 원칙)
   - docs/10_Architecture/Security_RBAC.md — 역할/권한/메뉴 가드 설계 요약
@@ -88,7 +87,7 @@ Set-ExecutionPolicy RemoteSigned
 - PR 체크리스트
   - db_lint critical=0
   - 스모크 통과(T01~T16 중 바뀐 영역)
-  - API 에러 포맷 표준 준수
+  - API 에러 포맷 표준 준수 
   - 성능 기준 영향 시 노트 첨부
 
 ## 라이선스/문의

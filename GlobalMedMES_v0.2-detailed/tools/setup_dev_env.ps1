@@ -208,7 +208,7 @@ server:
   port: ${ApiPort}
 spring:
   datasource:
-    url: "jdbc:mysql://localhost:${MysqlPort}/${DbName}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC"
+    url: jdbc:mysql://localhost:${MysqlPort}/${DbName}?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
     username: ${DbUser}
     password: ${DbPass}
   jpa:
