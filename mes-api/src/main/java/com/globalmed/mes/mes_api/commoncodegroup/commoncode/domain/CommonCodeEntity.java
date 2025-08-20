@@ -44,7 +44,7 @@ public class CommonCodeEntity {
     private String description;
 
     @Column(name = "use_yn", length = 1, nullable = false)
-    private String useYn;
+    private char useYn;
 
     @Column(name = "sort_order")
     private Integer sortOrder;
@@ -64,6 +64,6 @@ public class CommonCodeEntity {
     @Column(name = "modified_by", length = 50)
     private String modifiedBy;
 
-    @Column(name = "modified_at")
+    @Column(name = "modified_at", insertable = false, updatable = false)
     private LocalDateTime modifiedAt;
 }

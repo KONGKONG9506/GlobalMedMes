@@ -61,6 +61,6 @@ public class RoleMenuEntity {
     @Column(name = "modified_by", length = 50, nullable = true)
     private String modifiedBy;
 
-    @Column(name = "modified_at", nullable = true)
+    @Column(name = "modified_at", insertable = false, updatable = false, nullable = true)
     private LocalDateTime modifiedAt;
 }

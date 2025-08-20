@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.commoncodegroup.commoncode.workorder.domain;
+package com.globalmed.mes.mes_api.workorder.domain;
 
 import com.globalmed.mes.mes_api.commoncodegroup.commoncode.domain.CommonCodeEntity;
 import jakarta.persistence.*;
@@ -86,6 +86,6 @@ public class WorkOrderEntity {
     @Column(name = "modified_by", length = 50)
     private String modifiedBy;
 
-    @Column(name = "modified_at")
+    @Column(name = "modified_at", insertable = false, updatable = false)
     private LocalDateTime modifiedAt;
 }
