@@ -4,6 +4,7 @@ import com.globalmed.mes.mes_api.commoncodegroup.commoncode.domain.CommonCodeEnt
 import com.globalmed.mes.mes_api.commoncodegroup.commoncode.repository.CommonCodeRepository;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.dto.WorkOrderRequestDto;
+import com.globalmed.mes.mes_api.workorder.dto.WorkOrderResponseDto;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,8 +53,19 @@ public class WorkOrderService {
         return workOrderRepository.save(wo);
     }
     @Transactional(readOnly = true)
-    public WorkOrderEntity getWorkOrderById(String id) {
-        return workOrderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 작업지시 ID입니다: " + id));
+    public WorkOrderResponseDto getWorkOrderById(String id) {WorkOrderEntity wo = workOrderRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 작업지시 ID입니다: " + id));
+
+        WorkOrderResponseDto dto = new WorkOrderResponseDto();
+        dto.setWorkOrderId(wo.getWorkOrderId());
+        dto.setWorkOrderNumber(wo.getWorkOrderNumber());
+        dto.setItemId(wo.getItemId());
+        dto.setProcessId(wo.getProcessId());
+        dto.setEquipmentId(wo.getEquipmentId());
+        dto.setOrderQty(wo.getOrderQty());
+        dto.setProducedQty(wo.getProducedQty());
+        dto.setStatusCode(wo.getStatusCode().getCode());
+
+        return dto;
     }
 }

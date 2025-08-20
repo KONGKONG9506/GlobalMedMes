@@ -80,7 +80,7 @@ public class WorkOrderEntity {
     @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "modified_by", length = 50)
