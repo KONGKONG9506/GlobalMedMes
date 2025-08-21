@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.process.productionplan.productionperformance.domain;
+package com.globalmed.mes.mes_api.process.productionperformance.domain;
 
 import com.globalmed.mes.mes_api.equipment.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
@@ -79,7 +79,7 @@ public class ProductionPerformanceEntity {
     @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "modified_by", length = 50)

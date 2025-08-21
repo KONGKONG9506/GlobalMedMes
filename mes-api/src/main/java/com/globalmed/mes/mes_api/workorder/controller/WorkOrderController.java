@@ -47,7 +47,7 @@ public class WorkOrderController {
     /**
      * (옵션) 작업지시 단건 조회
      */
-    @GetMapping("/{workOrderNumber}")
+    @GetMapping("/by-number/{workOrderNumber}")
     public ResponseEntity<?> getWorkOrderByNumber(@PathVariable("workOrderNumber") String workOrderNumber) {
         try {
             WorkOrderResponseDto dto = workOrderService.getWorkOrderByNumber(workOrderNumber);
