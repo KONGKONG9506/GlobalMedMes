@@ -17,7 +17,7 @@ public class CaptchaController {
     @GetMapping("/captcha")
     public void getCaptcha(HttpServletResponse response, HttpSession session) throws IOException {
         // 너비 130, 높이 48, 자리수 4개
-        SpecCaptcha captcha = new SpecCaptcha(130, 48, 1);
+        SpecCaptcha captcha = new SpecCaptcha(130, 48, 4);
         captcha.setCharType(Captcha.TYPE_DEFAULT);//영문 숫자 혼합
         session.setAttribute("captcha", captcha.text().toLowerCase());
         response.setHeader("Pragma","No-cache");

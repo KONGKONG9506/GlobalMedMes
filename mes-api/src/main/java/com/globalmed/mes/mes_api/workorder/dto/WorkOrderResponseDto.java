@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.workorder.dto;
 
+import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,16 @@ public class WorkOrderResponseDto {
     private BigDecimal orderQty;
     private BigDecimal producedQty;
     private String statusCode; // code 문자열만
+    public static WorkOrderResponseDto fromEntity(WorkOrderEntity entity) {
+        WorkOrderResponseDto dto = new WorkOrderResponseDto();
+        dto.workOrderId = entity.getWorkOrderId();
+        dto.workOrderNumber = entity.getWorkOrderNumber();
+        dto.itemId = entity.getItemId();
+        dto.processId = entity.getProcessId();
+        dto.equipmentId = entity.getEquipmentId();
+        dto.orderQty = entity.getOrderQty();
+        dto.producedQty = entity.getProducedQty();
+        dto.statusCode = entity.getStatusCode().getCode();
+        return dto;
+    }
 }

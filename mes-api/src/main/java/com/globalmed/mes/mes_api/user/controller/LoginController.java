@@ -35,12 +35,13 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpSession session) {
-        String sessionCaptcha = (String) session.getAttribute("captcha");
-        if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(request.getCaptchaAnswer())) {
-            log.error("CAPTCHA mismatch: session='{}', request='{}'", sessionCaptcha, request.getCaptchaAnswer());
-            return ResponseEntity.badRequest()
-                    .body(new LoginResponse(false, null, "captcha가 틀렸습니다"));
-        }
+//        CAPTCHA 임시 비활성화
+//        String sessionCaptcha = (String) session.getAttribute("captcha");
+//        if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(request.getCaptchaAnswer())) {
+//            log.error("CAPTCHA mismatch: session='{}', request='{}'", sessionCaptcha, request.getCaptchaAnswer());
+//            return ResponseEntity.badRequest()
+//                    .body(new LoginResponse(false, null, "captcha가 틀렸습니다"));
+//        }
 
         Optional<UserEntity> userOpt = userService.findByUsername(request.getUsername());
 
