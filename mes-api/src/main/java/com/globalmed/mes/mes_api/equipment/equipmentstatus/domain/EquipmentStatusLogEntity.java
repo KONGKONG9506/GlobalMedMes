@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.equipment.equipmentstatuslog.domain;
+package com.globalmed.mes.mes_api.equipment.equipmentstatus.domain;
 
 import com.globalmed.mes.mes_api.commoncodegroup.commoncode.domain.CommonCodeEntity;
 import com.globalmed.mes.mes_api.equipment.domain.EquipmentEntity;
