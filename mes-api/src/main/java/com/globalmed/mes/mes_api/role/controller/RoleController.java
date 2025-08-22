@@ -1,6 +1,6 @@
 package com.globalmed.mes.mes_api.role.controller;
 
-import com.globalmed.mes.mes_api.user.userrole.service.UserRoleService;
+import com.globalmed.mes.mes_api.auth.userrole.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

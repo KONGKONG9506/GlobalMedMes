@@ -1,9 +1,6 @@
 package com.globalmed.mes.mes_api.workorder.controller;
 
-import com.globalmed.mes.mes_api.workorder.dto.WorkOrderMessageResponseDto;
-import com.globalmed.mes.mes_api.workorder.dto.WorkOrderRequestDto;
-import com.globalmed.mes.mes_api.workorder.dto.WorkOrderResponseDto;
-import com.globalmed.mes.mes_api.workorder.dto.WorkOrderStatusUpdateRequestDto;
+import com.globalmed.mes.mes_api.workorder.dto.*;
 import com.globalmed.mes.mes_api.workorder.exception.WorkOrderNotFoundException;
 import com.globalmed.mes.mes_api.workorder.service.WorkOrderService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/work-orders")
@@ -59,6 +58,11 @@ public class WorkOrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new WorkOrderMessageResponseDto("예외 서버 오류: " + ex.getMessage()));
         }
+    }
+    @GetMapping
+    public ResponseEntity<List<WorkOrderListResponseDto>> getAllWorkOrders() {
+        List<WorkOrderListResponseDto> list = workOrderService.getAllWorkOrders();
+        return ResponseEntity.ok(list);
     }
     @GetMapping("/{workOrderId}")
     public ResponseEntity<?> getWorkOrderById(@PathVariable("workOrderId") String workOrderId) {

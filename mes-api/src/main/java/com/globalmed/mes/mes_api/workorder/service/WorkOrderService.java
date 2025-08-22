@@ -3,6 +3,7 @@ package com.globalmed.mes.mes_api.workorder.service;
 import com.globalmed.mes.mes_api.commoncodegroup.commoncode.domain.CommonCodeEntity;
 import com.globalmed.mes.mes_api.commoncodegroup.commoncode.repository.CommonCodeRepository;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
+import com.globalmed.mes.mes_api.workorder.dto.WorkOrderListResponseDto;
 import com.globalmed.mes.mes_api.workorder.dto.WorkOrderRequestDto;
 import com.globalmed.mes.mes_api.workorder.dto.WorkOrderResponseDto;
 import com.globalmed.mes.mes_api.workorder.exception.WorkOrderNotFoundException;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,6 +76,23 @@ public class WorkOrderService {
     private boolean isValidTransition(String currentStatus, String toStatus) {
         return (currentStatus.equals("P") && (toStatus.equals("R") || toStatus.equals("C"))) ||
                 (currentStatus.equals("R") && toStatus.equals("C"));
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<WorkOrderListResponseDto> getAllWorkOrders() {
+        return workOrderRepository.findAll().stream()
+                .map(wo -> new WorkOrderListResponseDto(
+//      지금 리스트에 전부다 보내는 중 일부만 보낼거면 DTO와 이부분에서 보내지 않을 항목 삭제
+                        wo.getWorkOrderId(),
+                        wo.getWorkOrderNumber(),
+                        wo.getStatusCode().getCode(),
+                        wo.getStatusCode().getName(),
+                        wo.getItemId(),
+                        wo.getEquipmentId(),
+                        wo.getProcessId()
+                ))
+                .collect(Collectors.toList());
     }
 
     @Transactional

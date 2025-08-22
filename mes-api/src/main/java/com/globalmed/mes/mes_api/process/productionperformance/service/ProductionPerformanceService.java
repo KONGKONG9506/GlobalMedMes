@@ -3,6 +3,7 @@ package com.globalmed.mes.mes_api.process.productionperformance.service;
 import com.globalmed.mes.mes_api.equipment.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.equipment.repository.EquipmentRepository;
 import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
+import com.globalmed.mes.mes_api.process.productionperformance.dto.ProductionPerformanceListResponseDto;
 import com.globalmed.mes.mes_api.process.repository.ProcessRepository;
 import com.globalmed.mes.mes_api.process.productionperformance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.process.productionperformance.dto.ProductionPerformanceRequestDto;
@@ -23,6 +24,22 @@ public class ProductionPerformanceService {
     private final ProductionPerformanceRepository performanceRepository;
     private final ProcessRepository processRepository;
     private final EquipmentRepository equipmentRepository;
+    //목록 조회 서비스
+    @Transactional(readOnly = true)
+    public List<ProductionPerformanceListResponseDto> getAllPerformances() {
+        return performanceRepository.findAll().stream()
+                .map(p -> new ProductionPerformanceListResponseDto(
+//      일부만 보낼꺼면 보내지 않을 항목을 아래와 ListDto에서 삭제
+                        p.getPerformanceId(),
+                        p.getWorkOrderId(),
+                        p.getItemId(),
+                        p.getProcess().getProcessId(),
+                        p.getEquipment().getEquipmentId(),
+                        p.getProducedQty(),
+                        p.getDefectQty()
+                ))
+                .toList();
+    }
 
     @Transactional
     public ProductionPerformanceResponseDto createPerformance(

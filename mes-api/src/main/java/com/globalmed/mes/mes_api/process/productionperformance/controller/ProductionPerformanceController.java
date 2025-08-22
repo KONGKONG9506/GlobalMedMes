@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.process.productionperformance.controller;
 
+import com.globalmed.mes.mes_api.process.productionperformance.dto.ProductionPerformanceListResponseDto;
 import com.globalmed.mes.mes_api.process.productionperformance.dto.ProductionPerformanceRequestDto;
 import com.globalmed.mes.mes_api.process.productionperformance.dto.ProductionPerformanceResponseDto;
 import com.globalmed.mes.mes_api.process.productionperformance.service.ProductionPerformanceService;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/performances")
@@ -26,7 +29,12 @@ public class ProductionPerformanceController {
         ProductionPerformanceResponseDto response = performanceService.createPerformance(dto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
+    // 퍼포먼스 목록 조회
+    @GetMapping
+    public ResponseEntity<List<ProductionPerformanceListResponseDto>> getAllPerformances() {
+        List<ProductionPerformanceListResponseDto> list = performanceService.getAllPerformances();
+        return ResponseEntity.ok(list);
+    }
     // 단일 퍼포먼스 조회
     @GetMapping("/{performanceId}")
     public ResponseEntity<?> getPerformanceById(@PathVariable("performanceId") Long performanceId) {

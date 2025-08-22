@@ -1,6 +1,6 @@
 package com.globalmed.mes.mes_api.config;
 
-import com.globalmed.mes.mes_api.user.service.JwtProvider;
+import com.globalmed.mes.mes_api.auth.service.JwtProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,8 +46,8 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/h2-console", "/h2-console/**"
                         ).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+//                        .requestMatchers("/admin/**").hasRole("ADMIN") 특정 권한 이상만 요청 가능 예시
+//                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

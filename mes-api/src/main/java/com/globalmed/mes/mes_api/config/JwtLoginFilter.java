@@ -1,6 +1,6 @@
 package com.globalmed.mes.mes_api.config;
 
-import com.globalmed.mes.mes_api.user.service.JwtProvider;
+import com.globalmed.mes.mes_api.auth.service.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
