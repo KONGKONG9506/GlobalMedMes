@@ -20,14 +20,14 @@ public interface PerformanceRepo extends JpaRepository<ProductionPerformanceEnti
         BigDecimal getGood();     // ← get 접두어
     }
 
-    @Query(value = """
-    select COALESCE(sum(pp.produced_qty),0) as produced,
-           COALESCE(sum(pp.produced_qty - pp.defect_qty),0) as good
-      from tb_production_performance pp
-     where pp.equipment_id = :eqp
-       and pp.start_time >= :fromTs
-       and pp.start_time <  :toTs
-  """, nativeQuery = true)
+    @Query("""
+    select COALESCE(sum(pp.producedQty), 0) as produced,
+           COALESCE(sum(pp.producedQty - pp.defectQty), 0) as good
+      from ProductionPerformanceEntity pp
+     where pp.equipmentId = :eqp
+       and pp.startTime >= :fromTs
+       and pp.startTime < :toTs
+    """)
     PerfAgg aggregateForDay(@Param("eqp") String equipmentId,
                             @Param("fromTs") LocalDateTime fromTs,
                             @Param("toTs") LocalDateTime toTs);
