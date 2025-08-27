@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.common.api;
 
+import com.globalmed.mes.mes_api.auth.exception.CaptchaException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -68,5 +69,18 @@ public class GlobalExceptionHandler {
                 "path", req.getRequestURI(),
                 "method", req.getMethod()
         ));
+    }
+    @ExceptionHandler(CaptchaException.class)
+    public ResponseEntity<ErrorResponse> handleCaptcha(CaptchaException ex, HttpServletRequest req) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(ErrorResponse.builder()
+                        .code(ex.getCode())
+                        .message(ex.getMessage())
+                        .details(ex.getDetails())
+                        .timestamp(OffsetDateTime.now(ZoneOffset.UTC).toString())
+                        .path(req.getRequestURI())
+                        .method(req.getMethod())
+                        .build()
+                );
     }
 }
