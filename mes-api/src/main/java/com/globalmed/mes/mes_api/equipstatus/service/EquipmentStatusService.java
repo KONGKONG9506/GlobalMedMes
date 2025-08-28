@@ -4,6 +4,7 @@ import com.globalmed.mes.mes_api.code.CodeEntity;
 import com.globalmed.mes.mes_api.code.CodeRepo;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentStatusLogEntity;
 import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentStatusRepo;
+import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.time.*;
 public class EquipmentStatusService {
     private final EquipmentStatusRepo repo;
     private final CodeRepo codeRepo;
+    private final ProductionLogService productionLogService;
 
     @Transactional
     public EquipmentStatusLogEntity startRun(EquipStatusReq req) {
@@ -25,6 +27,12 @@ public class EquipmentStatusService {
         LocalDateTime start = parseUtc(req.startTimeUtc());
         LocalDateTime end = req.endTimeUtc() == null || req.endTimeUtc().isBlank() ? null : parseUtc(req.endTimeUtc());
         if (end != null && end.isBefore(start)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
+
+
+        // downtime 기록 (RUN으로 변경될 때만)
+        if ("RUN".equals(status.getCode())) {
+            productionLogService.logDowntime(req.equipmentId(), status.getCode());
+        }
 
         EquipmentStatusLogEntity log = new EquipmentStatusLogEntity();
         log.setEquipmentId(req.equipmentId());

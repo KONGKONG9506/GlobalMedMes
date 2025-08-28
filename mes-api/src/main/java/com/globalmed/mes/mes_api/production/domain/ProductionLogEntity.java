@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.production.domain;
 
+import com.globalmed.mes.mes_api.code.CodeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,8 +28,15 @@ public class ProductionLogEntity {
     @Column(name = "process_id", length = 36, nullable = false)
     private String processId;
 
-    @Column(name = "event_type", length = 50, nullable = false)
-    private String eventType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "event_type", nullable = false)
+    private CodeEntity eventType; 
+    // tb_code(PROD_EVENT: START/END/GOODQTY/DEFECTQTY/DOWNTIME)
+    //('PROD_EVENT','START','시작','Y',1,'seed'),
+    //('PROD_EVENT','END','종료','Y',2,'seed'),
+    //('PROD_EVENT','GOODQTY','양품수','Y',3,'seed'),
+    //('PROD_EVENT','DEFECTQTY','불량수','Y',4,'seed'),
+    //('PROD_EVENT','DOWNTIME','비가동','Y',5,'seed')
 
     @Column(name = "event_timestamp", nullable = false)
     private LocalDateTime eventTimestamp;

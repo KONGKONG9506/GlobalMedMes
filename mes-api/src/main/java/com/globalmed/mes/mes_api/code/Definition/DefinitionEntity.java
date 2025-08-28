@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.common;
+package com.globalmed.mes.mes_api.code.Definition;
 
 import jakarta.persistence.*;
 import lombok.Getter;
