@@ -2,19 +2,18 @@ package com.globalmed.mes.mes_api.production.service;
 
 import com.globalmed.mes.mes_api.code.CodeEntity;
 import com.globalmed.mes.mes_api.code.CodeRepo;
-import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentStatusLogEntity;
 import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentStatusRepo;
 import com.globalmed.mes.mes_api.production.domain.ProductionLogEntity;
 import com.globalmed.mes.mes_api.production.repository.ProductionLogRepo;
-import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -140,4 +139,6 @@ public class ProductionLogService {
 //            statusRepo.save(lastStatus);
 //        }
 //    }
+
+
 }

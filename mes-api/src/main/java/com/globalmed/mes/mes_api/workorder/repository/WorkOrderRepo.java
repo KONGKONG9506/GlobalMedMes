@@ -14,10 +14,5 @@ public interface WorkOrderRepo extends JpaRepository<WorkOrderEntity, String>,
         JpaSpecificationExecutor<WorkOrderEntity> {
 
     Optional<WorkOrderEntity> findByWorkOrderNumber(String workOrderNumber);
-    @Query("SELECT w FROM WorkOrderEntity w " +
-            "JOIN w.statusCode s " +
-            "WHERE w.equipmentId = :equipmentId " +
-            "AND s.code = 'P' " +
-            "ORDER BY w.startTs ASC")
-    List<WorkOrderEntity> findInProgressByEquipmentId(@Param("equipmentId") String equipmentId);
+
 }

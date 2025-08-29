@@ -43,6 +43,9 @@ public class KpiDataEntity {
     @Column(name = "actual_yield", precision = 5, scale = 2, nullable = false)
     private BigDecimal actualYield = BigDecimal.ZERO;
 
+    @Column(name = "actual_defect_rate", precision = 5, scale = 2, nullable = false)
+    private BigDecimal actualDefectRate = BigDecimal.ZERO;
+
     @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 

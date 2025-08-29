@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.code.Definition;
+package com.globalmed.mes.mes_api.code.Definition.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
