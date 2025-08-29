@@ -16,7 +16,6 @@ import java.time.*;
 public class EquipmentStatusService {
     private final EquipmentStatusRepo repo;
     private final CodeRepo codeRepo;
-    private final ProductionLogService productionLogService;
 
     @Transactional
     public EquipmentStatusLogEntity startRun(EquipStatusReq req) {
@@ -29,10 +28,6 @@ public class EquipmentStatusService {
         if (end != null && end.isBefore(start)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
 
 
-        // downtime 기록 (RUN으로 변경될 때만)
-        if ("RUN".equals(status.getCode())) {
-            productionLogService.logDowntime(req.equipmentId(), status.getCode());
-        }
 
         EquipmentStatusLogEntity log = new EquipmentStatusLogEntity();
         log.setEquipmentId(req.equipmentId());

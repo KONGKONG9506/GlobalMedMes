@@ -71,16 +71,14 @@ public class GlobalExceptionHandler {
         ));
     }
     @ExceptionHandler(CaptchaException.class)
-    public ResponseEntity<ErrorResponse> handleCaptcha(CaptchaException ex, HttpServletRequest req) {
+    public ResponseEntity<?> handleCaptcha(CaptchaException ex, HttpServletRequest req) {
         return ResponseEntity.status(ex.getStatus())
-                .body(ErrorResponse.builder()
-                        .code(ex.getCode())
-                        .message(ex.getMessage())
-                        .details(ex.getDetails())
-                        .timestamp(OffsetDateTime.now(ZoneOffset.UTC).toString())
-                        .path(req.getRequestURI())
-                        .method(req.getMethod())
-                        .build()
-                );
+                .body(Map.of(
+                        "code", ex.getCode(),
+                        "message", ex.getMessage(),
+                        "path", req.getRequestURI(),
+                        "method", req.getMethod()
+                ));
     }
+
 }

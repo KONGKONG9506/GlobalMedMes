@@ -38,90 +38,106 @@ public class ProductionLogService {
 
     /* 양품 생산 기록 */
     public void logGood(String workOrderId, String equipmentId, String processId, int goodQty) {
-        ProductionLogEntity log = new ProductionLogEntity();
-        log.setWorkOrderId(workOrderId);
-        log.setEquipmentId(equipmentId);
-        log.setProcessId(processId);
-        log.setEventType(getEventCode("GOODQTY"));
-        log.setEventValue(BigDecimal.valueOf(goodQty));
-        log.setEventTimestamp(LocalDateTime.now());
-        productionLogRepository.save(log);
+        try {
+            ProductionLogEntity logGood = new ProductionLogEntity();
+            logGood.setWorkOrderId(workOrderId);
+            logGood.setEquipmentId(equipmentId);
+            logGood.setProcessId(processId);
+            logGood.setEventType(getEventCode("GOODQTY"));
+            logGood.setEventValue(BigDecimal.valueOf(goodQty));
+            logGood.setEventTimestamp(LocalDateTime.now());
+            productionLogRepository.save(logGood);
+        } catch (Exception ex) {
+            throw new IllegalStateException("PROD_LOG_Good_ERROR: " + ex.getMessage(), ex);
+        }
     }
 
     /* 불량 기록 */
     public void logDefect(String workOrderId, String equipmentId, String processId, int defectQty) {
-        ProductionLogEntity log = new ProductionLogEntity();
-        log.setWorkOrderId(workOrderId);
-        log.setEquipmentId(equipmentId);
-        log.setProcessId(processId);
-        log.setEventType(getEventCode("DEFECTQTY"));
-        log.setEventValue(BigDecimal.valueOf(defectQty));
-        log.setEventTimestamp(LocalDateTime.now());
-        productionLogRepository.save(log);
+        try {
+            ProductionLogEntity logDefect = new ProductionLogEntity();
+            logDefect.setWorkOrderId(workOrderId);
+            logDefect.setEquipmentId(equipmentId);
+            logDefect.setProcessId(processId);
+            logDefect.setEventType(getEventCode("DEFECTQTY"));
+            logDefect.setEventValue(BigDecimal.valueOf(defectQty));
+            logDefect.setEventTimestamp(LocalDateTime.now());
+            productionLogRepository.save(logDefect);
+        } catch (Exception ex) {
+            throw new IllegalStateException("PROD_LOG_Defect_ERROR: " + ex.getMessage(), ex);
+        }
     }
 
     /* 시작 기록 */
     public void logStart(String workOrderId, String equipmentId, String processId) {
-        ProductionLogEntity log = new ProductionLogEntity();
-        log.setWorkOrderId(workOrderId);
-        log.setEquipmentId(equipmentId);
-        log.setProcessId(processId);
-        log.setEventType(getEventCode("START"));
-        log.setEventValue(BigDecimal.ZERO);
-        log.setEventTimestamp(LocalDateTime.now());
-        productionLogRepository.save(log);
+        try {
+            ProductionLogEntity logStart = new ProductionLogEntity();
+            logStart.setWorkOrderId(workOrderId);
+            logStart.setEquipmentId(equipmentId);
+            logStart.setProcessId(processId);
+            logStart.setEventType(getEventCode("START"));
+            logStart.setEventValue(BigDecimal.ZERO);
+            logStart.setEventTimestamp(LocalDateTime.now());
+            productionLogRepository.save(logStart);
+        } catch (Exception ex) {
+            throw new IllegalStateException("PROD_LOG_Start_ERROR: " + ex.getMessage(), ex);
+        }
     }
 
     /* 종료 기록 */
     public void logEnd(String workOrderId, String equipmentId, String processId) {
-        ProductionLogEntity log = new ProductionLogEntity();
-        log.setWorkOrderId(workOrderId);
-        log.setEquipmentId(equipmentId);
-        log.setProcessId(processId);
-        log.setEventType(getEventCode("END"));
-        log.setEventValue(BigDecimal.ZERO);
-        log.setEventTimestamp(LocalDateTime.now());
-        productionLogRepository.save(log);
-    }
-
-    @Transactional
-    public void logDowntime(String equipmentId, String newStatusCodeStr) {
-        // 새로운 상태 코드
-        CodeEntity newStatusCode = getEquipmentStatusCode(newStatusCodeStr);
-
-        // JPQL로 endTime이 NULL인 마지막 DOWN/IDLE 상태 조회
-        Optional<EquipmentStatusLogEntity> lastInactiveOpt = statusRepo.findLatestInactiveStatus(equipmentId);
-
-        if (lastInactiveOpt.isPresent() && newStatusCode.getCode().equals("RUN")) {
-            EquipmentStatusLogEntity lastStatus = lastInactiveOpt.get();
-
-            // 진행 중 워크오더 조회
-            Optional<WorkOrderEntity> currentWO = workOrderRepo.findInProgressByEquipmentId(equipmentId)
-                    .stream().findFirst();
-
-            // workOrderId, processId 추출 (없으면 null 처리 가능)
-            String workOrderId = currentWO.map(WorkOrderEntity::getWorkOrderId).orElse(null);
-            String processId = currentWO.map(WorkOrderEntity::getProcessId).orElse(null);
-
-            // downtime 계산
-            long downtimeMinutes = Duration.between(
-                    lastStatus.getStartTime(),
-                    LocalDateTime.now()
-            ).toMinutes();
-
-            // ProductionLog에 downtime 기록
-            ProductionLogEntity downtimeLog = new ProductionLogEntity();
-            downtimeLog.setWorkOrderId(workOrderId);
-            downtimeLog.setEquipmentId(equipmentId);
-            downtimeLog.setProcessId(processId);
-            downtimeLog.setEventType(getEventCode("DOWNTIME"));
-            downtimeLog.setEventValue(BigDecimal.valueOf(downtimeMinutes));
-            downtimeLog.setEventTimestamp(LocalDateTime.now());
-            productionLogRepository.save(downtimeLog);
-
-            // 이전 장비 상태 종료 시간만 업데이트
-            lastStatus.setEndTime(LocalDateTime.now());
-            statusRepo.save(lastStatus);
+        try {
+            ProductionLogEntity logEnd = new ProductionLogEntity();
+            logEnd.setWorkOrderId(workOrderId);
+            logEnd.setEquipmentId(equipmentId);
+            logEnd.setProcessId(processId);
+            logEnd.setEventType(getEventCode("END"));
+            logEnd.setEventValue(BigDecimal.ZERO);
+            logEnd.setEventTimestamp(LocalDateTime.now());
+            productionLogRepository.save(logEnd);
+        } catch (Exception ex) {
+            throw new IllegalStateException("PROD_LOG_END_ERROR: " + ex.getMessage(), ex);
         }
     }
+
+//    @Transactional
+//    public void logDowntime(String equipmentId, String newStatusCodeStr) {
+//        // 새로운 상태 코드
+//        CodeEntity newStatusCode = getEquipmentStatusCode(newStatusCodeStr);
+//
+//        // JPQL로 endTime이 NULL인 마지막 DOWN/IDLE 상태 조회
+//        Optional<EquipmentStatusLogEntity> lastInactiveOpt = statusRepo.findLatestInactiveStatus(equipmentId);
+//
+//        if (lastInactiveOpt.isPresent() && newStatusCode.getCode().equals("RUN")) {
+//            EquipmentStatusLogEntity lastStatus = lastInactiveOpt.get();
+//
+//            // 진행 중 워크오더 조회
+//            Optional<WorkOrderEntity> currentWO = workOrderRepo.findInProgressByEquipmentId(equipmentId)
+//                    .stream().findFirst();
+//
+//            // workOrderId, processId 추출 (없으면 null 처리 가능)
+//            String workOrderId = currentWO.map(WorkOrderEntity::getWorkOrderId).orElse(null);
+//            String processId = currentWO.map(WorkOrderEntity::getProcessId).orElse(null);
+//
+//            // downtime 계산
+//            long downtimeMinutes = Duration.between(
+//                    lastStatus.getStartTime(),
+//                    LocalDateTime.now()
+//            ).toMinutes();
+//
+//            // ProductionLog에 downtime 기록
+//            ProductionLogEntity downtimeLog = new ProductionLogEntity();
+//            downtimeLog.setWorkOrderId(workOrderId);
+//            downtimeLog.setEquipmentId(equipmentId);
+//            downtimeLog.setProcessId(processId);
+//            downtimeLog.setEventType(getEventCode("DOWNTIME"));
+//            downtimeLog.setEventValue(BigDecimal.valueOf(downtimeMinutes));
+//            downtimeLog.setEventTimestamp(LocalDateTime.now());
+//            productionLogRepository.save(downtimeLog);
+//
+//            // 이전 장비 상태 종료 시간만 업데이트
+//            lastStatus.setEndTime(LocalDateTime.now());
+//            statusRepo.save(lastStatus);
+//        }
+//    }
 }

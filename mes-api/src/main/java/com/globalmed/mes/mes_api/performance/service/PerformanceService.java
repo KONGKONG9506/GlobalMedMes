@@ -2,6 +2,7 @@ package com.globalmed.mes.mes_api.performance.service;
 
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
+import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
 import jakarta.transaction.Transactional;
@@ -17,6 +18,7 @@ public class PerformanceService {
 
     private final PerformanceRepo performanceRepo;
     private final WorkOrderRepo workOrderRepo;
+    private final ProductionLogService productionLogService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
@@ -89,8 +91,17 @@ public class PerformanceService {
 
         // 누적 갱신
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
-
         BigDecimal good = req.producedQty().subtract(req.defectQty());
+
+        // Good/Defect 이벤트 로그 남기기
+        if (good.compareTo(BigDecimal.ZERO) > 0) {
+            productionLogService.logGood(woId, eqp, proc, good.intValue());
+        }
+        if (req.defectQty().compareTo(BigDecimal.ZERO) > 0) {
+            productionLogService.logDefect(woId, eqp, proc, req.defectQty().intValue());
+        }
+
+
         return new Res(p.getPerformanceId(), good);
     }
 

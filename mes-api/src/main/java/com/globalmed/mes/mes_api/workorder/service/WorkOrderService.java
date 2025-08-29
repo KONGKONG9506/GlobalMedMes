@@ -3,6 +3,7 @@ package com.globalmed.mes.mes_api.workorder.service;
 
 
 import com.globalmed.mes.mes_api.code.CodeRepo;
+import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
 import jakarta.transaction.Transactional;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class WorkOrderService {
     private final WorkOrderRepo woRepo;
     private final CodeRepo codeRepo;
+    private final ProductionLogService productionLogService;
 
     @Transactional
     public WorkOrderEntity create(String workOrderNumber, String itemId, String processId,
@@ -66,6 +68,22 @@ public class WorkOrderService {
                 .orElseThrow(() -> new IllegalStateException("WO_STATUS_"+to+"_NOT_FOUND"));
 
         wo.setStatusCode(next);           // status_code_id 매핑
+        // ✅ 상태 전이에 따른 로그 기록
+        if (cur.equals("P") && to.equals("R")) {
+            // Released → START 로그
+            productionLogService.logStart(
+                    wo.getWorkOrderId(),
+                    wo.getEquipmentId(),
+                    wo.getProcessId()
+            );
+        } else if (cur.equals("R") && to.equals("C")) {
+            // Completed → END 로그
+            productionLogService.logEnd(
+                    wo.getWorkOrderId(),
+                    wo.getEquipmentId(),
+                    wo.getProcessId()
+            );
+        }
         return wo;                        // @Transactional로 플러시
     }
 
