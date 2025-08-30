@@ -1,87 +1,97 @@
 package com.globalmed.mes.mes_api.kpi.service;
 
-import com.globalmed.mes.mes_api.code.Definition.service.DefinitionService;
-import com.globalmed.mes.mes_api.production.domain.ProductionLogEntity;
-import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
+import com.globalmed.mes.mes_api.kpi.KpiDataConstants;
+import com.globalmed.mes.mes_api.kpi.domain.KpiDataEntity;
+import com.globalmed.mes.mes_api.kpi.repository.KpiDataRepo;
+import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class KpiDataService {
 
-    private final DefinitionService definitionService;
+    private final KpiCalculationService kpiCalculationService;
+    private final KpiDataRepo kpiDataRepo;
 
     /**
-     * ProductionLog 기반 양품/불량/총 생산 수 집계
+     * ProductionPerformanceEntity 기반 KPI 실시간 계산 및 저장/갱신
      */
-    private Map<String, BigDecimal> aggregateProductionLogs(List<ProductionLogEntity> logs) {
-        BigDecimal goodQty = logs.stream()
-                .filter(l -> "GOODQTY".equals(l.getEventType().getCode()))
-                .map(ProductionLogEntity::getEventValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    @Transactional
+    public void saveKpiFromPerformance(List<ProductionPerformanceEntity> performances) {
+        LocalDate kpiDate = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
 
-        BigDecimal defectQty = logs.stream()
-                .filter(l -> "DEFECTQTY".equals(l.getEventType().getCode()))
-                .map(ProductionLogEntity::getEventValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        for (ProductionPerformanceEntity p : performances) {
+            // KPI 계산
+            BigDecimal goodQty = p.getProducedQty().subtract(p.getDefectQty());
+            BigDecimal defectQty = p.getDefectQty();
+            BigDecimal totalQty = goodQty.add(defectQty);
 
-        return Map.of(
-                "good_qty", goodQty,
-                "defect_qty", defectQty,
-                "total_qty", goodQty.add(defectQty)
-        );
+            BigDecimal yield = kpiCalculationService.calculateYieldFromValues(goodQty, totalQty);
+            BigDecimal defectRate = kpiCalculationService.calculateDefectRateFromValues(defectQty, totalQty);
+            BigDecimal runSeconds = BigDecimal.valueOf(java.time.Duration.between(p.getStartTime(), p.getEndTime()).toSeconds());
+            BigDecimal oee = kpiCalculationService.calculateOeeFromValues(goodQty, totalQty, runSeconds, runSeconds);
+
+            // 실시간 KPI는 performance_id 기준 UNIQUE
+            KpiDataEntity kpi = kpiDataRepo.findByPerformanceIdAndKpiDate(p.getPerformanceId(), kpiDate)
+                    .orElseGet(KpiDataEntity::new);
+
+            kpi.setKpiDate(kpiDate);
+            kpi.setEquipmentId(p.getEquipmentId());
+            kpi.setProcessId(p.getProcessId());
+            kpi.setItemId(p.getItemId());
+            kpi.setPerformanceId(p.getPerformanceId());
+            kpi.setAggregationType(KpiDataConstants.AGG_REALTIME);
+
+            kpi.setActualYield(yield);
+            kpi.setActualDefectRate(defectRate);
+            kpi.setActualOee(oee);
+            kpi.setActualProductivity(BigDecimal.ZERO); // 필요하면 계산 로직 추가
+
+            kpi.setStartTime(p.getStartTime());
+            kpi.setEndTime(p.getEndTime());
+            kpi.setCalcStatus(KpiDataConstants.CALC_SUCCESS);
+            kpi.setCalcAt(now);
+            kpi.setCreatedBy("system");
+
+            kpiDataRepo.save(kpi);
+        }
     }
 
     /**
-     * OEE 계산 (임시, 런타임 계산식 변경 TODO)
+     * 주기적으로(일일) KPI 저장 (performance_id 없이)
      */
-    public BigDecimal calculateOee(WorkOrderEntity wo, List<ProductionLogEntity> logs) {
-        Map<String, BigDecimal> agg = aggregateProductionLogs(logs);
-        // 실제 가동 시간 계산 (초 단위)
-        BigDecimal runTime = BigDecimal.valueOf(Duration.between(wo.getStartTs(), wo.getEndTs()).toSeconds());
+    @Transactional
+    public void saveBatchKpi(KpiDataEntity batchKpi) {
+        // 배치 KPI의 aggregationType을 DAILY_BATCH로 강제
+        batchKpi.setAggregationType("DAILY_BATCH");
 
-        // TODO: CMMS/인원관리 개발 후 런타임 계산식 변경 필요
-        Map<String, Object> params = Map.of(
-                "good_qty", agg.get("good_qty"),
-                "total_qty", agg.get("total_qty"),
-                "run_time", runTime,
-                "planned_time", runTime // 현재는 임시로 run_time = planned_time
-        );
+        // UNIQUE: kpi_date + equipment + process + item + aggregation_type
+        KpiDataEntity kpi = kpiDataRepo.findByKpiDateAndEquipmentIdAndProcessIdAndItemIdAndAggregationType(
+                batchKpi.getKpiDate(),
+                batchKpi.getEquipmentId(),
+                batchKpi.getProcessId(),
+                batchKpi.getItemId(),
+                batchKpi.getAggregationType()
+        ).orElse(batchKpi);
 
-        return definitionService.calculate("OEE", params);
-    }
+        kpi.setActualOee(batchKpi.getActualOee());
+        kpi.setActualProductivity(batchKpi.getActualProductivity());
+        kpi.setActualYield(batchKpi.getActualYield());
+        kpi.setActualDefectRate(batchKpi.getActualDefectRate());
+        kpi.setStartTime(batchKpi.getStartTime());
+        kpi.setEndTime(batchKpi.getEndTime());
+        kpi.setCalcStatus(KpiDataConstants.CALC_SUCCESS);
+        kpi.setCalcAt(LocalDateTime.now());
+        kpi.setCreatedBy(batchKpi.getCreatedBy());
 
-    /**
-     * 수율(Yield) 계산
-     */
-    public BigDecimal calculateYield(List<ProductionLogEntity> logs) {
-        Map<String, BigDecimal> agg = aggregateProductionLogs(logs);
-
-        Map<String, Object> params = Map.of(
-                "good_qty", agg.get("good_qty"),
-                "total_qty", agg.get("total_qty")
-        );
-
-        return definitionService.calculate("Yield", params);
-    }
-
-    /**
-     * 불량률(Defect Rate) 계산
-     */
-    public BigDecimal calculateDefectRate(List<ProductionLogEntity> logs) {
-        Map<String, BigDecimal> agg = aggregateProductionLogs(logs);
-
-        Map<String, Object> params = Map.of(
-                "defect_qty", agg.get("defect_qty"),
-                "total_qty", agg.get("total_qty")
-        );
-
-        return definitionService.calculate("Defect Rate", params);
+        kpiDataRepo.save(kpi);
     }
 }

@@ -11,8 +11,8 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import java.math.RoundingMode;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -26,9 +26,7 @@ public class DefinitionService {
     private final SpelExpressionParser parser = new SpelExpressionParser();
 
     /**
-     * 정의된 수식 계산
-     * @param definitionName KPI/수식 이름
-     * @param params 수식 파라미터
+     * 정의된 수식 계산 (BigDecimal 정밀도 유지)
      */
     public BigDecimal calculate(String definitionName, Map<String, Object> params) {
         DefinitionEntity def = definitionRepo.findByDefinitionName(definitionName)
@@ -48,14 +46,18 @@ public class DefinitionService {
             }
         }
 
+        // 0으로 나누기 방지
+        if (params.containsKey("total_qty") && new BigDecimal(params.get("total_qty").toString()).compareTo(BigDecimal.ZERO) == 0) {
+            System.out.println("WARN: total_qty is 0, returning 0 for " + definitionName);
+            return BigDecimal.ZERO;
+        }
+        if (params.containsKey("planned_time") && new BigDecimal(params.get("planned_time").toString()).compareTo(BigDecimal.ZERO) == 0) {
+            System.out.println("WARN: planned_time is 0, returning 0 for " + definitionName);
+            return BigDecimal.ZERO;
+        }
+
         // Expression 캐싱
-        Expression expression = expressionCache.computeIfAbsent(def.getFormula(), formula -> {
-            String parsedFormula = formula;
-            for (String key : requiredParams) {
-                parsedFormula = parsedFormula.replaceAll("\\b" + key + "\\b", "#" + key);
-            }
-            return parser.parseExpression(parsedFormula);
-        });
+        Expression expression = expressionCache.computeIfAbsent(def.getFormula(), parser::parseExpression);
 
         // 평가 컨텍스트 생성
         StandardEvaluationContext context = new StandardEvaluationContext();
@@ -68,13 +70,18 @@ public class DefinitionService {
                             else throw new IllegalArgumentException("PARAM_TYPE_INVALID: " + e.getKey());
                         }
                 )));
-        context.setMethodResolvers(List.of());
-        context.setTypeLocator(null);
 
         try {
-            Double result = expression.getValue(context, Double.class);
-            if (result == null) return BigDecimal.ZERO;
-            return BigDecimal.valueOf(result).setScale(4, BigDecimal.ROUND_HALF_UP);
+            System.out.println("Calculating formula '" + def.getFormula() + "' with params: " + params);
+
+            // BigDecimal 타입으로 결과 받기
+            BigDecimal result = expression.getValue(context, BigDecimal.class);
+            if (result == null) result = BigDecimal.ZERO;
+
+            BigDecimal res = result.setScale(4, RoundingMode.HALF_UP);
+            System.out.println("Result: " + res);
+            return res;
+
         } catch (ArithmeticException ae) {
             throw new IllegalStateException(
                     "FORMULA_EVAL_ERROR (Arithmetic): definition=" + definitionName

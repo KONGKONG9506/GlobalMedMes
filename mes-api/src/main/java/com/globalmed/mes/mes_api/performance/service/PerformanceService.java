@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.performance.service;
 
+import com.globalmed.mes.mes_api.kpi.service.KpiDataService;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
 import com.globalmed.mes.mes_api.production.service.ProductionLogService;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ public class PerformanceService {
     private final PerformanceRepo performanceRepo;
     private final WorkOrderRepo workOrderRepo;
     private final ProductionLogService productionLogService;
+    private final KpiDataService kpiDataService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
@@ -85,10 +88,12 @@ public class PerformanceService {
 
         try {
             p = performanceRepo.save(p);
+
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
-
+        //KPI DATA 실시간 저장
+        kpiDataService.saveKpiFromPerformance(List.of(p));
         // 누적 갱신
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
         BigDecimal good = req.producedQty().subtract(req.defectQty());
