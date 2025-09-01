@@ -32,4 +32,9 @@ public interface PerformanceRepo extends JpaRepository<ProductionPerformanceEnti
                             @Param("fromTs") LocalDateTime fromTs,
                             @Param("toTs") LocalDateTime toTs);
     Optional<ProductionPerformanceEntity> findByRequestId(String requestId);
+
+    @Query("select pp from ProductionPerformanceEntity pp " +
+            "where pp.startTime >= :fromTs and pp.startTime < :toTs")
+    List<ProductionPerformanceEntity> findPerformancesForDay(@Param("fromTs") LocalDateTime fromTs,
+                                                             @Param("toTs") LocalDateTime toTs);
 }

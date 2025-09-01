@@ -93,7 +93,7 @@ public class PerformanceService {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
         //KPI DATA 실시간 저장
-        kpiDataService.saveKpiFromPerformance(List.of(p));
+        kpiDataService.saveKpiFromPerformance(p);
         // 누적 갱신
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
         BigDecimal good = req.producedQty().subtract(req.defectQty());
@@ -114,4 +114,6 @@ public class PerformanceService {
     private LocalDateTime toUtcLdt(String isoZ) {
         return OffsetDateTime.parse(isoZ).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
+
+
 }

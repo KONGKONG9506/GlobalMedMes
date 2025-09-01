@@ -4,14 +4,20 @@ import com.globalmed.mes.mes_api.kpi.KpiDataConstants;
 import com.globalmed.mes.mes_api.kpi.domain.KpiDataEntity;
 import com.globalmed.mes.mes_api.kpi.repository.KpiDataRepo;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
+import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,79 +25,121 @@ public class KpiDataService {
 
     private final KpiCalculationService kpiCalculationService;
     private final KpiDataRepo kpiDataRepo;
+    private final PerformanceRepo performanceRepo;
 
     /**
      * ProductionPerformanceEntity 기반 KPI 실시간 계산 및 저장/갱신
+     * 이 메서드는 각 performance 기록에 대해 개별적인 KPI를 계산하고 저장합니다.
      */
     @Transactional
-    public void saveKpiFromPerformance(List<ProductionPerformanceEntity> performances) {
-        LocalDate kpiDate = LocalDate.now();
-        LocalDateTime now = LocalDateTime.now();
+    public void saveKpiFromPerformance(ProductionPerformanceEntity p) {
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
-        for (ProductionPerformanceEntity p : performances) {
-            // KPI 계산
-            BigDecimal goodQty = p.getProducedQty().subtract(p.getDefectQty());
-            BigDecimal defectQty = p.getDefectQty();
-            BigDecimal totalQty = goodQty.add(defectQty);
+        // work_order_id를 기반으로 KPI 기록을 찾습니다.
+        Optional<KpiDataEntity> existingKpi = kpiDataRepo.findRealtimeKpi(
+                p.getStartTime().toLocalDate(),
+                p.getWorkOrderId(),
+                p.getEquipmentId(),
+                p.getProcessId(),
+                p.getItemId(),
+                KpiDataConstants.AGG_REALTIME
+        );
+        KpiDataEntity kpi = existingKpi.orElseGet(KpiDataEntity::new);
 
-            BigDecimal yield = kpiCalculationService.calculateYieldFromValues(goodQty, totalQty);
-            BigDecimal defectRate = kpiCalculationService.calculateDefectRateFromValues(defectQty, totalQty);
-            BigDecimal runSeconds = BigDecimal.valueOf(java.time.Duration.between(p.getStartTime(), p.getEndTime()).toSeconds());
-            BigDecimal oee = kpiCalculationService.calculateOeeFromValues(goodQty, totalQty, runSeconds, runSeconds);
+        BigDecimal goodQty = p.getProducedQty().subtract(p.getDefectQty());
+        BigDecimal defectQty = p.getDefectQty();
+        BigDecimal runSeconds = BigDecimal.valueOf(java.time.Duration.between(p.getStartTime(), p.getEndTime()).toSeconds());
 
-            // 실시간 KPI는 performance_id 기준 UNIQUE
-            KpiDataEntity kpi = kpiDataRepo.findByPerformanceIdAndKpiDate(p.getPerformanceId(), kpiDate)
-                    .orElseGet(KpiDataEntity::new);
+        Map<String, BigDecimal> kpiValues = kpiCalculationService.calculateFromPerformance(goodQty, defectQty, runSeconds, runSeconds);
 
-            kpi.setKpiDate(kpiDate);
-            kpi.setEquipmentId(p.getEquipmentId());
-            kpi.setProcessId(p.getProcessId());
-            kpi.setItemId(p.getItemId());
-            kpi.setPerformanceId(p.getPerformanceId());
-            kpi.setAggregationType(KpiDataConstants.AGG_REALTIME);
+        kpi.setKpiDate(p.getStartTime().toLocalDate());
+        kpi.setEquipmentId(p.getEquipmentId());
+        kpi.setProcessId(p.getProcessId());
+        kpi.setItemId(p.getItemId());
+        kpi.setWorkOrderId(p.getWorkOrderId());
+        kpi.setAggregationType(KpiDataConstants.AGG_REALTIME);
+        kpi.setBatchCheck(null);
+        kpi.setStartTime(p.getStartTime());
+        kpi.setEndTime(p.getEndTime());
+        kpi.setCalcSuccessCheck(KpiDataConstants.CALC_SUCCESS);
+        kpi.setCalcAt(now);
+        kpi.setCreatedBy("system");
 
-            kpi.setActualYield(yield);
-            kpi.setActualDefectRate(defectRate);
-            kpi.setActualOee(oee);
-            kpi.setActualProductivity(BigDecimal.ZERO); // 필요하면 계산 로직 추가
+        kpi.setActualYield(kpiValues.get("yield"));
+        kpi.setActualDefectRate(kpiValues.get("defectRate"));
+        kpi.setActualOee(kpiValues.get("oee"));
+        kpi.setActualProductivity(kpiValues.get("productivity"));
 
-            kpi.setStartTime(p.getStartTime());
-            kpi.setEndTime(p.getEndTime());
-            kpi.setCalcStatus(KpiDataConstants.CALC_SUCCESS);
-            kpi.setCalcAt(now);
-            kpi.setCreatedBy("system");
-
-            kpiDataRepo.save(kpi);
-        }
+        kpiDataRepo.save(kpi);
     }
 
     /**
-     * 주기적으로(일일) KPI 저장 (performance_id 없이)
+     * 일일 배치 KPI 계산 및 저장
+     * 지정된 날짜의 모든 생산 실적을 집계하여 일일 배치 KPI를 생성합니다.
      */
     @Transactional
-    public void saveBatchKpi(KpiDataEntity batchKpi) {
-        // 배치 KPI의 aggregationType을 DAILY_BATCH로 강제
-        batchKpi.setAggregationType("DAILY_BATCH");
+    public void runDailyBatchKpiCalculation(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
 
-        // UNIQUE: kpi_date + equipment + process + item + aggregation_type
-        KpiDataEntity kpi = kpiDataRepo.findByKpiDateAndEquipmentIdAndProcessIdAndItemIdAndAggregationType(
-                batchKpi.getKpiDate(),
-                batchKpi.getEquipmentId(),
-                batchKpi.getProcessId(),
-                batchKpi.getItemId(),
-                batchKpi.getAggregationType()
-        ).orElse(batchKpi);
+        // 날짜별 모든 생산 실적 데이터 조회
+        List<ProductionPerformanceEntity> performances = performanceRepo.findPerformancesForDay(startOfDay, endOfDay);
 
-        kpi.setActualOee(batchKpi.getActualOee());
-        kpi.setActualProductivity(batchKpi.getActualProductivity());
-        kpi.setActualYield(batchKpi.getActualYield());
-        kpi.setActualDefectRate(batchKpi.getActualDefectRate());
-        kpi.setStartTime(batchKpi.getStartTime());
-        kpi.setEndTime(batchKpi.getEndTime());
-        kpi.setCalcStatus(KpiDataConstants.CALC_SUCCESS);
-        kpi.setCalcAt(LocalDateTime.now());
-        kpi.setCreatedBy(batchKpi.getCreatedBy());
+        if (performances.isEmpty()) {
+            return;
+        }
 
-        kpiDataRepo.save(kpi);
+        // 장비,공정,품목 조합별로 실적을 그룹화
+        Map<String, List<ProductionPerformanceEntity>> groupedPerformances = performances.stream()
+                .collect(Collectors.groupingBy(p -> p.getEquipmentId() + "_" + p.getProcessId() + "_" + p.getItemId()));
+
+        groupedPerformances.forEach((key, list) -> {
+            // 그룹별 데이터 집계
+            BigDecimal totalGoodQty = BigDecimal.ZERO;
+            BigDecimal totalDefectQty = BigDecimal.ZERO;
+            BigDecimal totalRunSeconds = BigDecimal.ZERO;
+            LocalDateTime firstStartTime = list.get(0).getStartTime();
+            LocalDateTime lastEndTime = list.get(list.size() - 1).getEndTime();
+
+            for (ProductionPerformanceEntity p : list) {
+                totalGoodQty = totalGoodQty.add(p.getProducedQty().subtract(p.getDefectQty()));
+                totalDefectQty = totalDefectQty.add(p.getDefectQty());
+                totalRunSeconds = totalRunSeconds.add(BigDecimal.valueOf(Duration.between(p.getStartTime(), p.getEndTime()).toSeconds()));
+            }
+
+            // 배치 KPI 값 계산
+            Map<String, BigDecimal> kpiValues = kpiCalculationService.calculateFromPerformance(
+                    totalGoodQty, totalDefectQty, totalRunSeconds, totalRunSeconds
+            );
+
+            // 배치 KPI 엔티티 생성 또는 갱신
+
+
+            ProductionPerformanceEntity representative = list.get(0);
+            Optional<KpiDataEntity> existingBatchKpi = kpiDataRepo.findDailyBatchKpi(date, representative.getEquipmentId(), representative.getProcessId(), representative.getItemId(), KpiDataConstants.AGG_DAILY_BATCH, KpiDataConstants.BATCH_DAILY);
+
+
+            KpiDataEntity batchKpi = existingBatchKpi.orElseGet(KpiDataEntity::new);
+
+            batchKpi.setKpiDate(date);
+            batchKpi.setEquipmentId(representative.getEquipmentId());
+            batchKpi.setProcessId(representative.getProcessId());
+            batchKpi.setItemId(representative.getItemId());
+            batchKpi.setAggregationType(KpiDataConstants.AGG_DAILY_BATCH);
+            batchKpi.setBatchCheck(KpiDataConstants.BATCH_DAILY);
+
+            batchKpi.setStartTime(firstStartTime);
+            batchKpi.setEndTime(lastEndTime);
+            batchKpi.setCalcSuccessCheck(KpiDataConstants.CALC_SUCCESS);
+            batchKpi.setCalcAt(LocalDateTime.now(ZoneOffset.UTC));
+            batchKpi.setCreatedBy("system");
+
+            batchKpi.setActualYield(kpiValues.get("yield"));
+            batchKpi.setActualDefectRate(kpiValues.get("defectRate"));
+            batchKpi.setActualOee(kpiValues.get("oee"));
+            batchKpi.setActualProductivity(kpiValues.get("productivity"));
+
+            kpiDataRepo.save(batchKpi);
+        });
     }
 }

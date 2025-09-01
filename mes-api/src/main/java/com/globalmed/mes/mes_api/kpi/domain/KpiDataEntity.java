@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "tb_kpi_data",
         uniqueConstraints = {
-                // 실시간 KPI: performance_id 기준
-                @UniqueConstraint(name = "uk_kpi_realtime", columnNames = {"kpi_date", "performance_id"}),
-                // 배치 KPI: performance_id 없이 equipment/process/item/aggregation_type 기준
-                @UniqueConstraint(name = "uk_kpi_daily", columnNames = {"kpi_date", "equipment_id", "process_id", "item_id", "aggregation_type"})
+                // 실시간 KPI
+                @UniqueConstraint(name = "uk_kpi_realtime", columnNames = {"kpi_date", "work_order_id", "equipment_id", "process_id", "item_id", "aggregation_type"}),
+                // 배치 KPI
+                @UniqueConstraint(name = "uk_kpi_daily", columnNames = {"kpi_date",  "equipment_id", "process_id", "item_id", "aggregation_type", "batch_check"})
         })
 @Getter
 @Setter
@@ -40,8 +40,8 @@ public class KpiDataEntity {
     private String itemId;
 
     // 실시간 KPI용
-    @Column(name = "performance_id")
-    private Long performanceId;
+    @Column(name = "work_order_id", length = 36)
+    private String workOrderId;
 
     @Column(name = "actual_oee", precision = 5, scale = 2, nullable = false)
     private BigDecimal actualOee = BigDecimal.ZERO;
@@ -62,11 +62,14 @@ public class KpiDataEntity {
     @Column(name = "aggregation_type", length = 20, nullable = false)
     private String aggregationType;
 
-    @Column(name = "calc_status", nullable = false)
-    private Byte calcStatus = 1; // 0=FAIL, 1=SUCCESS, 2=IN_PROGRESS, 3=RETRY
+    @Column(name = "batch_check", length = 20)
+    private String batchCheck;
+
+    @Column(name = "calc_success_check", nullable = false)
+    private Byte calcSuccessCheck = 1; // 0=FAIL, 1=SUCCESS, 2=IN_PROGRESS, 3=RETRY
 
     @Column(name = "calc_at", nullable = false)
-    private LocalDateTime calcAt = LocalDateTime.now();
+    private LocalDateTime calcAt;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
