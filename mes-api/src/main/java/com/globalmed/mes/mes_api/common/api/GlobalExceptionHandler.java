@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -80,5 +81,14 @@ public class GlobalExceptionHandler {
                         "method", req.getMethod()
                 ));
     }
-
+    // 메소드 불일치 익셉션
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+        return ResponseEntity.status(400).body(Map.of(
+                "code", "Type Mismatch",
+                "message", ex.getMessage(),
+                "path", req.getRequestURI(),
+                "method", req.getMethod()
+        ));
+    }
 }

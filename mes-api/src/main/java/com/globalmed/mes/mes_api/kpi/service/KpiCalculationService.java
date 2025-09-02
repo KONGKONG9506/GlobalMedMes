@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 @Service
@@ -19,11 +20,14 @@ public class KpiCalculationService {
      */
     public Map<String, BigDecimal> calculateFromPerformance(BigDecimal goodQty, BigDecimal defectQty, BigDecimal runSeconds, BigDecimal plannedSeconds) {
         BigDecimal totalQty = goodQty.add(defectQty);
+        //run second를 hour 로 변환(나중에 제거)
+        BigDecimal runHours = runSeconds.divide(BigDecimal.valueOf(3600), 4, RoundingMode.HALF_UP);
+        BigDecimal plannedHours = plannedSeconds.divide(BigDecimal.valueOf(3600), 4, RoundingMode.HALF_UP);
 
         BigDecimal yield = calculateYieldFromValues(goodQty, totalQty);
         BigDecimal defectRate = calculateDefectRateFromValues(defectQty, totalQty);
-        BigDecimal oee = calculateOeeFromValues(goodQty, totalQty, runSeconds, plannedSeconds);
-        BigDecimal productivity = calculateProductivity(totalQty, runSeconds);
+        BigDecimal oee = calculateOeeFromValues(goodQty, totalQty, runHours, plannedHours);
+        BigDecimal productivity = calculateProductivity(totalQty, runHours);
 
         return Map.of(
                 "yield", yield,

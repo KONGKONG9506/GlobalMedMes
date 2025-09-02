@@ -1,8 +1,17 @@
 package com.globalmed.mes.mes_api.kpi.controller;
 
 
+import com.globalmed.mes.mes_api.common.PageResponse;
+import com.globalmed.mes.mes_api.kpi.domain.KpiDataEntity;
+import com.globalmed.mes.mes_api.kpi.dto.KpiDataListDto;
+import com.globalmed.mes.mes_api.kpi.repository.KpiDataRepo;
 import com.globalmed.mes.mes_api.kpi.service.KpiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,4 +41,47 @@ public class KpiController {
                 "actualYield", res.actualYield()
         ));
     }
+    private final KpiDataRepo kpiDataRepo;
+
+    /**
+     * KPI 데이터를 날짜, 장비, 공정, 품목, 집계 유형별로 조회합니다.
+     * @param kpiDate KPI 기준 날짜 (YYYY-MM-DD)
+     * @param equipmentId 설비 ID
+     * @param processId 공정 ID
+     * @param itemId 품목 ID
+     * @param aggregationType 집계 유형 (REALTIME, DAILY_BATCH 등)
+     * @param page 페이지 번호 (0부터 시작)
+     * @param size 페이지 크기
+     * @param sort 정렬 기준 (예: `kpiDate,desc`)
+     * @return 필터링된 KPI 데이터의 페이지 응답
+     */
+    @GetMapping("/datalist")
+    public ResponseEntity<PageResponse<KpiDataListDto>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate kpiDate,
+            @RequestParam(required = false) String equipmentId,
+            @RequestParam(required = false) String processId,
+            @RequestParam(required = false) String itemId,
+            @RequestParam(required = false) String aggregationType,
+            @RequestParam(defaultValue = "kpiDate,desc") String sort) {
+
+        Sort s = Sort.by(sort.split(",")[0]).descending();
+        if (sort.split(",").length > 1 && sort.split(",")[1].equalsIgnoreCase("asc")) {
+            s = Sort.by(sort.split(",")[0]).ascending();
+        }
+        Pageable pageable = PageRequest.of(page, size, s);
+
+        // 검색 조건에 따라 적절한 Repository 메서드 호출
+        Page<KpiDataEntity> result;
+        if (kpiDate != null) {
+            result = kpiDataRepo.findByKpiDateAndFilters(kpiDate, equipmentId, processId, itemId, aggregationType, pageable);
+        } else {
+            result = kpiDataRepo.findByFilters(equipmentId, processId, itemId, aggregationType, pageable);
+        }
+
+        var dtoPage = result.map(KpiDataListDto::fromEntity);
+        return ResponseEntity.ok(PageResponse.of(dtoPage, sort));
+    }
+
 }

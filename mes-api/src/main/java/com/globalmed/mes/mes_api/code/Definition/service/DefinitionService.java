@@ -48,11 +48,9 @@ public class DefinitionService {
 
         // 0으로 나누기 방지
         if (params.containsKey("total_qty") && new BigDecimal(params.get("total_qty").toString()).compareTo(BigDecimal.ZERO) == 0) {
-            System.out.println("WARN: total_qty is 0, returning 0 for " + definitionName);
             return BigDecimal.ZERO;
         }
         if (params.containsKey("planned_time") && new BigDecimal(params.get("planned_time").toString()).compareTo(BigDecimal.ZERO) == 0) {
-            System.out.println("WARN: planned_time is 0, returning 0 for " + definitionName);
             return BigDecimal.ZERO;
         }
 
@@ -72,14 +70,10 @@ public class DefinitionService {
                 )));
 
         try {
-            System.out.println("Calculating formula '" + def.getFormula() + "' with params: " + params);
-
             // BigDecimal 타입으로 결과 받기
             BigDecimal result = expression.getValue(context, BigDecimal.class);
             if (result == null) result = BigDecimal.ZERO;
-
             BigDecimal res = result.setScale(4, RoundingMode.HALF_UP);
-            System.out.println("Result: " + res);
             return res;
 
         } catch (ArithmeticException ae) {

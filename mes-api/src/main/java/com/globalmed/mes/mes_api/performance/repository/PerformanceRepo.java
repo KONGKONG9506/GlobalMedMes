@@ -13,8 +13,6 @@ import java.util.Optional;
 
 public interface PerformanceRepo extends JpaRepository<ProductionPerformanceEntity, Long>,
         JpaSpecificationExecutor<ProductionPerformanceEntity> {
-    List<ProductionPerformanceEntity> findByEquipmentIdAndStartTimeBetween(String eqp, LocalDateTime from, LocalDateTime to);
-
     interface PerfAgg {
         BigDecimal getProduced(); // ← get 접두어
         BigDecimal getGood();     // ← get 접두어
@@ -34,7 +32,7 @@ public interface PerformanceRepo extends JpaRepository<ProductionPerformanceEnti
     Optional<ProductionPerformanceEntity> findByRequestId(String requestId);
 
     @Query("select pp from ProductionPerformanceEntity pp " +
-            "where pp.startTime >= :fromTs and pp.startTime < :toTs")
+            "where pp.startTime >= :fromTs and pp.startTime < :toTs ORDER BY pp.startTime")
     List<ProductionPerformanceEntity> findPerformancesForDay(@Param("fromTs") LocalDateTime fromTs,
                                                              @Param("toTs") LocalDateTime toTs);
 }

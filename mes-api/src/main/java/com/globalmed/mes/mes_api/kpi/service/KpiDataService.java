@@ -13,12 +13,10 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class KpiDataService {
@@ -29,13 +27,13 @@ public class KpiDataService {
 
     /**
      * ProductionPerformanceEntity 기반 KPI 실시간 계산 및 저장/갱신
-     * 이 메서드는 각 performance 기록에 대해 개별적인 KPI를 계산하고 저장합니다.
+     * 이 메서드는 각 performance 기록에 대해 개별적인 KPI를 계산하고 저장
      */
     @Transactional
     public void saveKpiFromPerformance(ProductionPerformanceEntity p) {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now();
 
-        // work_order_id를 기반으로 KPI 기록을 찾습니다.
+        // work_order_id를 기반으로 KPI 기록을 찾음
         Optional<KpiDataEntity> existingKpi = kpiDataRepo.findRealtimeKpi(
                 p.getStartTime().toLocalDate(),
                 p.getWorkOrderId(),
@@ -44,13 +42,18 @@ public class KpiDataService {
                 p.getItemId(),
                 KpiDataConstants.AGG_REALTIME
         );
+
         KpiDataEntity kpi = existingKpi.orElseGet(KpiDataEntity::new);
 
         BigDecimal goodQty = p.getProducedQty().subtract(p.getDefectQty());
         BigDecimal defectQty = p.getDefectQty();
+        // 임시 가동 시간
         BigDecimal runSeconds = BigDecimal.valueOf(java.time.Duration.between(p.getStartTime(), p.getEndTime()).toSeconds());
+        // 임시 계획 시간
+        BigDecimal plannedSeconds = runSeconds;
 
-        Map<String, BigDecimal> kpiValues = kpiCalculationService.calculateFromPerformance(goodQty, defectQty, runSeconds, runSeconds);
+        Map<String, BigDecimal> kpiValues = kpiCalculationService
+                .calculateFromPerformance(goodQty, defectQty, runSeconds, plannedSeconds);
 
         kpi.setKpiDate(p.getStartTime().toLocalDate());
         kpi.setEquipmentId(p.getEquipmentId());
@@ -98,8 +101,15 @@ public class KpiDataService {
             BigDecimal totalGoodQty = BigDecimal.ZERO;
             BigDecimal totalDefectQty = BigDecimal.ZERO;
             BigDecimal totalRunSeconds = BigDecimal.ZERO;
-            LocalDateTime firstStartTime = list.get(0).getStartTime();
-            LocalDateTime lastEndTime = list.get(list.size() - 1).getEndTime();
+            LocalDateTime firstStartTime = list.stream()
+                    .map(ProductionPerformanceEntity::getStartTime)
+                    .min(LocalDateTime::compareTo)
+                    .orElse(null);
+
+            LocalDateTime lastEndTime = list.stream()
+                    .map(ProductionPerformanceEntity::getEndTime)
+                    .max(LocalDateTime::compareTo)
+                    .orElse(null);
 
             for (ProductionPerformanceEntity p : list) {
                 totalGoodQty = totalGoodQty.add(p.getProducedQty().subtract(p.getDefectQty()));
@@ -111,9 +121,6 @@ public class KpiDataService {
             Map<String, BigDecimal> kpiValues = kpiCalculationService.calculateFromPerformance(
                     totalGoodQty, totalDefectQty, totalRunSeconds, totalRunSeconds
             );
-
-            // 배치 KPI 엔티티 생성 또는 갱신
-
 
             ProductionPerformanceEntity representative = list.get(0);
             Optional<KpiDataEntity> existingBatchKpi = kpiDataRepo.findDailyBatchKpi(date, representative.getEquipmentId(), representative.getProcessId(), representative.getItemId(), KpiDataConstants.AGG_DAILY_BATCH, KpiDataConstants.BATCH_DAILY);
@@ -131,7 +138,7 @@ public class KpiDataService {
             batchKpi.setStartTime(firstStartTime);
             batchKpi.setEndTime(lastEndTime);
             batchKpi.setCalcSuccessCheck(KpiDataConstants.CALC_SUCCESS);
-            batchKpi.setCalcAt(LocalDateTime.now(ZoneOffset.UTC));
+            batchKpi.setCalcAt(LocalDateTime.now());
             batchKpi.setCreatedBy("system");
 
             batchKpi.setActualYield(kpiValues.get("yield"));
