@@ -26,6 +26,7 @@ public class AuthController {
                 "user", Map.of("userId", res.userId(), "roles", res.roles())
         ));
     }
-    public record LoginReq(@NotBlank String username, @NotBlank String password, @NotBlank String captcha
+    public record LoginReq(@NotBlank String username, @NotBlank String password
+                           , @NotBlank String captcha
     ){}
 }

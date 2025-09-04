@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS `tb_employee_cert`;
+
 -- 직원
 CREATE TABLE `tb_employee` (
   `employee_id` VARCHAR(36) NOT NULL COMMENT '직원 ID (PK, FK→tb_user.user_id)',
@@ -31,12 +33,12 @@ CREATE TABLE `tb_cert` (
   UNIQUE KEY `uk_cert_code` (`cert_code`)
 ) ENGINE=InnoDB COMMENT='자격 마스터: 설비/공정 필요 자격 정의';
 
--- tb_user_cert (직원별 자격증 보유 현황)
-CREATE TABLE `tb_user_cert` (
-  `user_cert_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '직원-자격증 매핑 ID (PK)',
+-- tb_employee_cert (직원별 자격증 보유 현황)
+CREATE TABLE `tb_employee_cert` (
+  `employee_cert_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '직원-자격증 매핑 ID (PK)',
   `employee_id` VARCHAR(36) NOT NULL COMMENT '직원 ID (FK→tb_employee.employee_id)',
   `cert_id` BIGINT NOT NULL COMMENT '자격증 ID (FK→tb_cert.cert_id)',
-  `user_level_code_id` BIGINT NOT NULL COMMENT '숙련도 코드 ID (FK→tb_code, 예: BASIC, INTERMEDIATE)',
+  `employee_level_code_id` BIGINT NOT NULL COMMENT '숙련도 코드 ID (FK→tb_code, 예: BASIC, INTERMEDIATE)',
   `cert_obtained_date` DATE NOT NULL COMMENT '취득일',
   `cert_expiry_date` DATE NULL COMMENT '만료일 (NULL=무기한)',
   `is_deleted` TINYINT DEFAULT 0,
@@ -45,11 +47,11 @@ CREATE TABLE `tb_user_cert` (
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_by` VARCHAR(50) NULL,
   `modified_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_cert_id`),
-  UNIQUE KEY `uk_user_cert` (`employee_id`, `cert_id`),
-  CONSTRAINT `fk_user_cert_emp` FOREIGN KEY (`employee_id`) REFERENCES `tb_employee`(`employee_id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_user_cert_cert` FOREIGN KEY (`cert_id`) REFERENCES `tb_cert`(`cert_id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_user_cert_level` FOREIGN KEY (`user_level_code_id`) REFERENCES `tb_code`(`code_id`) ON DELETE RESTRICT
+  PRIMARY KEY (`employee_cert_id`),
+  UNIQUE KEY `uk_employee_cert` (`employee_id`, `cert_id`),
+  CONSTRAINT `fk_employee_cert_emp` FOREIGN KEY (`employee_id`) REFERENCES `tb_employee`(`employee_id`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_employee_cert_cert` FOREIGN KEY (`cert_id`) REFERENCES `tb_cert`(`cert_id`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_employee_cert_level` FOREIGN KEY (`employee_level_code_id`) REFERENCES `tb_code`(`code_id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB COMMENT='직원-자격증 매핑: 직원별 자격증/숙련도 관리';
 
 -- 공정 자격

@@ -3,6 +3,7 @@ package com.globalmed.mes.mes_api.workorder.service;
 
 
 import com.globalmed.mes.mes_api.code.CodeRepo;
+import com.globalmed.mes.mes_api.employee.cert.service.ProcessCertCheckService;
 import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
@@ -19,7 +20,7 @@ public class WorkOrderService {
     private final WorkOrderRepo woRepo;
     private final CodeRepo codeRepo;
     private final ProductionLogService productionLogService;
-
+    private final ProcessCertCheckService processCertCheckService;
     @Transactional
     public WorkOrderEntity create(String workOrderNumber, String itemId, String processId,
                                   String equipmentId, BigDecimal orderQty, String createdByOpt) {
@@ -62,6 +63,10 @@ public class WorkOrderService {
         if (!allowed) {
             throw new IllegalStateException("WO_STATUS_INVALID");
         }
+//        P -> R 전이 공정 자격 체크
+//        if(cur.equals("P")&&to.equals("R")){
+//            processCertCheckService
+//        }
 
         // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
         var next = codeRepo.findByGroupCodeAndCodeAndUseYn("wo_status", to, 'Y')
