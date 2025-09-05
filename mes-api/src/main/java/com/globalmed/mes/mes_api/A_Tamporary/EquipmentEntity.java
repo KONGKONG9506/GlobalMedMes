@@ -4,10 +4,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-//commit도 안할 임시 코드
+import lombok.Getter;
+
+//shift및 R 전이 가드용 임시 코드
 @Entity
 @Table(name="tb_equipment")
+@Getter
 public class EquipmentEntity {
     @Id
     @Column(name="equipment_id", length = 36) private String equipmentId;
+    @Column(name="workcenter_id", length = 36) private String workcenterId;
 }

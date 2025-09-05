@@ -3,9 +3,10 @@ package com.globalmed.mes.mes_api.employee.shift.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "tb_shift")
@@ -30,9 +31,10 @@ public class ShiftEntity {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
+    @Column(name = "created_by", length = 50, nullable = false)
+    private String createdBy;
 
-    @Column(name = "modified_at")
-    private OffsetDateTime modifiedAt;
+    @Column(name = "modified_by", length = 50)
+    private String modifiedBy;
+
 }

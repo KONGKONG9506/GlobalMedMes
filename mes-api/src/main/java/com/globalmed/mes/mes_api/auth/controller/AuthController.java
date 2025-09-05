@@ -19,7 +19,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReq req, HttpSession session){
-        captchaService.validateCaptcha(session, req.captcha());
+//        captchaService.validateCaptcha(session, req.captcha());
         var res = userService.authenticate(req.username(), req.password());
         return ResponseEntity.ok(Map.of(
                 "token", res.token(),
@@ -27,6 +27,6 @@ public class AuthController {
         ));
     }
     public record LoginReq(@NotBlank String username, @NotBlank String password
-                           , @NotBlank String captcha
+//                           , @NotBlank String captcha
     ){}
 }

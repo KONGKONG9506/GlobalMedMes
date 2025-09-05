@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.time.Duration.between;
+
 @Service
 @RequiredArgsConstructor
 public class KpiDataService {
@@ -48,7 +51,7 @@ public class KpiDataService {
         BigDecimal goodQty = p.getProducedQty().subtract(p.getDefectQty());
         BigDecimal defectQty = p.getDefectQty();
         // 임시 가동 시간
-        BigDecimal runSeconds = BigDecimal.valueOf(java.time.Duration.between(p.getStartTime(), p.getEndTime()).toSeconds());
+        BigDecimal runSeconds = BigDecimal.valueOf(between(p.getStartTime(), p.getEndTime()).toSeconds());
         // 임시 계획 시간
         BigDecimal plannedSeconds = runSeconds;
 
@@ -114,7 +117,7 @@ public class KpiDataService {
             for (ProductionPerformanceEntity p : list) {
                 totalGoodQty = totalGoodQty.add(p.getProducedQty().subtract(p.getDefectQty()));
                 totalDefectQty = totalDefectQty.add(p.getDefectQty());
-                totalRunSeconds = totalRunSeconds.add(BigDecimal.valueOf(Duration.between(p.getStartTime(), p.getEndTime()).toSeconds()));
+                totalRunSeconds = totalRunSeconds.add(BigDecimal.valueOf(between(p.getStartTime(), p.getEndTime()).toSeconds()));
             }
 
             // 배치 KPI 값 계산

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -18,5 +19,21 @@ public interface ShiftAssignmentRepo extends JpaRepository<ShiftAssignmentEntity
     Optional<ShiftAssignmentEntity> findCurrentWorker(
             @Param("equipmentId") String equipmentId,
             @Param("now") OffsetDateTime now
+    );
+    @Query("""
+        SELECT CASE WHEN COUNT(a) > 0 THEN TRUE ELSE FALSE END
+        FROM ShiftAssignmentEntity a
+        WHERE a.shiftDate = :shiftDate
+          AND a.shift.shiftId = :shiftId
+          AND a.workerId = :workerId
+          AND a.equipmentId = :equipmentId
+          AND a.workcenterId = :workcenterId
+    """)
+    boolean existsAssignment(
+            @Param("shiftDate") LocalDate shiftDate,
+            @Param("shiftId") Long shiftId,
+            @Param("workerId") String workerId,
+            @Param("equipmentId") String equipmentId,
+            @Param("workcenterId") String workcenterId
     );
 }

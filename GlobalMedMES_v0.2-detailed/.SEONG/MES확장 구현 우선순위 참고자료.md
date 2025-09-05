@@ -132,15 +132,42 @@ ProcessCertCheck서비스는 해당 설비의 현재 담당 직원이 해당 공
 employee_cert를 이용해 해당 직원이 무슨 자격증을 가지고 있는지 파악하고
 tb_process_cert 를 이용해서 해당 공정을 할 자격이 있는지 판단함
 
-EquipmentCertCheck로 설비에 직원을 배치할 때 해당 직원이 그 설비를 쓸 자격이 있는지 체크
+EquipmentCertCheck로 설비에 직원을 배치할 때 해당 직원이 그 설비를 사용할 수 있는지 체크
 ProcessCertCheck로 WorkOrder로 공정을 진행할 때 해당 설비의 담당 직원이 해당 공정을 할 수 있는지 체크
 
 
++ 직원 배치 제작
+담당 직원을 통한 전이 가드를 위해선 직원을 배치 할 수 있어야 하고 해당 컨트롤러가 필요함
+설비에 직원을 배치해야 함
+tb_shift, 
+tb_shift_calendar,
+tb_shift_assignment,
+세개의 테이블을 이용해서 직원의 교대를 담당함
+tb_shift는 교대근무의 기본 정보를 정의함
+
+shift_id, shift_code(교대 코드(유일, 예: A,B,C)), shift_name(교대 명칭(예: 주간조)), start_time, end_time
+
+tb_shift_calender는 교대 달력 : 날짜/교대 (설비 또는 작업장) 단위의 집계 프레임
+calendar_id, shift_date(교대 날짜), shift_id, equipment_id, workcenter_id, start_ts, end_ts
+
+tb_shift_assignment 교대 배치: 날짜/교대/작업자 (설비 또는 작업장) 다건 배정(UTC). XOR+부분 유니크, 작업자=tb_user FK
+assignment_id, shift_date, shift_id, worker_id, equipment_id, workcenter_id, start_ts, end_ts
+
+
+공정은 모든 작업장 공통
+ --설비에 공정이 지정되어 있음?
+ --공정은 자기만 있음
+ --아이템도 자기만 있음
+
+설비는 작업장이 지정되어 있음
+작업장은 워크샵이 지정되어 있음
 
 
 
-교대/출근 기록 제작
 
+교대/출근 기록 제작 
+교대/출근 기록은 지금 함께 만드는 것과 나중에 추가해서 만드는 것 둘중 뭐가 더 나을까 고민 필요
+나중에 추가하는게 MES에 더 나을꺼라 생각함
 
 비가동 시간용 직원 휴식 계산
 

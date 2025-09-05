@@ -74,7 +74,6 @@ CREATE TABLE `tb_kpi_data` (
   PRIMARY KEY (`kpi_id`),
   
   UNIQUE KEY `uk_kpi_realtime` (`kpi_date`, `work_order_id`, `equipment_id`, `process_id`, `item_id`, `aggregation_type`),
-
   UNIQUE KEY `uk_kpi_daily` (`kpi_date`, `equipment_id`, `process_id`, `item_id`, `batch_check`, `aggregation_type`),
 
   KEY `idx_kpi_date` (`kpi_date`),

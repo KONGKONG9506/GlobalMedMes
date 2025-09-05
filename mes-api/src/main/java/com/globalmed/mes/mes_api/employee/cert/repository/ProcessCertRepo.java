@@ -1,6 +1,5 @@
 package com.globalmed.mes.mes_api.employee.cert.repository;
 
-import com.globalmed.mes.mes_api.employee.cert.domain.CertEntity;
 import com.globalmed.mes.mes_api.employee.cert.domain.ProcessCertEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
