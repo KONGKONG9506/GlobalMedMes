@@ -1,4 +1,8 @@
+-- 기존 테이블 업데이트
+--  ALTER TABLE tb_shift_calendar DROP CHECK ck_shiftcal_scope_exclusive;
+--  ALTER TABLE tb_shift_assignment DROP CHECK ck_assign_scope_exclusive;
 
+-- 테이블 새로 작성
 CREATE TABLE `tb_shift_calendar` (
   `calendar_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '교대 달력 ID (PK)',
   `shift_date` DATE NOT NULL COMMENT '근무 날짜',

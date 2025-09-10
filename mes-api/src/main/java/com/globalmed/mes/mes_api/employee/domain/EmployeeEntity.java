@@ -3,12 +3,14 @@ package com.globalmed.mes.mes_api.employee.domain;
 import com.globalmed.mes.mes_api.auth.domain.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "tb_employee")
 @Getter
 @Setter
+@NoArgsConstructor
 public class EmployeeEntity {
     @Id
     @Column(name = "employee_id", length = 36)

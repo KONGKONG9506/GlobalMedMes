@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
@@ -50,7 +51,7 @@ public class WorkOrderService {
     }
 
     @Transactional
-    public WorkOrderEntity transition(String workOrderId, String toStatus) {
+    public WorkOrderEntity transition(String workOrderId, String toStatus, OffsetDateTime now) {
         var wo = woRepo.findById(workOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
 
@@ -63,16 +64,18 @@ public class WorkOrderService {
         if (!allowed) {
             throw new IllegalStateException("WO_STATUS_INVALID");
         }
+        if(now == null) now = OffsetDateTime.now();
 //        P -> R 전이 공정 자격 체크
-//        if(cur.equals("P")&&to.equals("R")){
-//            processCertCheckService
-//        }
+        if(cur.equals("P")&&to.equals("R")){
+            processCertCheckService.check(wo.getEquipmentId(),wo.getProcessId(), now);
+        }
 
         // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
         var next = codeRepo.findByGroupCodeAndCodeAndUseYn("wo_status", to, 'Y')
                 .orElseThrow(() -> new IllegalStateException("WO_STATUS_"+to+"_NOT_FOUND"));
 
         wo.setStatusCode(next);           // status_code_id 매핑
+
         // ✅ 상태 전이에 따른 로그 기록
         if (cur.equals("P") && to.equals("R")) {
             // Released → START 로그

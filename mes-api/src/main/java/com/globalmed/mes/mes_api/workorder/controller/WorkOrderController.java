@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 import static com.globalmed.mes.mes_api.workorder.specs.WorkOrderSpecs.*;
@@ -59,8 +60,11 @@ public class WorkOrderController {
     @PreAuthorize("@permChecker.has(authentication, '/work-orders','write') or hasAnyRole('ADMIN','OP')")
     @PutMapping("/{id}/status")
     public ResponseEntity<?> changeStatus(@PathVariable("id") String workOrderId,
-                                          @RequestBody StatusChangeReq req) {
-        var wo = workOrderService.transition(workOrderId, req.toStatus());
+                                          @RequestBody StatusChangeReq req,
+                                          @RequestParam(name = "now", required = false) OffsetDateTime now) {
+//        전이가드 테스트를 위해 offsetDateTime 추가
+//        offsetDateTime이 null일시 현재 시간으로 계산
+        var wo = workOrderService.transition(workOrderId, req.toStatus(), now);
         return ResponseEntity.ok(Map.of("workOrderId", wo.getWorkOrderId(),
                 "status", wo.getStatusCode().getCode()));
     }

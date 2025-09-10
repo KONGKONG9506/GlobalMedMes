@@ -24,7 +24,7 @@ public class ShiftCalendarService {
     private final EquipRepo equipRepo;
     @Transactional
     public List<ShiftCalendarEntity> generateCalendarForDateAndEquipment(LocalDate shiftDate, String equipmentId, String workcenterId) {
-        // 1. 설비 존재 여부 확인
+        // 1. 설비 존재 여부 확인t
         EquipmentEntity equipment = equipRepo.findById(equipmentId)
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
         // 2. 워크센터 매치 확인
@@ -35,6 +35,10 @@ public class ShiftCalendarService {
         List<ShiftCalendarEntity> results = new ArrayList<>();
 
         for (ShiftEntity shift : shifts) {
+            // 중복 확인
+            if (calendarRepo.existsByShiftDateAndEquipmentIdAndShift(shiftDate, equipmentId, shift)) {
+                throw new IllegalStateException("Date_E_WC_Overlaps");
+            }
             // start/end LocalDateTime 생성
             LocalDateTime start = LocalDateTime.of(shiftDate, shift.getStartTime());
             LocalDateTime end = LocalDateTime.of(shiftDate, shift.getEndTime());
@@ -47,6 +51,8 @@ public class ShiftCalendarService {
             ShiftCalendarEntity calendar = new ShiftCalendarEntity();
             calendar.setShiftDate(shiftDate);
             calendar.setShift(shift);
+            calendar.setEquipmentId(equipmentId);
+            calendar.setWorkcenterId(workcenterId);
             calendar.setStartTs(start.atOffset(ZoneOffset.ofHours(9))); // KST 예시
             calendar.setEndTs(end.atOffset(ZoneOffset.ofHours(9)));
             calendar.setCreatedBy("system");

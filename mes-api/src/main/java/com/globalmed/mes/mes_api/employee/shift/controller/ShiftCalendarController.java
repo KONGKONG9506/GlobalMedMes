@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/shifts/calendars")
+@RequestMapping("/shifts/calendars")
 @RequiredArgsConstructor
 public class ShiftCalendarController {
     private final ShiftCalendarService calendarService;
@@ -28,5 +28,6 @@ public class ShiftCalendarController {
         );
         return ResponseEntity.ok(calendars);
     }
+
 }
 

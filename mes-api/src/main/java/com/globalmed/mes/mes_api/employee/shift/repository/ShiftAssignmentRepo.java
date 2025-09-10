@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Optional;
+import java.util.List;
 
 public interface ShiftAssignmentRepo extends JpaRepository<ShiftAssignmentEntity, Long> {
     @Query("""
@@ -16,7 +16,7 @@ public interface ShiftAssignmentRepo extends JpaRepository<ShiftAssignmentEntity
         WHERE sa.equipmentId = :equipmentId
           AND :now BETWEEN sa.startTs AND sa.endTs
         """)
-    Optional<ShiftAssignmentEntity> findCurrentWorker(
+    List<ShiftAssignmentEntity> findCurrentWorkers(
             @Param("equipmentId") String equipmentId,
             @Param("now") OffsetDateTime now
     );
@@ -36,4 +36,6 @@ public interface ShiftAssignmentRepo extends JpaRepository<ShiftAssignmentEntity
             @Param("equipmentId") String equipmentId,
             @Param("workcenterId") String workcenterId
     );
+
+    List<ShiftAssignmentEntity> findByShiftDateBetween(LocalDate startDate, LocalDate endDate);
 }

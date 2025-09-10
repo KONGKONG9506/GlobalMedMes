@@ -26,4 +26,5 @@ public class ProcessCertEntity {
     @ManyToOne
     @JoinColumn(name = "cert_id", nullable = false, foreignKey = @ForeignKey(name = "fk_proc_cert_cert"))
     private CertEntity cert;
+
 }
