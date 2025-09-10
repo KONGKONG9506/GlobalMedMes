@@ -10,6 +10,7 @@ spring:
     hibernate:
       ddl-auto: validate           # 운영스럽게 validate(개발 중 create/update 쓰고 싶으면 팀 합의)
     properties:
+      hibernate.type.preferred_boolean_jdbc_type: TINYINT
       hibernate:
         jdbc:
           time_zone: UTC           # DB-UTC 일치

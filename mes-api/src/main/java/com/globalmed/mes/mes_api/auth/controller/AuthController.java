@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@RestController @RequestMapping("/auth")
+@RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService userService;
@@ -26,7 +27,11 @@ public class AuthController {
                 "user", Map.of("userId", res.userId(), "roles", res.roles())
         ));
     }
+<<<<<<< HEAD
     public record LoginReq(@NotBlank String username, @NotBlank String password
 //                           , @NotBlank String captcha
     ){}
+=======
+    public record LoginReq(@NotBlank String username, @NotBlank String password){ }
+>>>>>>> fa9798cefd759593e3016432f7f7f9cde1f2e76d
 }
