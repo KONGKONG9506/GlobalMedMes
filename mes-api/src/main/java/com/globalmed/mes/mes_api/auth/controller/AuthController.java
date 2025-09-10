@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@RestController @RequestMapping("/auth")
+@RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final UserService userService;
@@ -22,5 +23,5 @@ public class AuthController {
                 "user", Map.of("userId", res.userId(), "roles", res.roles())
         ));
     }
-    public record LoginReq(@NotBlank String username, @NotBlank String password){}
+    public record LoginReq(@NotBlank String username, @NotBlank String password){ }
 }
