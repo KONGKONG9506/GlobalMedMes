@@ -19,10 +19,9 @@ public class CmmsWorkOrderDto {
 
     public static record AssignReq(@NotBlank String assigneeUserId) {}
 
-    public static record UpdateReq(
-            OffsetDateTime startedAt, OffsetDateTime finishedAt,
-            Integer actualMinutes, BigDecimal partsCost
-    ) {}
+    public static record finishReq(OffsetDateTime finishedAt, Integer actualMinutes, BigDecimal partsCost){}
+
+    public static record startReq(OffsetDateTime startedAt){}
 
     @Schema(name = "WorkOrderRes")
     public static record Res(

@@ -61,7 +61,7 @@ public class CmmsWorkOrderService {
     }
 
     @Transactional
-    public CmmsWorkOrderDto.Res start(Long id, CmmsWorkOrderDto.UpdateReq req, String actorUserId){
+    public CmmsWorkOrderDto.Res start(Long id, CmmsWorkOrderDto.startReq req, String actorUserId){
         var e = repo.findByIdAndDeletedFalse(id).orElseThrow();
         var idAssigned = codes.idOf(G_WO_STATUS, S_ASSIGNED);
         var idInProg   = codes.idOf(G_WO_STATUS, S_INPROG);
@@ -77,7 +77,7 @@ public class CmmsWorkOrderService {
     }
 
     @Transactional
-    public CmmsWorkOrderDto.Res complete(Long id, CmmsWorkOrderDto.UpdateReq req, String actorUserId){
+    public CmmsWorkOrderDto.Res complete(Long id, CmmsWorkOrderDto.finishReq req, String actorUserId){
         var e = repo.findByIdAndDeletedFalse(id).orElseThrow();
         var idInProg = codes.idOf(G_WO_STATUS, S_INPROG);
         var idDone   = codes.idOf(G_WO_STATUS, S_DONE);

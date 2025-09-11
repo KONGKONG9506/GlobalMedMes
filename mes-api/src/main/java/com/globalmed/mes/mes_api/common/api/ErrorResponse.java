@@ -8,12 +8,7 @@ import java.util.Map;
 @Getter
 @Builder
 public class ErrorResponse {
-    private String code;
-    private String message;
-    private Map<String,Object> details;
-    private String traceId;
-    private String timestamp;
-    private String path;
-    private String method;
+    private String code; private String message; private Map<String,Object> details;
+    private String traceId; private String timestamp; private String path; private String method;
 }
 
