@@ -22,6 +22,9 @@ public class EquipmentCertCheckService {
                 .map(ec -> ec.getCert().getCertCode())
                 .toList();
 
+        if (requiredCerts.isEmpty()) {
+            return;
+        }
         // 직원이 가진 자격증
         var employeeCerts = employeeCertRepo.findByEmployee_EmployeeId(employeeId).stream()
                 .map(ec -> ec.getCert().getCertCode())

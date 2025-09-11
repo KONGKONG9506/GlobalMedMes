@@ -36,6 +36,9 @@ public class ProcessCertCheckService {
                     .map(pc -> pc.getCert().getCertCode())
                     .collect(Collectors.toSet());
 
+            if (requiredCertCodes.isEmpty()) {
+                return;
+            }
             if(employeeCertCodes.containsAll(requiredCertCodes)){
                 return; // 자격 있는 사람 한 명이라도 있으면 통과
             }
