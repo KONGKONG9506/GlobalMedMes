@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwQUQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTc1NzQ4MjQwNywiZXhwIjoxNzU3NDg0MjA3fQ.d6wupo6lZUx1lYrUtSiFW2GJFfjxwhgy3HSALTzoqzU
+
+### Create CMMS Work-Order
+POST {{baseUrl}}/api/cmms/work-orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "equipmentId": "E-0001",
+  "title": "ㅂㅂㅈㄷㅂㅈㄷㅈㅂㄷ",
+  "priorityCodeId": 0,
+  "requestId": "string"
+}
+
+### Create CMMS PM-PLAN
+POST {{baseUrl}}/api/cmms/work-orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "equipmentId": "E-0001",
+  "taskName": "윤활 점검(주1회)",
+  "cycleTypeCodeId": 31,     
+  "cycleValue": 7,
+  "lastDoneAt": null,
+  "nextDueAt": "2025-09-15T00:00:00Z"
+}
+
+###
