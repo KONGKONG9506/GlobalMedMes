@@ -2,6 +2,7 @@ package com.globalmed.mes.mes_api.kpi.service;
 
 import com.globalmed.mes.mes_api.kpi.KpiDataConstants;
 import com.globalmed.mes.mes_api.kpi.domain.KpiDataEntity;
+import com.globalmed.mes.mes_api.kpi.downtime.service.PlannedDowntimeService;
 import com.globalmed.mes.mes_api.kpi.repository.KpiDataRepo;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +29,7 @@ public class KpiDataService {
     private final KpiCalculationService kpiCalculationService;
     private final KpiDataRepo kpiDataRepo;
     private final PerformanceRepo performanceRepo;
+    private final PlannedDowntimeService plannedDowntimeService; // 계획된 다운타임을 위한 서비스 의존성 추가
 
     /**
      * ProductionPerformanceEntity 기반 KPI 실시간 계산 및 저장/갱신
@@ -52,8 +55,16 @@ public class KpiDataService {
         BigDecimal defectQty = p.getDefectQty();
         // 임시 가동 시간
         BigDecimal runSeconds = BigDecimal.valueOf(between(p.getStartTime(), p.getEndTime()).toSeconds());
-        // 임시 계획 시간
-        BigDecimal plannedSeconds = runSeconds;
+
+        // 계획된 다운타임 계산 및 총 기간(seconds)에서 제외
+        long totalPeriodSeconds = Duration.between(p.getStartTime(), p.getEndTime()).toSeconds();
+
+        // PlannedDowntimeService에서 분 단위로 반환받음
+        long plannedDowntimeMinutes = plannedDowntimeService.calculatePlannedDowntimeMinutes(p.getEquipmentId(), p.getStartTime().atOffset(ZoneOffset.UTC), p.getEndTime().atOffset(ZoneOffset.UTC));
+        BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - (plannedDowntimeMinutes * 60));
+
+        // 모든 KPI 계산에 필요한 데이터를 한 번에 KpiCalculationService로 전달
+
 
         Map<String, BigDecimal> kpiValues = kpiCalculationService
                 .calculateFromPerformance(goodQty, defectQty, runSeconds, plannedSeconds);
@@ -103,6 +114,7 @@ public class KpiDataService {
             // 그룹별 데이터 집계
             BigDecimal totalGoodQty = BigDecimal.ZERO;
             BigDecimal totalDefectQty = BigDecimal.ZERO;
+            BigDecimal totalProducedQty = BigDecimal.ZERO;
             BigDecimal totalRunSeconds = BigDecimal.ZERO;
             LocalDateTime firstStartTime = list.stream()
                     .map(ProductionPerformanceEntity::getStartTime)
@@ -117,12 +129,21 @@ public class KpiDataService {
             for (ProductionPerformanceEntity p : list) {
                 totalGoodQty = totalGoodQty.add(p.getProducedQty().subtract(p.getDefectQty()));
                 totalDefectQty = totalDefectQty.add(p.getDefectQty());
+                totalProducedQty = totalProducedQty.add(p.getProducedQty());
                 totalRunSeconds = totalRunSeconds.add(BigDecimal.valueOf(between(p.getStartTime(), p.getEndTime()).toSeconds()));
             }
 
-            // 배치 KPI 값 계산
+            // 일일 배치 계획 시간 계산
+            // 워크 오더 지시 시간
+            long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
+            // 해당 지시 시간 사이의 계획된 비가동 시간
+            long plannedDowntimeMinutes = plannedDowntimeService.calculatePlannedDowntimeMinutes(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+            // 지시시간 - 계획된 비가동 시간 = 계획된 작동 시간
+            BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - (plannedDowntimeMinutes * 60));
+
+            // 모든 KPI 계산에 필요한 데이터를 한 번에 KpiCalculationService로 전달
             Map<String, BigDecimal> kpiValues = kpiCalculationService.calculateFromPerformance(
-                    totalGoodQty, totalDefectQty, totalRunSeconds, totalRunSeconds
+                    totalGoodQty, totalDefectQty, totalRunSeconds, plannedSeconds
             );
 
             ProductionPerformanceEntity representative = list.get(0);
