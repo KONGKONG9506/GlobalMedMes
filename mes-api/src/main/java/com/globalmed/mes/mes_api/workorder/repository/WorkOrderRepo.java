@@ -14,5 +14,6 @@ public interface WorkOrderRepo extends JpaRepository<WorkOrderEntity, String>,
         JpaSpecificationExecutor<WorkOrderEntity> {
 
     Optional<WorkOrderEntity> findByWorkOrderNumber(String workOrderNumber);
+    Optional<WorkOrderEntity> findTopByEquipmentIdOrderByCreatedAtDesc(String equipmentId);
 
 }

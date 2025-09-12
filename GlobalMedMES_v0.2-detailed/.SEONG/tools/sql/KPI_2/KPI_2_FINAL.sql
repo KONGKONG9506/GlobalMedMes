@@ -1,4 +1,4 @@
-
+-- 마지막 수정 2025-09-11-17:00
 -- 테이블 삭제
 -- DROP TABLE IF EXISTS tb_employee_cert;
 -- DROP TABLE IF EXISTS tb_process_cert;
@@ -155,9 +155,9 @@ INSERT IGNORE INTO tb_equipment_cert (equipment_id, cert_id) VALUES
 -- 목적: 교대 시스템 테스트를 위해 더 많은 직원을 추가하는 스크립트.
 -- ==========================================
 
-SET @cert_FORKLIFT = (SELECT cert_id FROM tb_cert WHERE cert_code = 'FORKLIFT');
-SET @cert_ELECTRIC = (SELECT cert_id FROM tb_cert WHERE cert_code = 'ELECTRIC');
-SET @cert_SAFETY = (SELECT cert_id FROM tb_cert WHERE cert_code = 'SAFETY');
+SET @cert_FORKLIFT = (SELECT cert_id FROM tb_cert WHERE cert_code = 'C-FORKLIFT');
+SET @cert_ELECTRIC = (SELECT cert_id FROM tb_cert WHERE cert_code = '0410100');
+SET @cert_SAFETY = (SELECT cert_id FROM tb_cert WHERE cert_code = '1910100');
 SET @SKILL_BASIC = (SELECT code_id FROM tb_code WHERE group_code = 'EMPLOYEE_LEVEL' AND code = 'BASIC');
 SET @SKILL_INTERMEDIATE = (SELECT code_id FROM tb_code WHERE group_code = 'EMPLOYEE_LEVEL' AND code = 'INTERMEDIATE');
 SET @SKILL_EXPERT = (SELECT code_id FROM tb_code WHERE group_code = 'EMPLOYEE_LEVEL' AND code = 'EXPERT');
