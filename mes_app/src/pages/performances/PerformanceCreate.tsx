@@ -116,7 +116,7 @@ const etMs = etIso ? new Date(etIso).getTime() : NaN;
       defectQty,
       startTime: stIso, // UTC
       endTime: etIso,   // UTC
-      requestId: crypto.randomUUID() ?? `${Date.now()}-${Math.random()}`, // 멱등키
+      requestId: crypto.randomUUID() ?? `${Date.now()}-${Math.random()}`, 
     };
 
     try {

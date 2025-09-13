@@ -98,6 +98,7 @@ const QualityPage: React.FC = () => {
     },
   };
 
+  // 신규 등록
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const newEntry: Inspection = {
@@ -114,6 +115,13 @@ const QualityPage: React.FC = () => {
     setInspector("");
   };
 
+  // 삭제 기능
+  const handleDelete = (id: number) => {
+    if (window.confirm("정말로 삭제하시겠습니까?")) {
+      setData(data.filter((d) => d.id !== id));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white-100 p-6">
       <h1 className="text-2xl font-bold mb-6">품질 관리</h1>
@@ -128,12 +136,12 @@ const QualityPage: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-       <button
-       onClick={() => setSearchTerm("")}
-       className="ml-2 bg-gray-300 hover:bg-gray-300 text-gray-600 px-5 py-2.5 rounded text-sm transition"
-       >
-       Reset
-       </button>
+          <button
+            onClick={() => setSearchTerm("")}
+            className="ml-2 bg-gray-300 hover:bg-gray-400 text-gray-600 px-5 py-2.5 rounded text-sm transition"
+          >
+            Reset
+          </button>
         </div>
       )}
 
@@ -145,7 +153,7 @@ const QualityPage: React.FC = () => {
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
               onClick={() => setMode("form")}
-            >  
+            >
               + 신규 검사 등록
             </button>
           </div>
@@ -158,12 +166,13 @@ const QualityPage: React.FC = () => {
                 <th className="border px-2 py-1">결과</th>
                 <th className="border px-2 py-1">검사자</th>
                 <th className="border px-2 py-1">날짜</th>
+                <th className="border px-2 py-1">관리</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-4">
+                  <td colSpan={6} className="py-4">
                     결과가 없습니다.
                   </td>
                 </tr>
@@ -181,6 +190,14 @@ const QualityPage: React.FC = () => {
                     </td>
                     <td className="border px-2 py-1">{item.inspector}</td>
                     <td className="border px-2 py-1">{item.date}</td>
+                    <td className="border px-2 py-1">
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-sm"
+                      >
+                        삭제
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
