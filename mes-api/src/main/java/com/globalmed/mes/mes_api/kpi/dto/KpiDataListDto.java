@@ -16,7 +16,7 @@ public record KpiDataListDto(
         BigDecimal actualProductivity,
         BigDecimal actualYield,
         BigDecimal actualDefectRate,
-        String aggregationType,
+        Long aggregationType,
         LocalDateTime startTime,
         LocalDateTime endTime
 ) {
@@ -31,7 +31,7 @@ public record KpiDataListDto(
                 entity.getActualProductivity(),
                 entity.getActualYield(),
                 entity.getActualDefectRate(),
-                entity.getAggregationType(),
+                entity.getAggregationTypeId(),
                 entity.getStartTime(),
                 entity.getEndTime()
         );

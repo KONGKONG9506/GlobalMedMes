@@ -57,6 +57,8 @@ ALTER TABLE `tb_kpi_data`
 
 -- 2단계: 기존 데이터를 신규 컬럼으로 마이그레이션
 -- `aggregation_type` 컬럼의 값을 기준으로 `tb_code` 테이블에서 `code_id`를 조회하여 `aggregation_type_id`에 삽입합니다.
+SET SQL_SAFE_UPDATES = 0;
+
 UPDATE `tb_kpi_data` AS `t1`
 JOIN `tb_code` AS `t2`
   ON `t1`.`aggregation_type` = `t2`.`code`
@@ -77,6 +79,9 @@ JOIN `tb_code` AS `t2`
     END
   ) AND `t2`.`group_code` = 'KPI_CALC_STATUS'
 SET `t1`.`calc_status_code_id` = `t2`.`code_id`;
+
+
+SET SQL_SAFE_UPDATES = 1; -- 업데이트 완료 후 안전 모드 다시 활성화
 
 
 -- 3단계: 기존 컬럼 삭제

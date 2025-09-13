@@ -12,60 +12,60 @@ import java.util.Optional;
 
 public interface KpiDataRepo extends JpaRepository<KpiDataEntity, Long> {
 
-    // 일일 배치 KPI 조회를 위해 추가된 메서드
+    // 일일 배치 KPI 조회를 위해 추가된 메서드 (업데이트)
     @Query("SELECT k FROM KpiDataEntity k WHERE k.kpiDate = :kpiDate " +
             "AND k.equipmentId = :equipmentId AND k.processId = :processId " +
-            "AND k.itemId = :itemId AND k.aggregationType = :aggregationType " +
-            "AND k.batchCheck = :batchCheck")
+            "AND k.itemId = :itemId AND k.aggregationTypeId = :aggregationTypeId " +
+            "AND k.batchGroupKey = :batchGroupKey")
     Optional<KpiDataEntity> findDailyBatchKpi(
             @Param("kpiDate") LocalDate kpiDate,
             @Param("equipmentId") String equipmentId,
             @Param("processId") String processId,
             @Param("itemId") String itemId,
-            @Param("aggregationType") String aggregationType,
-            @Param("batchCheck") String batchCheck
+            @Param("aggregationTypeId") Long aggregationTypeId,
+            @Param("batchGroupKey") String batchGroupKey
     );
 
-    // 실시간 KPI를 위해 추가된 메서드
+    // 실시간 KPI를 위해 추가된 메서드 (업데이트)
     @Query("SELECT k FROM KpiDataEntity k WHERE k.kpiDate = :kpiDate " +
             "AND k.workOrderId = :workOrderId AND k.equipmentId = :equipmentId " +
             "AND k.processId = :processId AND k.itemId = :itemId " +
-            "AND k.aggregationType = :aggregationType")
+            "AND k.aggregationTypeId = :aggregationTypeId")
     Optional<KpiDataEntity> findRealtimeKpi(
             @Param("kpiDate") LocalDate kpiDate,
             @Param("workOrderId") String workOrderId,
             @Param("equipmentId") String equipmentId,
             @Param("processId") String processId,
             @Param("itemId") String itemId,
-            @Param("aggregationType") String aggregationType
+            @Param("aggregationTypeId") Long aggregationTypeId
     );
-    // 컨트롤러에서 날짜 필터를 사용하지 않을 때 호출되는 메서드
+    // 컨트롤러에서 날짜 필터를 사용하지 않을 때 호출되는 메서드 (업데이트)
     @Query("SELECT k FROM KpiDataEntity k WHERE " +
             "(:equipmentId IS NULL OR k.equipmentId = :equipmentId) AND " +
             "(:processId IS NULL OR k.processId = :processId) AND " +
             "(:itemId IS NULL OR k.itemId = :itemId) AND " +
-            "(:aggregationType IS NULL OR k.aggregationType = :aggregationType)")
+            "(:aggregationTypeId IS NULL OR k.aggregationTypeId = :aggregationTypeId)")
     Page<KpiDataEntity> findByFilters(
             @Param("equipmentId") String equipmentId,
             @Param("processId") String processId,
             @Param("itemId") String itemId,
-            @Param("aggregationType") String aggregationType,
+            @Param("aggregationTypeId") Long aggregationTypeId,
             Pageable pageable
     );
 
-    // 컨트롤러에서 날짜 필터를 사용할 때 호출되는 메서드
+    // 컨트롤러에서 날짜 필터를 사용할 때 호출되는 메서드 (업데이트)
     @Query("SELECT k FROM KpiDataEntity k WHERE " +
             "k.kpiDate = :kpiDate AND " +
             "(:equipmentId IS NULL OR k.equipmentId = :equipmentId) AND " +
             "(:processId IS NULL OR k.processId = :processId) AND " +
             "(:itemId IS NULL OR k.itemId = :itemId) AND " +
-            "(:aggregationType IS NULL OR k.aggregationType = :aggregationType)")
+            "(:aggregationTypeId IS NULL OR k.aggregationTypeId = :aggregationTypeId)")
     Page<KpiDataEntity> findByKpiDateAndFilters(
             @Param("kpiDate") LocalDate kpiDate,
             @Param("equipmentId") String equipmentId,
             @Param("processId") String processId,
             @Param("itemId") String itemId,
-            @Param("aggregationType") String aggregationType,
+            @Param("aggregationTypeId") Long aggregationTypeId,
             Pageable pageable
     );
 }

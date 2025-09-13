@@ -1,6 +1,6 @@
 package com.globalmed.mes.mes_api.kpi.service;
 
-import com.globalmed.mes.mes_api.kpi.KpiDataConstants;
+import com.globalmed.mes.mes_api.code.CodeRepo;
 import com.globalmed.mes.mes_api.kpi.domain.KpiDataEntity;
 import com.globalmed.mes.mes_api.kpi.downtime.service.PlannedDowntimeService;
 import com.globalmed.mes.mes_api.kpi.downtime.service.UnplannedDowntimeService;
@@ -30,6 +30,25 @@ public class KpiDataService {
     private final PerformanceRepo performanceRepo;
     private final PlannedDowntimeService plannedDowntimeService;
     private final UnplannedDowntimeService unplannedDowntimeService;
+    private final CodeRepo codeRepo;
+
+    private static final String KPI_DATA_TYPE_GROUP = "KPI_DATA_TYPE";
+    private static final String KPI_CALC_STATUS_GROUP = "KPI_CALC_STATUS";
+
+    private Long getCodeId(String groupCode, String code) {
+        return codeRepo.findByGroupCodeAndCode(groupCode, code)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid code: " + groupCode + " - " + code))
+                .getCodeId();
+    }
+    private Long getRealtimeAggregationTypeId() {
+        return getCodeId(KPI_DATA_TYPE_GROUP, "REALTIME");
+    }
+    private Long getDailyBatchAggregationTypeId() {
+        return getCodeId(KPI_DATA_TYPE_GROUP, "DAILY_BATCH");
+    }
+    private Long getSuccessCalcStatusCodeId() {
+        return getCodeId(KPI_CALC_STATUS_GROUP, "SUCCESS");
+    }
 
     /**
      * ProductionPerformanceEntity 기반 KPI 실시간 계산 및 저장/갱신
@@ -40,35 +59,26 @@ public class KpiDataService {
     public void saveKpiFromPerformance(ProductionPerformanceEntity p) {
         LocalDateTime now = LocalDateTime.now();
 
-        // work_order_id를 기반으로 KPI 기록을 찾음
         Optional<KpiDataEntity> existingKpi = kpiDataRepo.findRealtimeKpi(
                 p.getStartTime().toLocalDate(),
                 p.getWorkOrderId(),
                 p.getEquipmentId(),
                 p.getProcessId(),
                 p.getItemId(),
-                KpiDataConstants.AGG_REALTIME
+                getRealtimeAggregationTypeId()
         );
 
         KpiDataEntity kpi = existingKpi.orElseGet(KpiDataEntity::new);
 
         BigDecimal goodQty = p.getProducedQty().subtract(p.getDefectQty());
         BigDecimal defectQty = p.getDefectQty();
-        // 계획된 다운타임 계산 및 총 기간(seconds)에서 제외
         long totalPeriodSeconds = Duration.between(p.getStartTime(), p.getEndTime()).toSeconds();
 
-        // 계획되지 않은 비가동 시간
         long unplannedDowntimeMinutes = unplannedDowntimeService.calculateUnplannedDowntimeMinutes(p.getEquipmentId(), p.getStartTime().atOffset(ZoneOffset.UTC), p.getEndTime().atOffset(ZoneOffset.UTC));
-
-        // PlannedDowntimeService에서 분 단위로 반환받음
         long plannedDowntimeMinutes = plannedDowntimeService.calculatePlannedDowntimeMinutes(p.getEquipmentId(), p.getStartTime().atOffset(ZoneOffset.UTC), p.getEndTime().atOffset(ZoneOffset.UTC));
-        // 총 계획 시간
+
         BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - (plannedDowntimeMinutes * 60));
-
-        // 총 가동 시간
         BigDecimal runSeconds =  plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeMinutes * 60));
-
-
 
         Map<String, BigDecimal> kpiValues = kpiCalculationService
                 .calculateFromPerformance(goodQty, defectQty, runSeconds, plannedSeconds);
@@ -78,11 +88,11 @@ public class KpiDataService {
         kpi.setProcessId(p.getProcessId());
         kpi.setItemId(p.getItemId());
         kpi.setWorkOrderId(p.getWorkOrderId());
-        kpi.setAggregationType(KpiDataConstants.AGG_REALTIME);
-        kpi.setBatchCheck(null);
+        kpi.setAggregationTypeId(getRealtimeAggregationTypeId());
+        kpi.setBatchGroupKey(null);
         kpi.setStartTime(p.getStartTime());
         kpi.setEndTime(p.getEndTime());
-        kpi.setCalcSuccessCheck(KpiDataConstants.CALC_SUCCESS);
+        kpi.setCalcStatusCodeId(getSuccessCalcStatusCodeId());
         kpi.setCalcAt(now);
         kpi.setCreatedBy("system");
 
@@ -96,26 +106,22 @@ public class KpiDataService {
 
     /**
      * 일일 배치 KPI 계산 및 저장
-     * 지정된 날짜의 모든 생산 실적을 집계하여 일일 배치 KPI를 생성합니다.
      */
     @Transactional
     public void runDailyBatchKpiCalculation(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
 
-        // 날짜별 모든 생산 실적 데이터 조회
         List<ProductionPerformanceEntity> performances = performanceRepo.findPerformancesForDay(startOfDay, endOfDay);
 
         if (performances.isEmpty()) {
             return;
         }
 
-        // 장비,공정,품목 조합별로 실적을 그룹화
         Map<String, List<ProductionPerformanceEntity>> groupedPerformances = performances.stream()
                 .collect(Collectors.groupingBy(p -> p.getEquipmentId() + "_" + p.getProcessId() + "_" + p.getItemId()));
 
         groupedPerformances.forEach((key, list) -> {
-            // 그룹별 데이터 집계
             BigDecimal totalGoodQty = BigDecimal.ZERO;
             BigDecimal totalDefectQty = BigDecimal.ZERO;
             LocalDateTime firstStartTime = list.stream()
@@ -133,11 +139,12 @@ public class KpiDataService {
                 totalDefectQty = totalDefectQty.add(p.getDefectQty());
             }
 
-            // 일일 배치 계획 시간 계산
             // 워크 오더 지시 시간
             long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
+
             // 해당 지시 시간 사이의 계획된 비가동 시간
             long plannedDowntimeMinutes = plannedDowntimeService.calculatePlannedDowntimeMinutes(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+
             // 계획되지 않은 비가동 시간
             long unplannedDowntimeMinutes = unplannedDowntimeService.calculateUnplannedDowntimeMinutes(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
 
@@ -147,14 +154,12 @@ public class KpiDataService {
             // 총 가동 시간 (초) = 계획된 가동 시간 - 계획되지 않은 비가동 시간
             BigDecimal totalRunSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeMinutes * 60));
 
-            // 모든 KPI 계산에 필요한 데이터를 한 번에 KpiCalculationService로 전달
             Map<String, BigDecimal> kpiValues = kpiCalculationService.calculateFromPerformance(
                     totalGoodQty, totalDefectQty, totalRunSeconds, plannedSeconds
             );
 
             ProductionPerformanceEntity representative = list.get(0);
-            Optional<KpiDataEntity> existingBatchKpi = kpiDataRepo.findDailyBatchKpi(date, representative.getEquipmentId(), representative.getProcessId(), representative.getItemId(), KpiDataConstants.AGG_DAILY_BATCH, KpiDataConstants.BATCH_DAILY);
-
+            Optional<KpiDataEntity> existingBatchKpi = kpiDataRepo.findDailyBatchKpi(date, representative.getEquipmentId(), representative.getProcessId(), representative.getItemId(), getDailyBatchAggregationTypeId(), "DAILY");
 
             KpiDataEntity batchKpi = existingBatchKpi.orElseGet(KpiDataEntity::new);
 
@@ -162,12 +167,12 @@ public class KpiDataService {
             batchKpi.setEquipmentId(representative.getEquipmentId());
             batchKpi.setProcessId(representative.getProcessId());
             batchKpi.setItemId(representative.getItemId());
-            batchKpi.setAggregationType(KpiDataConstants.AGG_DAILY_BATCH);
-            batchKpi.setBatchCheck(KpiDataConstants.BATCH_DAILY);
+            batchKpi.setAggregationTypeId(getDailyBatchAggregationTypeId());
+            batchKpi.setBatchGroupKey("DAILY");
 
             batchKpi.setStartTime(firstStartTime);
             batchKpi.setEndTime(lastEndTime);
-            batchKpi.setCalcSuccessCheck(KpiDataConstants.CALC_SUCCESS);
+            batchKpi.setCalcStatusCodeId(getSuccessCalcStatusCodeId());
             batchKpi.setCalcAt(LocalDateTime.now());
             batchKpi.setCreatedBy("system");
 

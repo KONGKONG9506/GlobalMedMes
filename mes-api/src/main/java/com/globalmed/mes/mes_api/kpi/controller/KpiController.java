@@ -53,7 +53,7 @@ public class KpiController {
             @RequestParam(required = false) String equipmentId,
             @RequestParam(required = false) String processId,
             @RequestParam(required = false) String itemId,
-            @RequestParam(required = false) String aggregationType,
+            @RequestParam(required = false) Long aggregationTypeId,
             @RequestParam(defaultValue = "kpiDate,desc") String sort) {
 
         Sort s = Sort.by(sort.split(",")[0]).descending();
@@ -65,9 +65,9 @@ public class KpiController {
         // 검색 조건에 따라 적절한 Repository 메서드 호출
         Page<KpiDataEntity> result;
         if (kpiDate != null) {
-            result = kpiDataRepo.findByKpiDateAndFilters(kpiDate, equipmentId, processId, itemId, aggregationType, pageable);
+            result = kpiDataRepo.findByKpiDateAndFilters(kpiDate, equipmentId, processId, itemId, aggregationTypeId, pageable);
         } else {
-            result = kpiDataRepo.findByFilters(equipmentId, processId, itemId, aggregationType, pageable);
+            result = kpiDataRepo.findByFilters(equipmentId, processId, itemId, aggregationTypeId, pageable);
         }
 
         var dtoPage = result.map(KpiDataListDto::fromEntity);
