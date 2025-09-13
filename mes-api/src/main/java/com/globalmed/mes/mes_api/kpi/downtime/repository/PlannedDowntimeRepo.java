@@ -11,9 +11,9 @@ import java.util.List;
 public interface PlannedDowntimeRepo extends JpaRepository<PlannedDowntimeEntity, Long> {
 
     @Query("SELECT p FROM PlannedDowntimeEntity p WHERE p.equipmentId = :equipmentId " +
-            "AND p.startTime >= :startTs AND p.endTime <= :endTs " +
-            "AND p.isDeleted = false")
-    List<PlannedDowntimeEntity> findByEquipmentAndDateRange(
+            "AND p.isDeleted = false " +
+            "AND p.startTime <= :endTs AND p.endTime >= :startTs")
+    List<PlannedDowntimeEntity> findByEquipmentIdAndOverlappingDateRange(
             @Param("equipmentId") String equipmentId,
             @Param("startTs") OffsetDateTime startTs,
             @Param("endTs") OffsetDateTime endTs

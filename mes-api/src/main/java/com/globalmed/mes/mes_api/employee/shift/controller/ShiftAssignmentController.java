@@ -5,6 +5,7 @@ import com.globalmed.mes.mes_api.employee.shift.dto.ShiftAssignmentDto;
 import com.globalmed.mes.mes_api.employee.shift.service.ShiftAssignmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ public class ShiftAssignmentController {
     private final ShiftAssignmentService assignmentService;
 
     @PostMapping("/{calendarId}/assign")
+    @PreAuthorize("@permChecker.has(authentication, '/work-orders','write') or hasAnyRole('ADMIN','OP')")
     public ResponseEntity<ShiftAssignmentEntity> assignWorker(
             @PathVariable Long calendarId,
             @RequestParam String workerId

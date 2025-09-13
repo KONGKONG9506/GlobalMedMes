@@ -31,7 +31,6 @@ public class PlannedDowntimeEntity {
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;
 
-    // 변경: downtime_type 문자열 대신 tb_code 테이블의 code_id를 참조
     @Column(name = "downtime_type_code_id", nullable = false)
     private Long downtimeTypeCodeId;
 

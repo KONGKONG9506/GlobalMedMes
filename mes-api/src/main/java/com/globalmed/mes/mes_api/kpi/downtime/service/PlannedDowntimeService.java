@@ -1,7 +1,10 @@
 package com.globalmed.mes.mes_api.kpi.downtime.service;
 
 import com.globalmed.mes.mes_api.kpi.downtime.domain.PlannedDowntimeEntity;
+import com.globalmed.mes.mes_api.kpi.downtime.dto.DowntimeIntervalDto;
+import com.globalmed.mes.mes_api.kpi.downtime.dto.PlannedDowntimeDto;
 import com.globalmed.mes.mes_api.kpi.downtime.repository.PlannedDowntimeRepo;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +12,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 계획된 다운타임(Planned Downtime) 관련 계산을 전담하는 서비스입니다.
@@ -21,51 +25,62 @@ public class PlannedDowntimeService {
     private final PlannedDowntimeRepo plannedDowntimeRepo;
 
     /**
-     * 특정 기간 동안의 총 계획된 다운타임 시간을 분 단위로 계산합니다.
-     *
-     * @param equipmentId 대상 장비 ID
-     * @param from        기간 시작 시간
-     * @param to          기간 종료 시간
-     * @return 총 계획된 다운타임 시간(분)
+     * 새로운 계획된 다운타임 기록을 추가합니다.
      */
-    public long calculatePlannedDowntimeMinutes(String equipmentId, OffsetDateTime from, OffsetDateTime to) {
-        long totalMinutes = 0;
-        List<PlannedDowntimeEntity> plannedDowntimes = plannedDowntimeRepo.findByEquipmentAndDateRange(equipmentId, from, to);
-        for (PlannedDowntimeEntity downtime : plannedDowntimes) {
-            totalMinutes += downtime.getDurationMinutes();
+    @Transactional
+    public PlannedDowntimeEntity addPlannedDowntime(PlannedDowntimeDto dto) {
+        PlannedDowntimeEntity plannedDowntimeEntity = new PlannedDowntimeEntity();
+        plannedDowntimeEntity.setEquipmentId(dto.getEquipmentId());
+        plannedDowntimeEntity.setStartTime(dto.getStartTime());
+        plannedDowntimeEntity.setEndTime(dto.getEndTime());
+        plannedDowntimeEntity.setDowntimeTypeCodeId(dto.getDowntimeTypeCodeId());
+        plannedDowntimeEntity.setDescription(dto.getDescription());
+
+        // 다운타임 시간 계산 (분 단위)
+        Duration duration = Duration.between(dto.getStartTime(), dto.getEndTime());
+        plannedDowntimeEntity.setDurationMinutes((int) duration.toMinutes());
+
+        return plannedDowntimeRepo.save(plannedDowntimeEntity);
+    }
+
+    /**
+     * 주어진 장비와 기간에 대한 총 계획된 다운타임 시간을 분 단위로 계산
+     */
+    @Transactional
+    public long calculatePlannedDowntimeMinutes(String equipmentId, OffsetDateTime startTz, OffsetDateTime endTz) {
+        // 주어진 기간 내의 모든 계획된 다운타임 기록을 조회
+        List<PlannedDowntimeEntity> downtimes = plannedDowntimeRepo.findByEquipmentIdAndOverlappingDateRange(
+                equipmentId, startTz, endTz
+        );
+
+        long totalMinutes = 0L;
+        for (PlannedDowntimeEntity downtime : downtimes) {
+            OffsetDateTime intervalStart = downtime.getStartTime();
+            OffsetDateTime intervalEnd = downtime.getEndTime();
+
+            // 계산 기간과 다운타임 기간이 겹치는 부분만 계산
+            OffsetDateTime effectiveStart = intervalStart.isAfter(startTz) ? intervalStart : startTz;
+            OffsetDateTime effectiveEnd = intervalEnd.isBefore(endTz) ? intervalEnd : endTz;
+
+            if (effectiveStart.isBefore(effectiveEnd) || effectiveStart.isEqual(effectiveEnd)) {
+                Duration duration = Duration.between(effectiveStart, effectiveEnd);
+                totalMinutes += duration.toMinutes();
+            }
         }
         return totalMinutes;
     }
 
     /**
-     * 특정 기간 동안의 모든 계획된 다운타임 시간 간격 리스트를 생성합니다.
-     * 이 리스트는 계획되지 않은 다운타임 계산 시 중복 시간 제거에 사용됩니다.
-     *
-     * @param equipmentId 대상 장비 ID
-     * @param from        기간 시작 시간
-     * @param to          기간 종료 시간
-     * @return 계획된 다운타임 시간 간격(Interval) 리스트
+     * 주어진 기간과 겹치는 모든 계획된 다운타임 기록의 시간 간격을 조회
+     * 이 메서드는 UnplannedDowntimeService에서 사용하기 위해 DTO 리스트를 반환
      */
-    public List<Interval> getPlannedDowntimeIntervals(String equipmentId, OffsetDateTime from, OffsetDateTime to) {
-        List<Interval> intervals = new ArrayList<>();
-        List<PlannedDowntimeEntity> plannedDowntimes = plannedDowntimeRepo.findByEquipmentAndDateRange(equipmentId, from, to);
-        for (PlannedDowntimeEntity downtime : plannedDowntimes) {
-            intervals.add(new Interval(downtime.getStartTime(), downtime.getEndTime()));
-        }
-        return intervals;
-    }
-
-    /**
-     * 시간 간격을 표현하는 내부 클래스.
-     * UnplannedDowntimeService에서도 사용됩니다.
-     */
-    public static class Interval {
-        public OffsetDateTime start;
-        public OffsetDateTime end;
-
-        public Interval(OffsetDateTime start, OffsetDateTime end) {
-            this.start = start;
-            this.end = end;
-        }
+    @Transactional
+    public List<DowntimeIntervalDto> getPlannedDowntimeIntervals(String equipmentId, OffsetDateTime from, OffsetDateTime to) {
+        List<PlannedDowntimeEntity> downtimes = plannedDowntimeRepo.findByEquipmentIdAndOverlappingDateRange(
+                equipmentId, from, to
+        );
+        return downtimes.stream()
+                .map(d -> new DowntimeIntervalDto(d.getStartTime(), d.getEndTime()))
+                .collect(Collectors.toList());
     }
 }
