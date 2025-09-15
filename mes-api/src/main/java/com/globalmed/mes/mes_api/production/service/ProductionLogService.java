@@ -105,7 +105,7 @@ public class ProductionLogService {
         }
     }
 
-    /* 장비 비가동 종료 기록 eventvalue = 분단위 */
+    /* 장비 비가동 종료 기록 eventvalue = 초단위 */
     @Transactional
     public void logDowntimeEnd(String equipmentId) {
         try {

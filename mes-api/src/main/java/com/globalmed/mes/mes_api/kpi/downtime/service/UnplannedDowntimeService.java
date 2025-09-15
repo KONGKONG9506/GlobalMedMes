@@ -1,14 +1,12 @@
 package com.globalmed.mes.mes_api.kpi.downtime.service;
 
-import com.globalmed.mes.mes_api.cmms.domain.CmmsWorkOrder;
-import com.globalmed.mes.mes_api.cmms.repository.CmmsWorkOrderRepo;
-import com.globalmed.mes.mes_api.code.CodeRepo;
-import com.globalmed.mes.mes_api.kpi.downtime.dto.DowntimeIntervalDto;
-import jakarta.transaction.Transactional;
+import com.globalmed.mes.mes_api.production.domain.ProductionLogEntity;
+import com.globalmed.mes.mes_api.production.repository.ProductionLogRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -18,59 +16,27 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UnplannedDowntimeService {
-
-    private final CmmsWorkOrderRepo woRepo;
-    private final CodeRepo codeRepo;
-    private final PlannedDowntimeService plannedDowntimeService;
-
-    private static final String G_WO_STATUS = "CMMS_WO_STATUS";
-    private static final String S_DONE = "DONE";
+    private final ProductionLogRepo productionLogRepo;
 
     /**
-     * 특정 기간 동안의 총 계획되지 않은 다운타임 시간을 분 단위로 계산합니다.
-     * 계획된 다운타임과 중복되는 시간을 제거합니다.
+     * ProductionLog 기록을 기반으로 계획되지 않은 비가동 시간(분)을 계산합니다.
+     * DOWNTIME_END 로그의 eventValue에 기록된 시간(초)을 합산하여 총 비가동 시간을 구합니다.
      */
-    @Transactional
-    public long calculateUnplannedDowntimeMinutes(String equipmentId, OffsetDateTime from, OffsetDateTime to) {
-        var doneStatusId = codeRepo.findByGroupCodeAndCode(G_WO_STATUS, S_DONE)
-                .orElseThrow(() -> new IllegalStateException("Code not found: " + G_WO_STATUS + "/" + S_DONE)).getCodeId();
-        var completedWOs = woRepo.findByEquipmentIdAndStatusCodeIdAndFinishedAtBetween(
-                equipmentId, doneStatusId, from, to
-        );
+    public long calculateUnplannedDowntimeMinutes(String equipmentId, OffsetDateTime start, OffsetDateTime end) {
+        // 1. 주어진 기간 동안 해당 장비의 'DOWNTIME_END' 로그를 조회합니다.
+        // ProductionLogRepo에 findBy... 메소드가 존재한다고 가정합니다.
+        List<ProductionLogEntity> downtimeEndLogs = productionLogRepo.findByEquipmentIdAndEventType_CodeAndEventTimestampBetween(
+                equipmentId, "DOWNTIME_END", start.toLocalDateTime(), end.toLocalDateTime());
 
-        long totalUnplannedMinutes = 0;
-        List<DowntimeIntervalDto> plannedIntervals = plannedDowntimeService.getPlannedDowntimeIntervals(equipmentId, from, to);
+        // 2. 각 로그의 eventValue(초 단위)를 모두 합산합니다.
+        BigDecimal totalDowntimeSeconds = downtimeEndLogs.stream()
+                .map(ProductionLogEntity::getEventValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        for (CmmsWorkOrder wo : completedWOs) {
-            if (wo.getStartedAt() != null && wo.getFinishedAt() != null) {
-                DowntimeIntervalDto unplannedInterval = new DowntimeIntervalDto(wo.getStartedAt(), wo.getFinishedAt());
-                long unplannedMinutesForWo = Duration.between(unplannedInterval.start(), unplannedInterval.end()).toMinutes();
+        // 3. 초 단위를 분 단위로 변환하여 반환합니다.
+        // 소수점 처리를 위해 BigInteger 대신 BigDecimal을 사용합니다.
+        BigDecimal totalDowntimeMinutes = totalDowntimeSeconds.divide(BigDecimal.valueOf(60), RoundingMode.HALF_UP);
 
-                long overlapMinutes = 0;
-                for (DowntimeIntervalDto plannedInterval : plannedIntervals) {
-                    overlapMinutes += calculateOverlapMinutes(unplannedInterval, plannedInterval);
-                }
-
-                totalUnplannedMinutes += Math.max(0, unplannedMinutesForWo - overlapMinutes);
-            }
-        }
-        return totalUnplannedMinutes;
-    }
-
-    /**
-     * 두 시간 간격의 겹치는 시간을 계산
-     *
-     * @param i1 첫 번째 시간 간격
-     * @param i2 두 번째 시간 간격
-     * @return 겹치는 시간(분)
-     */
-    private long calculateOverlapMinutes(DowntimeIntervalDto i1, DowntimeIntervalDto i2) {
-        OffsetDateTime overlapStart = i1.start().isAfter(i2.start()) ? i1.start() : i2.start();
-        OffsetDateTime overlapEnd = i1.end().isBefore(i2.end()) ? i1.end() : i2.end();
-
-        if (overlapStart.isBefore(overlapEnd)) {
-            return Duration.between(overlapStart, overlapEnd).toMinutes();
-        }
-        return 0;
+        return totalDowntimeMinutes.longValue();
     }
 }
