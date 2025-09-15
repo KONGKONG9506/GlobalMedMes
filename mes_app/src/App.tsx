@@ -13,8 +13,9 @@ import PermRoute from "./routes/PermRoute";
 import Forbidden from "./pages/Forbidden";
 import QualityPage  from "./pages/quality/quality";
 import Management from "./pages/Management/Managementcreate";
-import CmmsPage from "./pages/CMMS/cmms";
-
+// import CmmsPage from "./pages/CMMS/cmms pm-plan";
+// import CmmsFault from "./pages/CMMS/cmms faultlogs";
+import CmmsTotal from "./pages/CMMS/cmms total";
 
 
 export default function App() {
@@ -46,11 +47,27 @@ export default function App() {
          </PermRoute>
          } />
 
-        <Route path="cmms" element={
-         <PermRoute require="write">
-         <CmmsPage />
-         </PermRoute>
-         } />
+      {/* <Route path="cmms">
+      <Route index element={
+      <PermRoute require="write">
+      <CmmsPage />
+      </PermRoute>
+      }/>
+      <Route path="faults" element={
+      <PermRoute require="write">
+      <CmmsFault />
+      </PermRoute>
+      }/>
+      </Route> */}
+
+      
+      <Route path="cmms">
+      <Route index element={
+      <PermRoute require="write">
+      <CmmsTotal />
+      </PermRoute>
+      }/>
+      </Route>
 
           <Route path="403" element={<Forbidden/>}/>
 
