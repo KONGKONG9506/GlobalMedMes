@@ -1,9 +1,12 @@
 package com.globalmed.mes.mes_api.kpi.downtime.service;
 
+import com.globalmed.mes.mes_api.code.CodeEntity;
+import com.globalmed.mes.mes_api.code.CodeRepo;
 import com.globalmed.mes.mes_api.kpi.downtime.domain.PlannedDowntimeEntity;
 import com.globalmed.mes.mes_api.kpi.downtime.dto.DowntimeIntervalDto;
 import com.globalmed.mes.mes_api.kpi.downtime.dto.PlannedDowntimeDto;
 import com.globalmed.mes.mes_api.kpi.downtime.repository.PlannedDowntimeRepo;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,37 +25,42 @@ import java.util.stream.Collectors;
 public class PlannedDowntimeService {
 
     private final PlannedDowntimeRepo plannedDowntimeRepo;
+    private final CodeRepo codeRepo;
 
     /**
      * 새로운 계획된 다운타임 기록을 추가합니다.
      */
     @Transactional
     public PlannedDowntimeEntity addPlannedDowntime(PlannedDowntimeDto dto) {
+        // 코드 값으로 CodeEntity 조회
+        CodeEntity downtimeType = codeRepo.findByGroupCodeAndCodeAndUseYn("PLANNED_DOWNTIME_TYPE", dto.getDowntimeTypeCode(), 'Y')
+                .orElseThrow(() -> new EntityNotFoundException("Downtime type code not found: " + dto.getDowntimeTypeCode()));
+
         PlannedDowntimeEntity plannedDowntimeEntity = new PlannedDowntimeEntity();
         plannedDowntimeEntity.setEquipmentId(dto.getEquipmentId());
         plannedDowntimeEntity.setStartTime(dto.getStartTime());
         plannedDowntimeEntity.setEndTime(dto.getEndTime());
-        plannedDowntimeEntity.setDowntimeTypeCodeId(dto.getDowntimeTypeCodeId());
+        plannedDowntimeEntity.setDowntimeTypeCodeId(downtimeType.getCodeId());
         plannedDowntimeEntity.setDescription(dto.getDescription());
 
-        // 다운타임 시간 계산 (분 단위)
+        // 다운타임 시간 계산 (초 단위)
         Duration duration = Duration.between(dto.getStartTime(), dto.getEndTime());
-        plannedDowntimeEntity.setDurationMinutes((int) duration.toMinutes());
+        plannedDowntimeEntity.setDurationSeconds(duration.getSeconds());
 
         return plannedDowntimeRepo.save(plannedDowntimeEntity);
     }
 
     /**
-     * 주어진 장비와 기간에 대한 총 계획된 다운타임 시간을 분 단위로 계산
+     * 주어진 장비와 기간에 대한 총 계획된 다운타임 시간을 초 단위로 계산
      */
     @Transactional
-    public long calculatePlannedDowntimeMinutes(String equipmentId, OffsetDateTime startTz, OffsetDateTime endTz) {
+    public long calculatePlannedDowntimeSeconds(String equipmentId, OffsetDateTime startTz, OffsetDateTime endTz) {
         // 주어진 기간 내의 모든 계획된 다운타임 기록을 조회
         List<PlannedDowntimeEntity> downtimes = plannedDowntimeRepo.findByEquipmentIdAndOverlappingDateRange(
                 equipmentId, startTz, endTz
         );
 
-        long totalMinutes = 0L;
+        long totalSeconds = 0L;
         for (PlannedDowntimeEntity downtime : downtimes) {
             OffsetDateTime intervalStart = downtime.getStartTime();
             OffsetDateTime intervalEnd = downtime.getEndTime();
@@ -63,10 +71,10 @@ public class PlannedDowntimeService {
 
             if (effectiveStart.isBefore(effectiveEnd) || effectiveStart.isEqual(effectiveEnd)) {
                 Duration duration = Duration.between(effectiveStart, effectiveEnd);
-                totalMinutes += duration.toMinutes();
+                totalSeconds += duration.toSeconds();
             }
         }
-        return totalMinutes;
+        return totalSeconds;
     }
 
     /**

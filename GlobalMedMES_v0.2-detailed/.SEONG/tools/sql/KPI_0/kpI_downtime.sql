@@ -41,18 +41,18 @@ ON DUPLICATE KEY UPDATE name=VALUES(name), use_yn=VALUES(use_yn), sort_order=VAL
 CREATE TABLE `tb_kpi_planned_downtime` (
     `planned_downtime_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '계획된 다운타임 ID (PK)',
     `equipment_id` VARCHAR(36) NOT NULL COMMENT '설비 ID (FK)',
-    `start_time` DATETIME NOT NULL COMMENT '계획된 다운타임 시작 시간',
-    `end_time` DATETIME NOT NULL COMMENT '계획된 다운타임 종료 시간',
+    `start_time` TIMESTAMP NOT NULL COMMENT '계획된 다운타임 시작 시간',
+    `end_time` TIMESTAMP NOT NULL COMMENT '계획된 다운타임 종료 시간',
     `duration_minutes` INT NOT NULL COMMENT '다운타임 지속 시간(분)',
     `downtime_type_code_id` BIGINT NOT NULL COMMENT '다운타임 유형 (예: PM, SHIFT_BREAK, HOLIDAY)',
     `description` VARCHAR(255) NULL COMMENT '상세 설명',
     
     `is_deleted` TINYINT DEFAULT 0 COMMENT '소프트삭제 플래그',
-    `deleted_at` DATETIME NULL COMMENT 'UTC',
+    `deleted_at` TIMESTAMP NULL COMMENT 'UTC',
     `created_by` VARCHAR(50) NOT NULL,
-    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'UTC',
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'UTC',
     `modified_by` VARCHAR(50) NULL,
-    `modified_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'UTC',
+    `modified_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'UTC',
 
     PRIMARY KEY (`planned_downtime_id`),
     KEY `idx_equipment_time` (`equipment_id`, `start_time`),
@@ -60,3 +60,17 @@ CREATE TABLE `tb_kpi_planned_downtime` (
     CONSTRAINT fk_downtime_type FOREIGN KEY (downtime_type_code_id) REFERENCES tb_code(code_id)
 ) ENGINE=InnoDB COMMENT='계획된 다운타임 기록';
 
+
+ALTER TABLE tb_kpi_planned_downtime
+ADD COLUMN duration_seconds BIGINT NOT NULL DEFAULT 0 COMMENT '다운타임 지속 시간(초)';
+
+-- 2) 기존 minutes → seconds 변환해서 넣기
+UPDATE tb_kpi_planned_downtime
+SET duration_seconds = duration_minutes * 60;
+
+-- 3) 기존 minutes 컬럼 삭제
+ALTER TABLE tb_kpi_planned_downtime DROP COLUMN duration_minutes;
+
+-- 4) tmp 컬럼명을 duration_seconds로 변경
+ALTER TABLE tb_kpi_planned_downtime 
+CHANGE COLUMN tmp_duration_seconds duration_seconds BIGINT NOT NULL COMMENT '다운타임 지속 시간(초)';

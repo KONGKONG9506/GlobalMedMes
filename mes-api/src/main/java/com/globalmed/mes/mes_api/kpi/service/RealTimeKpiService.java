@@ -60,11 +60,11 @@ public class RealTimeKpiService {
 
         // 3. 누적된 시간을 기준으로 계획된/계획되지 않은 다운타임을 계산합니다.
         long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
-        long plannedDowntimeMinutes = plannedDowntimeService.calculatePlannedDowntimeMinutes(newPerformance.getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
-        long unplannedDowntimeMinutes = unplannedDowntimeService.calculateUnplannedDowntimeMinutes(newPerformance.getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+        long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(newPerformance.getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+        long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(newPerformance.getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
 
-        BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - (plannedDowntimeMinutes * 60));
-        BigDecimal runSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeMinutes * 60));
+        BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - plannedDowntimeSeconds );
+        BigDecimal runSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeSeconds));
 
         // 4. 기존 KPI 기록을 찾거나 새로 만듭니다.
         Optional<KpiDataEntity> existingKpi =  kpiDataRepo.findRealtimeKpiByWorkOrderId(

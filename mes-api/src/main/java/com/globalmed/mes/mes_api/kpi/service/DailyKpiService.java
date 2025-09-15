@@ -66,11 +66,11 @@ public class DailyKpiService {
             }
 
             long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
-            long plannedDowntimeMinutes = plannedDowntimeService.calculatePlannedDowntimeMinutes(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
-            long unplannedDowntimeMinutes = unplannedDowntimeService.calculateUnplannedDowntimeMinutes(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+            long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+            long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
 
-            BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - (plannedDowntimeMinutes * 60));
-            BigDecimal totalRunSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeMinutes * 60));
+            BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - plannedDowntimeSeconds);
+            BigDecimal totalRunSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeSeconds));
 
             ProductionPerformanceEntity representative = list.get(0);
             Optional<KpiDataEntity> existingBatchKpi = kpiDataRepo.findDailyBatchKpi(

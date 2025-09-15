@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "tb_kpi_planned_downtime")
@@ -28,8 +27,8 @@ public class PlannedDowntimeEntity {
     @Column(name = "end_time", nullable = false)
     private OffsetDateTime endTime;
 
-    @Column(name = "duration_minutes", nullable = false)
-    private Integer durationMinutes;
+    @Column(name = "duration_seconds", nullable = false)
+    private Long durationSeconds;
 
     @Column(name = "downtime_type_code_id", nullable = false)
     private Long downtimeTypeCodeId;

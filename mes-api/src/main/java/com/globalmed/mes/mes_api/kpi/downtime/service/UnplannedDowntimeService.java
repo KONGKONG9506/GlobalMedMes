@@ -1,13 +1,17 @@
 package com.globalmed.mes.mes_api.kpi.downtime.service;
 
+import com.globalmed.mes.mes_api.kpi.downtime.dto.DowntimeIntervalDto;
 import com.globalmed.mes.mes_api.production.domain.ProductionLogEntity;
 import com.globalmed.mes.mes_api.production.repository.ProductionLogRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -16,27 +20,51 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UnplannedDowntimeService {
+
     private final ProductionLogRepo productionLogRepo;
+    private final PlannedDowntimeService plannedDowntimeService;
 
     /**
      * ProductionLog 기록을 기반으로 계획되지 않은 비가동 시간(분)을 계산합니다.
-     * DOWNTIME_END 로그의 eventValue에 기록된 시간(초)을 합산하여 총 비가동 시간을 구합니다.
+     * 계획된 다운타임 시간을 제외하고 계산합니다.
      */
-    public long calculateUnplannedDowntimeMinutes(String equipmentId, OffsetDateTime start, OffsetDateTime end) {
+    @Transactional
+    public long calculateUnplannedDowntimeSeconds(String equipmentId, OffsetDateTime start, OffsetDateTime end) {
         // 1. 주어진 기간 동안 해당 장비의 'DOWNTIME_END' 로그를 조회합니다.
-        // ProductionLogRepo에 findBy... 메소드가 존재한다고 가정합니다.
         List<ProductionLogEntity> downtimeEndLogs = productionLogRepo.findByEquipmentIdAndEventType_CodeAndEventTimestampBetween(
                 equipmentId, "DOWNTIME_END", start.toLocalDateTime(), end.toLocalDateTime());
 
-        // 2. 각 로그의 eventValue(초 단위)를 모두 합산합니다.
-        BigDecimal totalDowntimeSeconds = downtimeEndLogs.stream()
-                .map(ProductionLogEntity::getEventValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 2. 해당 기간의 모든 계획된 다운타임 간격을 조회합니다.
+        List<DowntimeIntervalDto> plannedDowntimeIntervals = plannedDowntimeService.getPlannedDowntimeIntervals(
+                equipmentId, start, end
+        );
 
-        // 3. 초 단위를 분 단위로 변환하여 반환합니다.
-        // 소수점 처리를 위해 BigInteger 대신 BigDecimal을 사용합니다.
-        BigDecimal totalDowntimeMinutes = totalDowntimeSeconds.divide(BigDecimal.valueOf(60), RoundingMode.HALF_UP);
+        Long totalUnplannedDowntimeSeconds = 0L;
 
-        return totalDowntimeMinutes.longValue();
+        for (ProductionLogEntity log : downtimeEndLogs) {
+            BigDecimal downtimeValue = log.getEventValue();
+            OffsetDateTime downtimeStart = log.getEventTimestamp().atOffset(ZoneOffset.UTC).minusSeconds(downtimeValue.longValue());
+            OffsetDateTime downtimeEnd = log.getEventTimestamp().atOffset(ZoneOffset.UTC);
+
+            // 3. 현재 비계획 다운타임이 계획된 다운타임과 겹치는지 확인하고, 겹치는 시간은 제외합니다.
+            long overlapSeconds = 0L;
+            for (DowntimeIntervalDto plannedInterval : plannedDowntimeIntervals) {
+                // 겹치는 시간 계산
+                OffsetDateTime overlapStart = downtimeStart.isAfter(plannedInterval.start()) ? downtimeStart : plannedInterval.start();
+                OffsetDateTime overlapEnd = downtimeEnd.isBefore(plannedInterval.end()) ? downtimeEnd : plannedInterval.end();
+
+                if (overlapStart.isBefore(overlapEnd)) {
+                    overlapSeconds += Duration.between(overlapStart, overlapEnd).getSeconds();
+                }
+            }
+
+            // 겹치는 시간을 뺀 순수 비계획 다운타임만 합산
+            long effectiveDowntimeSeconds = downtimeValue.longValue() - overlapSeconds;
+            if (effectiveDowntimeSeconds > 0) {
+                totalUnplannedDowntimeSeconds += effectiveDowntimeSeconds;
+            }
+        }
+
+        return totalUnplannedDowntimeSeconds;
     }
 }
