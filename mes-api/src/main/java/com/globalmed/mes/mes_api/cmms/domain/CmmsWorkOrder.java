@@ -10,7 +10,7 @@ import lombok.*;
 @Table(name = "tb_cmms_work_order",
     uniqueConstraints =@UniqueConstraint(name="uq_cmms_wo_request_id", columnNames = "request_id")
 )
-@Getter @Setter
+@Getter @Setter @Builder
 public class CmmsWorkOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

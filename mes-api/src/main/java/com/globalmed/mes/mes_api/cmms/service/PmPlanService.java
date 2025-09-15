@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 @Service
 @RequiredArgsConstructor
 public class PmPlanService {
+
     private final CmmsPmPlanRepo repo;
     private final CodeService codes;
 
@@ -24,36 +25,46 @@ public class PmPlanService {
 
     @Transactional
     public PmPlanDto.Res create(PmPlanDto.CreateReq req, String actorUserId){
-        var e = new CmmsPmPlan();
-        e.setEquipmentId(req.equipmentId());
-        e.setTaskName(req.taskName());
-        e.setCycleTypeCodeId(req.cycleTypeCodeId());
-        e.setCycleValue(req.cycleValue());
-        e.setLastDoneAt(req.lastDoneAt());
 
-        if (req.nextDueAt() != null) {
-            e.setNextDueAt(req.nextDueAt());
+        OffsetDateTime nextDueAt;
+        if (req.getNextDueAt() != null) {
+            nextDueAt = req.getNextDueAt();
         } else {
-            OffsetDateTime base = (req.lastDoneAt() != null) ? req.lastDoneAt() : OffsetDateTime.now();
-            String cycleCode = codes.codeOf(G_CYCLE, req.cycleTypeCodeId());
-            e.setNextDueAt(computeNext(base, cycleCode, req.cycleValue()));
+            OffsetDateTime base = (req.getLastDoneAt() != null) ? req.getLastDoneAt() : OffsetDateTime.now();
+            String cycleCode = codes.codeOf(G_CYCLE, req.getCycleTypeCodeId());
+            nextDueAt = computeNext(base, cycleCode, req.getCycleValue());
         }
 
-        e.setStatus("ACTIVE");
-        e.setCreatedBy(actorUserId);
-        return CmmsMapper.toRes(repo.save(e));
+        CmmsPmPlan e = CmmsPmPlan.builder()
+        .equipmentId(req.getEquipmentId())
+        .taskName(req.getTaskName())
+        .cycleTypeCodeId(req.getCycleTypeCodeId())
+        .cycleValue(req.getCycleValue())
+        .lastDoneAt(req.getLastDoneAt())
+        .status("ACTIVE")
+        .build();
+
+        if(actorUserId != null){
+            e.setCreatedBy(actorUserId);
+        }
+
+        CmmsPmPlan saved = repo.save(e);
+        return CmmsMapper.toRes(saved);
     }
 
     @Transactional
     public PmPlanDto.Res markDoneAndRoll(Long planId, OffsetDateTime doneAt, String actorUserId){
-        var plan = repo.findByIdAndDeletedFalse(planId).orElseThrow();
+        CmmsPmPlan plan = repo.findByIdAndDeletedFalse(planId).orElseThrow();
         plan.setLastDoneAt(doneAt);
 
         String cycleCode = codes.codeOf(G_CYCLE, plan.getCycleTypeCodeId());
         plan.setNextDueAt(computeNext(doneAt, cycleCode, plan.getCycleValue()));
-        plan.setModifiedBy(actorUserId);
+        if(actorUserId != null){
+            plan.setModifiedBy(actorUserId);
+        }
 
-        return CmmsMapper.toRes(plan);
+        CmmsPmPlan saved = repo.save(plan);
+        return CmmsMapper.toRes(saved);
     }
 
     public Page<PmPlanDto.Res> findDue(OffsetDateTime to, String equipmentId, Pageable pageable){
