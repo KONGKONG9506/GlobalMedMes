@@ -14,7 +14,7 @@ public class KpiBatchScheduler {
     /**
      * 매일 새벽 1시(KTC기준 10시)에 배치(일일 총 생산량) KPI 계산 및 저장
      */
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void runDailyBatchKpi() {
         LocalDate yesterdayUtc = LocalDate.now(ZoneOffset.UTC).minusDays(1);
         dailyKpiService.runDailyBatchKpiCalculation(yesterdayUtc);

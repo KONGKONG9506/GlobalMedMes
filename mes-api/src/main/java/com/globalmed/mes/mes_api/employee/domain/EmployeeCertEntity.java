@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "tb_employee_cert",
@@ -44,6 +45,9 @@ public class EmployeeCertEntity {
     @Column(name = "modified_by", length = 50)
     private String modifiedBy;
 
-    @Column(name = "is_deleted")
-    private Byte isDeleted; // 소프트삭제
+    @Column(name="is_deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name="deleted_at")
+    private OffsetDateTime deletedAt;
 }

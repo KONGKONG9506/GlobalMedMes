@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProcessCertRepo extends JpaRepository<ProcessCertEntity, Long> {
-    List<ProcessCertEntity> findByProcess_ProcessId(String processId);
+    List<ProcessCertEntity> findByProcess_ProcessIdAndDeletedFalse(String processId);
 
 }

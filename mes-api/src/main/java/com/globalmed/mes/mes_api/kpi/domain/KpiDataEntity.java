@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "tb_kpi_data",
@@ -54,6 +55,12 @@ public class KpiDataEntity {
 
     @Column(name = "actual_defect_rate", precision = 5, scale = 2, nullable = false)
     private BigDecimal actualDefectRate = BigDecimal.ZERO;
+
+    @Column(name="is_deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name="deleted_at")
+    private OffsetDateTime deletedAt;
 
     @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;

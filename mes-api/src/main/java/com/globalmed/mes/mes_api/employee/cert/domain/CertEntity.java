@@ -32,4 +32,5 @@ public class CertEntity {
 
     @Column(name = "modified_by", length = 50)
     private String modifiedBy;
+
 }

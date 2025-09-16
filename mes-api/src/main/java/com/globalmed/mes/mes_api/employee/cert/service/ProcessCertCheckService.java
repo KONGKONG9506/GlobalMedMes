@@ -26,12 +26,12 @@ public class ProcessCertCheckService {
 
         for(var assignment : assignments){
             String employeeId = assignment.getWorkerId();
-            Set<String> employeeCertCodes = employeeCertRepo.findByEmployee_EmployeeId(employeeId)
+            Set<String> employeeCertCodes = employeeCertRepo.findByEmployee_EmployeeIdAndDeletedFalse(employeeId)
                     .stream()
                     .map(ec -> ec.getCert().getCertCode())
                     .collect(Collectors.toSet());
 
-            Set<String> requiredCertCodes = processCertRepo.findByProcess_ProcessId(processId)
+            Set<String> requiredCertCodes = processCertRepo.findByProcess_ProcessIdAndDeletedFalse(processId)
                     .stream()
                     .map(pc -> pc.getCert().getCertCode())
                     .collect(Collectors.toSet());
