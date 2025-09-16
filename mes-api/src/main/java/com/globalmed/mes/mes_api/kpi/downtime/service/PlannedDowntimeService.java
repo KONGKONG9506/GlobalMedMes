@@ -9,7 +9,6 @@ import com.globalmed.mes.mes_api.kpi.downtime.repository.PlannedDowntimeRepo;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
  * 계획된 다운타임(Planned Downtime) 관련 계산을 전담하는 서비스입니다.
  * PM, 교대조 휴식 시간 등 모든 계획된 다운타임 데이터를 처리합니다.
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PlannedDowntimeService {
@@ -78,11 +76,9 @@ public class PlannedDowntimeService {
                 .withOffsetSameInstant(ZoneOffset.UTC);
 
         // 주어진 기간 내의 모든 계획된 다운타임 기록을 조회
-        log.info("Querying planned downtime for equipmentId: {}, from: {} to: {}", equipmentId, startTz, endTz);
         List<PlannedDowntimeEntity> downtimes = plannedDowntimeRepo.findByEquipmentIdAndOverlappingDateRange(
                 equipmentId, startTz, endTz
         );
-        log.info("Found {} planned downtime records.", downtimes.size());
         long totalSeconds = 0L;
         for (PlannedDowntimeEntity downtime : downtimes) {
             OffsetDateTime intervalStart = downtime.getStartTime();
@@ -114,11 +110,9 @@ public class PlannedDowntimeService {
                 .atZone(ZoneId.systemDefault())
                 .toOffsetDateTime()
                 .withOffsetSameInstant(ZoneOffset.UTC);
-        log.info("Getting planned downtime intervals for UnplannedDowntimeService. Query from: {} to: {}", fromTz, toTz);
         List<PlannedDowntimeEntity> downtimes = plannedDowntimeRepo.findByEquipmentIdAndOverlappingDateRange(
                 equipmentId, fromTz, toTz
         );
-        log.info("Found {} planned downtime intervals.", downtimes.size());
         return downtimes.stream()
                 .map(d -> new DowntimeIntervalDto(d.getStartTime().atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(), d.getEndTime().atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()))
                 .collect(Collectors.toList());
