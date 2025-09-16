@@ -7,16 +7,18 @@ import com.globalmed.mes.mes_api.kpi.repository.KpiDataRepo;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RealTimeKpiService {
@@ -58,13 +60,25 @@ public class RealTimeKpiService {
             }
         }
 
+        log.info("firstStartTime : {}", firstStartTime);
+        log.info("lastEndTime : {}", lastEndTime);
         // 3. 누적된 시간을 기준으로 계획된/계획되지 않은 다운타임을 계산합니다.
         long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
-        long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(newPerformance.getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
-        long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(newPerformance.getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+        long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(newPerformance.getEquipmentId(),
+                firstStartTime,
+                lastEndTime);
+
+        long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(newPerformance.getEquipmentId(),
+                firstStartTime.atOffset(ZoneOffset.UTC),
+                lastEndTime.atOffset(ZoneOffset.UTC));
 
         BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - plannedDowntimeSeconds );
         BigDecimal runSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeSeconds));
+        log.info("planned downtime seconds : {}", plannedDowntimeSeconds);
+        log.info("unplanned downtime seconds : {}", unplannedDowntimeSeconds);
+        log.info("total period seconds : {}", totalPeriodSeconds);
+        log.info("planned seconds : {}", plannedSeconds);
+        log.info("total run seconds : {}", runSeconds);
 
         // 4. 기존 KPI 기록을 찾거나 새로 만듭니다.
         Optional<KpiDataEntity> existingKpi =  kpiDataRepo.findRealtimeKpiByWorkOrderId(

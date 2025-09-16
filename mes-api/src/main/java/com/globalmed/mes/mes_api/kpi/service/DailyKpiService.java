@@ -66,7 +66,7 @@ public class DailyKpiService {
             }
 
             long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
-            long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+            long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(list.get(0).getEquipmentId(), firstStartTime, lastEndTime);
             long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
 
             BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - plannedDowntimeSeconds);

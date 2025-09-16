@@ -4,11 +4,11 @@ import com.globalmed.mes.mes_api.kpi.downtime.dto.DowntimeIntervalDto;
 import com.globalmed.mes.mes_api.production.domain.ProductionLogEntity;
 import com.globalmed.mes.mes_api.production.repository.ProductionLogRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -17,6 +17,7 @@ import java.util.List;
 /**
  * 계획되지 않은 다운타임(Unplanned Downtime) 관련 계산을 전담하는 서비스입니다.
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UnplannedDowntimeService {
@@ -36,35 +37,44 @@ public class UnplannedDowntimeService {
 
         // 2. 해당 기간의 모든 계획된 다운타임 간격을 조회합니다.
         List<DowntimeIntervalDto> plannedDowntimeIntervals = plannedDowntimeService.getPlannedDowntimeIntervals(
-                equipmentId, start, end
+                equipmentId, start.toLocalDateTime(), end.toLocalDateTime()
         );
 
         Long totalUnplannedDowntimeSeconds = 0L;
 
-        for (ProductionLogEntity log : downtimeEndLogs) {
-            BigDecimal downtimeValue = log.getEventValue();
-            OffsetDateTime downtimeStart = log.getEventTimestamp().atOffset(ZoneOffset.UTC).minusSeconds(downtimeValue.longValue());
-            OffsetDateTime downtimeEnd = log.getEventTimestamp().atOffset(ZoneOffset.UTC);
+        for (ProductionLogEntity plog : downtimeEndLogs) {
+            BigDecimal downtimeValue = plog.getEventValue();
+            OffsetDateTime downtimeStart = plog.getEventTimestamp().atOffset(ZoneOffset.UTC).minusSeconds(downtimeValue.longValue());
+            OffsetDateTime downtimeEnd = plog.getEventTimestamp().atOffset(ZoneOffset.UTC);
 
+            log.info("downtimeStart : {}", downtimeStart);
+            log.info("downtimeEnd : {}", downtimeEnd);
             // 3. 현재 비계획 다운타임이 계획된 다운타임과 겹치는지 확인하고, 겹치는 시간은 제외합니다.
             long overlapSeconds = 0L;
             for (DowntimeIntervalDto plannedInterval : plannedDowntimeIntervals) {
                 // 겹치는 시간 계산
-                OffsetDateTime overlapStart = downtimeStart.isAfter(plannedInterval.start()) ? downtimeStart : plannedInterval.start();
-                OffsetDateTime overlapEnd = downtimeEnd.isBefore(plannedInterval.end()) ? downtimeEnd : plannedInterval.end();
+                OffsetDateTime plannedSt = plannedInterval.start().atOffset(ZoneOffset.UTC);
+                OffsetDateTime plannedEnd = plannedInterval.end().atOffset(ZoneOffset.UTC);
+                OffsetDateTime overlapStart = downtimeStart.isAfter(plannedSt) ? downtimeStart : plannedSt;
+                OffsetDateTime overlapEnd = downtimeEnd.isBefore(plannedEnd) ? downtimeEnd : plannedEnd;
 
+                log.info("plannedInterval.start : {}", plannedInterval.start());
+                log.info("plannedInterval.end : {}", plannedInterval.end());
+                log.info("Actual overlap start: {}, end: {}", overlapStart, overlapEnd);
                 if (overlapStart.isBefore(overlapEnd)) {
                     overlapSeconds += Duration.between(overlapStart, overlapEnd).getSeconds();
                 }
             }
+            log.info("overlapSeconds : {}", overlapSeconds);
 
             // 겹치는 시간을 뺀 순수 비계획 다운타임만 합산
             long effectiveDowntimeSeconds = downtimeValue.longValue() - overlapSeconds;
+            log.info("effectiveDowntimeSeconds : {}", effectiveDowntimeSeconds);
             if (effectiveDowntimeSeconds > 0) {
                 totalUnplannedDowntimeSeconds += effectiveDowntimeSeconds;
             }
         }
-
+        log.info("totalUnplannedDowntimeSeconds : {}", totalUnplannedDowntimeSeconds);
         return totalUnplannedDowntimeSeconds;
     }
 }
