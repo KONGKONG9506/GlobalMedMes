@@ -51,7 +51,7 @@ public class CmmsWorkOrder {
     private BigDecimal partsCost;
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean deleted = false;
+    private boolean deleted; // 기본값 = false;
 
     @Column(name="deleted_at")
     private OffsetDateTime deletedAt;

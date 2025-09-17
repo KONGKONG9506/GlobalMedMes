@@ -15,15 +15,15 @@ public class PmPlanDto{
     @AllArgsConstructor
     @Schema(name = "PmPlanCreateReq",
             description = "PM 계획 생성 요청")
-    public static record CreateReq(
-            @NotBlank String equipmentId,
-            @NotBlank String taskName,
-            @NotNull Long cycleTypeCodeId,
-            @NotNull Integer cycleValue,
-            OffsetDateTime lastDoneAt,
-            OffsetDateTime nextDueAt,
-            Integer estimatedTakeTime
-    ){}
+    public static class CreateReq{
+            @NotBlank String equipmentId;
+            @NotBlank String taskName;
+            @NotNull Long cycleTypeCodeId;
+            @NotNull Integer cycleValue;
+            OffsetDateTime lastDoneAt;
+            OffsetDateTime nextDueAt;
+            Integer estimatedTakeTime;
+    }
 
     @Getter
     @Builder

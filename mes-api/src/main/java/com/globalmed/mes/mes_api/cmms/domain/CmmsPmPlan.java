@@ -34,10 +34,10 @@ public class CmmsPmPlan {
     private OffsetDateTime nextDueAt;
 
     @Column(name="status", length=20, nullable = false)
-    private String status = "ACTIVE";
+    private String status; // 기본값  = "ACTIVE";
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean deleted = false;
+    private boolean deleted; // 기본값  = false;
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;

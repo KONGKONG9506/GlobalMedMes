@@ -44,6 +44,13 @@ public class PmPlanService {
         .status("ACTIVE")
         .build();
 
+
+        pmPlanDowntimeService.createPlannedDowntimeFromPmPlan(
+                e.getEquipmentId(),
+                nextDueAt,
+                e.getEstimatedTakeTime(),
+                e.getTaskName()
+        );
         if(actorUserId != null){
             e.setCreatedBy(actorUserId);
         }
