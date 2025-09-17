@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 
 
 @RestController
-@RequestMapping("/api/cmms/fault-logs")
+@RequestMapping("/cmms/fault-logs")
 @RequiredArgsConstructor
 public class FaultLogController {
     private final FaultLogService service;

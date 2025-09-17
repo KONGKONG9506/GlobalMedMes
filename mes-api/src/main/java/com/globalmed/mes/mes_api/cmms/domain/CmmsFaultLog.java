@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name="tb_cmms_fault_log")
-@Getter @Setter
+@Getter @Setter @Builder
 public class CmmsFaultLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

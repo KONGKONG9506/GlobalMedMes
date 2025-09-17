@@ -1,0 +1,89 @@
+@baseUrl = http://localhost:8080
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwQUQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTc1NzQ4MjQwNywiZXhwIjoxNzU3NDg0MjA3fQ.d6wupo6lZUx1lYrUtSiFW2GJFfjxwhgy3HSALTzoqzU
+
+### Create CMMS PM-PLAN
+POST {{baseUrl}}/api/cmms/work-orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "equipmentId": "E-0001",
+  "taskName": "윤활 점검(주1회)",
+  "cycleTypeCodeId": 31,     
+  "cycleValue": 7,
+  "lastDoneAt": null,
+  "nextDueAt": "2025-09-15T00:00:00Z"
+}
+
+### CMMS PM-PLAN / done
+{id,doneAt: 2025-09-12T09:00:00Z}
+
+### CMMS PM-PLAN / due
+{to: 2025-09-30T00:00:00Z
+equipmentId: E-0001
+page: 0
+size: 10
+sort: nextDueAt,asc}
+
+### code_id db검색 
+SELECT code_id, group_code, code, name
+FROM tb_code
+WHERE group_code IN ('WO_PRIORITY', 'CMMS_WO_STATUS','CYCLE_TYPE','LOSS_CATEGORY')
+ORDER BY group_code;
+
+### 생성 – POST /api/cmms/work-orders
+POST {{baseUrl}}/api/cmms/work-orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "equipmentId": "E-0001",
+  "title": "라인 진동 점검",
+  "priorityCodeId": <<WO_PRIORITY.M code_id>>,
+  "requestId": "CMMS-WO-TEST-001"
+}
+
+### 담당자 할당 – POST /api/cmms/work-orders/{id}/assign
+{
+  "assigneeUserId": "00000000-0000-0000-0000-0000000000OP"
+}
+
+### 시작 – POST /api/cmms/work-orders/{id}/start
+{
+  "startedAt": "2025-09-05T09:30:00Z"
+}
+
+### 완료 – POST /api/cmms/work-orders/{id}/complete
+{
+  "finishedAt": "2025-09-05T10:15:00Z",
+  "actualMinutes": 45,
+  "partsCost": 123.45
+}
+
+### GET /api/cmms/work-orders
+status: ASSIGNED (드롭다운)
+equipmentId: E-0001
+page: 0
+size: 10
+sort: createdAt,desc ← 배열 항목으로 1줄 입력 (여러 정렬이면 항목 추가)
+
+### POST CMMS/fault-logs
+
+{
+  "equipmentId": "E-0001",
+  "lossCategoryCodeId": 13,
+  "symptom": "베어링 소음 증가현상",
+  "action": "윤활 후 상태를 모니터링",
+  "occurredAt": "2025-09-05T02:00:00Z",
+  "resolvedAt": null,
+  "cmmsWoId": 6
+}
+
+### GET CMMS/fault-logs
+
+equipmentId: E-0001
+from: 2025-09-04T00:00:00Z
+to: 2025-09-06T00:00:00Z
+page: 0
+size: 10
+sort: occurredAt,desc

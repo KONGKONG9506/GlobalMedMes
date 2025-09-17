@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.OffsetDateTime;
 
 @RestController
-@RequestMapping("/api/cmms/pm-plans")
+@RequestMapping("/cmms/pm-plans")
 @RequiredArgsConstructor
 public class PmPlanController {
     private final PmPlanService service;

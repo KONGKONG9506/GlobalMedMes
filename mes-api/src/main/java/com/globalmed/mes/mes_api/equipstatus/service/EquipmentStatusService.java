@@ -4,6 +4,7 @@ import com.globalmed.mes.mes_api.code.CodeEntity;
 import com.globalmed.mes.mes_api.code.CodeRepo;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentStatusLogEntity;
 import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentStatusRepo;
+import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

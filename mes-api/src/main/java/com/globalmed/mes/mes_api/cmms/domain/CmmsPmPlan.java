@@ -1,15 +1,14 @@
 package com.globalmed.mes.mes_api.cmms.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
 
 @Entity
 @Table(name = "tb_cmms_pm_plan")
-@Getter @Setter
+@Getter @Setter @Builder
 public class CmmsPmPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
