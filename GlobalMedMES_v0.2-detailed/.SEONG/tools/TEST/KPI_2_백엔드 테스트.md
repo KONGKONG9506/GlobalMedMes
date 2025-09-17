@@ -27,6 +27,9 @@ assignment를 통해 calender에 직원 배치
 - 직원 배치할때 해당 설비 사용 자격이 없을 경우 WORKER_NO_CERT_FOR_EQUIPMENT 발생
 
 
-    22 06
-    06 14
-    14 22
+get 작성
+
+
+직원 목록
+-상세 목록 나중에
+-

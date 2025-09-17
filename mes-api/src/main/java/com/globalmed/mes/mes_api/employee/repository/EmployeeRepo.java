@@ -22,8 +22,9 @@ public interface EmployeeRepo extends JpaRepository<EmployeeEntity, String> {
     LEFT JOIN EquipmentCertEntity eqc ON eqc.cert = ec.cert AND eqc.deleted = false
     LEFT JOIN eqc.equipment eq
     LEFT JOIN ProcessCertEntity pc ON pc.cert = ec.cert AND pc.deleted = false
-    LEFT JOIN pc.process p 
+    LEFT JOIN pc.process p
     WHERE LOWER(e.employeeName) LIKE LOWER(CONCAT('%', :name, '%')) AND e.deleted = false
     """)
     List<Object[]> findRawAssignments(@Param("name") String name);
+
 }

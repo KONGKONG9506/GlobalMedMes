@@ -3,7 +3,7 @@ CREATE TABLE tb_process_cert (
  process_cert_id BIGINT NOT NULL AUTO_INCREMENT,
  process_id VARCHAR(36) NOT NULL COMMENT '공정 ID (FK)',
  cert_id BIGINT NOT NULL COMMENT '자격 ID (FK→tb_cert.cert_id)',
- is_deleted TINYINT(1) NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
+ is_deleted TINYINT NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
  deleted_at DATETIME NULL COMMENT '삭제 일시',
  PRIMARY KEY (process_cert_id),
  UNIQUE KEY uk_proc_cert (process_id, cert_id),
@@ -16,7 +16,7 @@ CREATE TABLE tb_equipment_cert (
  equipment_cert_id BIGINT NOT NULL AUTO_INCREMENT,
  equipment_id VARCHAR(36) NOT NULL COMMENT '설비 ID (FK)',
  cert_id BIGINT NOT NULL COMMENT '자격 ID (FK→tb_cert.cert_id)',
- is_deleted TINYINT(1) NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
+ is_deleted TINYINT NOT NULL DEFAULT FALSE COMMENT '삭제 여부',
  deleted_at DATETIME NULL COMMENT '삭제 일시',
  PRIMARY KEY (equipment_cert_id),
  UNIQUE KEY uk_eqp_cert (equipment_id, cert_id),
@@ -28,10 +28,10 @@ CREATE TABLE tb_equipment_cert (
 
 -- 공정 자격 테이블 수정
 ALTER TABLE tb_process_cert
-ADD COLUMN is_deleted TINYINT(1) NOT NULL DEFAULT FALSE COMMENT '삭제 여부' AFTER cert_id,
+ADD COLUMN is_deleted TINYINT NOT NULL DEFAULT FALSE COMMENT '삭제 여부' AFTER cert_id,
 ADD COLUMN deleted_at DATETIME NULL COMMENT '삭제 일시' AFTER is_deleted;
 
 -- 설비 자격 테이블 수정
 ALTER TABLE tb_equipment_cert
-ADD COLUMN is_deleted TINYINT(1) NOT NULL DEFAULT FALSE COMMENT '삭제 여부' AFTER cert_id,
+ADD COLUMN is_deleted TINYINT NOT NULL DEFAULT FALSE COMMENT '삭제 여부' AFTER cert_id,
 ADD COLUMN deleted_at DATETIME NULL COMMENT '삭제 일시' AFTER is_deleted;

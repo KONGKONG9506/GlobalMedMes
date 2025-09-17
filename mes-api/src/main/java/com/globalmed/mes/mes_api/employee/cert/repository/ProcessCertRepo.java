@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface ProcessCertRepo extends JpaRepository<ProcessCertEntity, Long> {
     List<ProcessCertEntity> findByProcess_ProcessIdAndDeletedFalse(String processId);
-
 }

@@ -74,3 +74,10 @@ ALTER TABLE tb_kpi_planned_downtime DROP COLUMN duration_minutes;
 -- 4) tmp 컬럼명을 duration_seconds로 변경
 ALTER TABLE tb_kpi_planned_downtime 
 CHANGE COLUMN tmp_duration_seconds duration_seconds BIGINT NOT NULL COMMENT '다운타임 지속 시간(초)';
+
+ALTER TABLE tb_kpi_planned_downtime
+MODIFY COLUMN start_time TIMESTAMP NOT NULL,
+MODIFY COLUMN end_time TIMESTAMP NOT NULL,
+MODIFY COLUMN deleted_at TIMESTAMP NULL,
+MODIFY COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+MODIFY COLUMN modified_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP;

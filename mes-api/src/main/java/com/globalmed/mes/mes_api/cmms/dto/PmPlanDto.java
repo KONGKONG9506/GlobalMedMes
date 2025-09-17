@@ -14,7 +14,8 @@ public class PmPlanDto{
             @NotNull Long cycleTypeCodeId,
             @NotNull Integer cycleValue,
             OffsetDateTime lastDoneAt,
-            OffsetDateTime nextDueAt
+            OffsetDateTime nextDueAt,
+            Integer estimatedTakeTime
     ){}
 
     @Schema(name = "PmPlanRes")

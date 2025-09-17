@@ -55,4 +55,6 @@ public class CmmsPmPlan {
     @Column(name = "modified_at")
     private OffsetDateTime modifiedAt;
 
+    @Column(name = "estimated_take_time")
+    private Integer estimatedTakeTime;
 }

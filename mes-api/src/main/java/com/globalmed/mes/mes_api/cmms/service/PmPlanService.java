@@ -5,6 +5,7 @@ import com.globalmed.mes.mes_api.cmms.dto.PmPlanDto;
 import com.globalmed.mes.mes_api.cmms.mapper.CmmsMapper;
 import com.globalmed.mes.mes_api.cmms.repository.CmmsPmPlanRepo;
 import com.globalmed.mes.mes_api.code.CodeService;
+import com.globalmed.mes.mes_api.kpi.downtime.service.PMPlanDowntimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,14 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
 public class PmPlanService {
     private final CmmsPmPlanRepo repo;
     private final CodeService codes;
-
+    private final PMPlanDowntimeService pmPlanDowntimeService;
     private static final String G_CYCLE = "CYCLE_TYPE";
 
     @Transactional
@@ -30,6 +30,7 @@ public class PmPlanService {
         e.setCycleTypeCodeId(req.cycleTypeCodeId());
         e.setCycleValue(req.cycleValue());
         e.setLastDoneAt(req.lastDoneAt());
+        e.setEstimatedTakeTime(req.estimatedTakeTime());
 
         if (req.nextDueAt() != null) {
             e.setNextDueAt(req.nextDueAt());
@@ -41,6 +42,16 @@ public class PmPlanService {
 
         e.setStatus("ACTIVE");
         e.setCreatedBy(actorUserId);
+
+        CmmsPmPlan savedPmPlan = repo.save(e);
+        pmPlanDowntimeService.createPlannedDowntimeFromPmPlan(
+                savedPmPlan.getEquipmentId(),
+                savedPmPlan.getNextDueAt(),
+                savedPmPlan.getEstimatedTakeTime(),
+                savedPmPlan.getTaskName()
+        );
+
+
         return CmmsMapper.toRes(repo.save(e));
     }
 
@@ -52,6 +63,13 @@ public class PmPlanService {
         String cycleCode = codes.codeOf(G_CYCLE, plan.getCycleTypeCodeId());
         plan.setNextDueAt(computeNext(doneAt, cycleCode, plan.getCycleValue()));
         plan.setModifiedBy(actorUserId);
+
+        pmPlanDowntimeService.createPlannedDowntimeFromPmPlan(
+                plan.getEquipmentId(),
+                plan.getNextDueAt(),
+                plan.getEstimatedTakeTime(),
+                plan.getTaskName()
+        );
 
         return CmmsMapper.toRes(plan);
     }
