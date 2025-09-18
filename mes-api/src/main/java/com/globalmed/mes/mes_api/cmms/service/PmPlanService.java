@@ -12,7 +12,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -35,13 +38,24 @@ public class PmPlanService {
             nextDueAt = computeNext(base, cycleCode, req.getCycleValue());
         }
 
+        LocalDateTime localLDAt = req.getLastDoneAt().toLocalDateTime();
+        LocalDateTime localNDAt = req.getNextDueAt().toLocalDateTime();
+        OffsetDateTime utcLDAt = localLDAt
+                .atZone(ZoneId.systemDefault()) // 서버 시간대 기준
+                .toOffsetDateTime()             // OffsetDateTime으로 변환
+                .withOffsetSameInstant(ZoneOffset.UTC); // UTC 기준;
+        OffsetDateTime utcNDAt = localNDAt
+                .atZone(ZoneId.systemDefault()) // 서버 시간대 기준
+                .toOffsetDateTime()             // OffsetDateTime으로 변환
+                .withOffsetSameInstant(ZoneOffset.UTC); // UTC 기준;;
+
         CmmsPmPlan e = CmmsPmPlan.builder()
         .equipmentId(req.getEquipmentId())
         .taskName(req.getTaskName())
         .cycleTypeCodeId(req.getCycleTypeCodeId())
         .cycleValue(req.getCycleValue())
-        .lastDoneAt(req.getLastDoneAt())
-        .nextDueAt(nextDueAt)
+        .lastDoneAt(utcLDAt)
+        .nextDueAt(utcNDAt)
         .status("ACTIVE")
         .build();
 
@@ -63,17 +77,25 @@ public class PmPlanService {
     @Transactional
     public PmPlanDto.Res markDoneAndRoll(Long planId, OffsetDateTime doneAt, String actorUserId){
         CmmsPmPlan plan = repo.findByIdAndDeletedFalse(planId).orElseThrow();
-        plan.setLastDoneAt(doneAt);
+
+        LocalDateTime localDAt = doneAt.toLocalDateTime();
+        OffsetDateTime utcDAt = localDAt
+                .atZone(ZoneId.systemDefault()) // 서버 시간대 기준
+                .toOffsetDateTime()             // OffsetDateTime으로 변환
+                .withOffsetSameInstant(ZoneOffset.UTC); // UTC 기준;;
+        plan.setLastDoneAt(utcDAt);
+
 
         String cycleCode = codes.codeOf(G_CYCLE, plan.getCycleTypeCodeId());
-        plan.setNextDueAt(computeNext(doneAt, cycleCode, plan.getCycleValue()));
+        plan.setNextDueAt(computeNext(utcDAt, cycleCode, plan.getCycleValue()));
         if(actorUserId != null){
             plan.setModifiedBy(actorUserId);
-        }
+       }
 
+        OffsetDateTime downTNDAt = computeNext(doneAt, cycleCode, plan.getCycleValue());
         pmPlanDowntimeService.createPlannedDowntimeFromPmPlan(
                 plan.getEquipmentId(),
-                plan.getNextDueAt(),
+                downTNDAt,
                 plan.getEstimatedTakeTime(),
                 plan.getTaskName()
         );

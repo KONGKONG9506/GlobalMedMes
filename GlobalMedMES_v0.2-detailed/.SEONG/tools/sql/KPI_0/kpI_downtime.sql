@@ -43,7 +43,7 @@ CREATE TABLE `tb_kpi_planned_downtime` (
     `equipment_id` VARCHAR(36) NOT NULL COMMENT '설비 ID (FK)',
     `start_time` TIMESTAMP NOT NULL COMMENT '계획된 다운타임 시작 시간',
     `end_time` TIMESTAMP NOT NULL COMMENT '계획된 다운타임 종료 시간',
-    `duration_minutes` INT NOT NULL COMMENT '다운타임 지속 시간(분)',
+    `duration_seconds` INT NOT NULL COMMENT '다운타임 지속 시간(초)',
     `downtime_type_code_id` BIGINT NOT NULL COMMENT '다운타임 유형 (예: PM, SHIFT_BREAK, HOLIDAY)',
     `description` VARCHAR(255) NULL COMMENT '상세 설명',
     

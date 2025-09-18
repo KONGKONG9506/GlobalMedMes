@@ -22,12 +22,12 @@ public class EquipmentDowntimeLogService {
         String currStatus = newStatus.getCode();
 
         // 해당 설비의 가장 최근의 워크오더가 R상태라면 가져오고 아니라면 가져오지 않음
-        Optional<WorkOrderEntity> optWo = workOrderRepo.findTopByEquipmentIdOrderByCreatedAtDesc(req.equipmentId());
+        Optional<WorkOrderEntity> optWo = workOrderRepo.findFirstByEquipment_EquipmentIdOrderByCreatedAtDesc(req.equipmentId());
         String workOrderId = optWo.filter(wo -> "R".equals(wo.getStatusCode().getCode()))
                 .map(WorkOrderEntity::getWorkOrderId)
                 .orElse(null);
         String processId = optWo.filter(wo -> "R".equals(wo.getStatusCode().getCode()))
-                .map(WorkOrderEntity::getProcessId)
+                .map(wo -> wo.getProcess().getProcessId())
                 .orElse(null);
 
 
