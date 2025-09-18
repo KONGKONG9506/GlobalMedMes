@@ -42,6 +42,7 @@ public class WorkOrderService {
         });
 
         // 1. 각 ID로 관련 엔티티 객체 조회
+
         var item = itemRepo.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("ITEM_NOT_FOUND"));
         var process = processRepo.findById(processId)
@@ -56,9 +57,9 @@ public class WorkOrderService {
         var wo = new WorkOrderEntity();
         wo.setWorkOrderId(UUID.randomUUID().toString());
         wo.setWorkOrderNumber(workOrderNumber);
-        wo.setItem(item);
-        wo.setProcess(process);
-        wo.setEquipment(equipment);
+        wo.setItemId(item);
+        wo.setProcessId(process);
+        wo.setEquipmentId(equipment);
         wo.setOrderQty(orderQty);
         wo.setProducedQty(BigDecimal.ZERO);
         wo.setStatusCode(status);        // ← status_code_id 매핑 완료
@@ -86,7 +87,7 @@ public class WorkOrderService {
         if(now == null) now = OffsetDateTime.now();
 //        P -> R 전이 공정 자격 체크
         if(cur.equals("P")&&to.equals("R")){
-            processCertCheckService.check(wo.getEquipment().getEquipmentId(),wo.getProcess().getProcessId(), now);
+            processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
         }
 
         // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
@@ -100,15 +101,15 @@ public class WorkOrderService {
             // Released → START 로그
             productionLogService.logStart(
                     wo.getWorkOrderId(),
-                    wo.getEquipment().getEquipmentId(),
-                    wo.getProcess().getProcessId()
+                    wo.getEquipmentId().getEquipmentId(),
+                    wo.getProcessId().getProcessId()
             );
         } else if (cur.equals("R") && to.equals("C")) {
             // Completed → END 로그
             productionLogService.logEnd(
                     wo.getWorkOrderId(),
-                    wo.getEquipment().getEquipmentId(),
-                    wo.getProcess().getProcessId()
+                    wo.getEquipmentId().getEquipmentId(),
+                    wo.getProcessId().getProcessId()
             );
         }
         return wo;
@@ -123,7 +124,9 @@ public class WorkOrderService {
 
     @Transactional
     public List<WorkOrderListDto> findAllWithDetails(Specification<WorkOrderEntity> spec) {
-        List<WorkOrderEntity> workOrders = woRepo.findAll(spec);
+        List<WorkOrderEntity> filtered = woRepo.findAll(spec);
+
+        List<WorkOrderEntity> workOrders = woRepo.findAllwithDetails();
 
         // 엔티티 리스트를 DTO 리스트로 변환
         return workOrders.stream()

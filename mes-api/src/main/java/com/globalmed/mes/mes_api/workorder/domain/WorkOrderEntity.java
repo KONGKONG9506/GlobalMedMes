@@ -31,17 +31,17 @@ public class WorkOrderEntity {
     // 기존의 itemId 컬럼을 제거하고, ItemEntity와의 관계로 대체
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
-    private ItemEntity item;
+    private ItemEntity itemId;
 
     // 기존의 processId 컬럼을 제거하고, ProcessEntity와의 관계로 대체
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "process_id", nullable = false)
-    private ProcessEntity process;
+    private ProcessEntity processId;
 
     // 기존의 equipmentId 컬럼을 제거하고, EquipmentEntity와의 관계로 대체
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipment_id", nullable = false)
-    private EquipmentEntity equipment;
+    private EquipmentEntity equipmentId;
 
     @Column(name = "order_qty", nullable = false, precision = 10, scale = 4)
     private BigDecimal orderQty;

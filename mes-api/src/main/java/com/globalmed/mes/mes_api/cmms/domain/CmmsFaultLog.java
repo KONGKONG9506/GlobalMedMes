@@ -19,7 +19,6 @@ public class CmmsFaultLog {
     @Column(name="equipment_id", length=36, nullable = false)
     private String equipmentId;
 
-
     @Column(name="loss_cat_code_id", nullable = false)
     private Long lossCategoryCodeId;
 
