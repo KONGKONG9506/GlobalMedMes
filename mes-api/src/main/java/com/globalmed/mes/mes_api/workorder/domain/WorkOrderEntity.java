@@ -1,9 +1,11 @@
 package com.globalmed.mes.mes_api.workorder.domain;
 
 import com.globalmed.mes.mes_api.code.CodeEntity;
+import com.globalmed.mes.mes_api.code.domain.ItemEntity;
+import com.globalmed.mes.mes_api.code.domain.ProcessEntity;
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -26,14 +28,20 @@ public class WorkOrderEntity {
     @Column(name = "work_order_number", length = 50, nullable = false)
     private String workOrderNumber;
 
-    @Column(name = "item_id", length = 36, nullable = false)
-    private String itemId;
+    // 기존의 itemId 컬럼을 제거하고, ItemEntity와의 관계로 대체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", nullable = false)
+    private ItemEntity item;
 
-    @Column(name = "process_id", length = 36, nullable = false)
-    private String processId;
+    // 기존의 processId 컬럼을 제거하고, ProcessEntity와의 관계로 대체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "process_id", nullable = false)
+    private ProcessEntity process;
 
-    @Column(name = "equipment_id", length = 36, nullable = false)
-    private String equipmentId;
+    // 기존의 equipmentId 컬럼을 제거하고, EquipmentEntity와의 관계로 대체
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipment_id", nullable = false)
+    private EquipmentEntity equipment;
 
     @Column(name = "order_qty", nullable = false, precision = 10, scale = 4)
     private BigDecimal orderQty;

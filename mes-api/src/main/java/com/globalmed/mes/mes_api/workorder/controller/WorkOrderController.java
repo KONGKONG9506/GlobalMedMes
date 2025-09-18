@@ -71,28 +71,8 @@ public class WorkOrderController {
 
     @GetMapping("/{id}")
     public ResponseEntity<WorkOrderDetailDto> get(@PathVariable String id){
-        var wo = workOrderRepo.findById(id).orElseThrow();
 
-        // 엔티티 LocalDateTime 값을 “UTC 벽시계”로 간주 → 오프셋만 UTC로 부여
-        // src/main/java/.../workorder/WorkOrderController.java (상세)
-        var startTsUtc = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getStartTs());
-        var createdUtc  = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getCreatedAt());
-        var modifiedUtc = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getModifiedAt());
-        // DTO 생성 시 createdAt/modifiedAt에 위 값 전달
-
-        var dto = new WorkOrderDetailDto(
-                wo.getWorkOrderId(),
-                wo.getWorkOrderNumber(),
-                wo.getItemId(),
-                wo.getProcessId(),
-                wo.getEquipmentId(),
-                wo.getOrderQty(),
-                wo.getProducedQty(),
-                wo.getStatusCode()!=null ? wo.getStatusCode().getCode() : null,
-                startTsUtc,
-                createdUtc,
-                modifiedUtc
-        );
+        var dto = workOrderService.findById(id);
         return ResponseEntity.ok(dto);
     }
 
@@ -120,23 +100,11 @@ public class WorkOrderController {
 
         Page<WorkOrderEntity> result = workOrderRepo.findAll(spec, pageable);
 
-        Page<WorkOrderListDto> dtoPage = result.map(wo -> new WorkOrderListDto(
-                wo.getWorkOrderId(),
-                wo.getWorkOrderNumber(),
-                wo.getItemId(),
-                wo.getProcessId(),
-                wo.getEquipmentId(),
-                wo.getOrderQty(),
-                wo.getProducedQty(),
-                (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null)
-        ));
+        Page<WorkOrderListDto> dtoPage = result.map(WorkOrderListDto::fromEntity);
 
         return ResponseEntity.ok(PageResponse.of(dtoPage, sort));
     }
 
     public record StatusChangeReq(@NotBlank String toStatus) {}
-
-
-
 
 }

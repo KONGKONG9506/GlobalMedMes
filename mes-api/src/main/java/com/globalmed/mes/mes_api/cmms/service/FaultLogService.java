@@ -25,7 +25,7 @@ public class FaultLogService {
         .action(req.getAction())
         .occurredAt(req.getOccurredAt())
         .resolvedAt(req.getResolvedAt())
-        .workOrderId(req.getWorkOrderId())
+        .cmmsWoId(req.getCmmsWoId())
         .build();
 
         if (actorUserId != null){
