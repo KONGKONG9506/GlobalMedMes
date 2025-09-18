@@ -79,9 +79,9 @@ export default function CmmsPage() {
       try {
         setLoading(true);
         const [pmRes, woRes, faultRes] = await Promise.all([
-          api.get<CmmsPmPlan[]>("/api/cmms/pm-plans/due"),
+          api.get<CmmsPmPlan[]>("/cmms/pm-plans/due"),
           api.get<CmmsWo[]>("/cmms/work-orders"),
-          api.get<CmmsFault[]>("/api/cmms/fault-logs"),
+          api.get<CmmsFault[]>("/cmms/fault-logs"),
         ]);
 
         setPmPlans(pmRes.data);
