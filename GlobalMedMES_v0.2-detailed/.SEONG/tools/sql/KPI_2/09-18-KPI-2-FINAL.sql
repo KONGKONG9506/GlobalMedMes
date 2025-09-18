@@ -106,8 +106,42 @@ CREATE TABLE `tb_attendance` (
 
 
 -- 기존 테이블 업데이트
- ALTER TABLE tb_shift_calendar DROP CHECK ck_shiftcal_scope_exclusive;
- ALTER TABLE tb_shift_assignment DROP CHECK ck_assign_scope_exclusive;
+-- tb_shift_calendar 체크 제약 확인
+SET @constraint_name := (
+  SELECT CONSTRAINT_NAME
+  FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'tb_shift_calendar'
+    AND CONSTRAINT_TYPE = 'CHECK'
+    AND CONSTRAINT_NAME = 'ck_shiftcal_scope_exclusive'
+);
+
+-- 존재하면 DROP
+SET @sql := IF(@constraint_name IS NOT NULL,
+               CONCAT('ALTER TABLE tb_shift_calendar DROP CHECK ', @constraint_name),
+               'SELECT "Constraint not found"');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+
+-- tb_shift_assignment 체크 제약 삭제도 동일하게
+SET @constraint_name := (
+  SELECT CONSTRAINT_NAME
+  FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'tb_shift_assignment'
+    AND CONSTRAINT_TYPE = 'CHECK'
+    AND CONSTRAINT_NAME = 'ck_assign_scope_exclusive'
+);
+
+SET @sql := IF(@constraint_name IS NOT NULL,
+               CONCAT('ALTER TABLE tb_shift_assignment DROP CHECK ', @constraint_name),
+               'SELECT "Constraint not found"');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- 테이블
 
 
@@ -302,9 +336,9 @@ INSERT INTO tb_shift_assignment (shift_date, shift_id, worker_id, equipment_id, 
 ON DUPLICATE KEY UPDATE end_ts=VALUES(end_ts);
 
 -- 출퇴근 추가
-INSERT INTO `tb_code_group` (`group_code`, `group_name`, `description`, `created_by`)
+INSERT IGNORE INTO `tb_code_group` (`group_code`, `group_name`, `description`, `created_by`)
 VALUES ('ATTENDANCE_STATUS', '출퇴근 상태', '직원의 출근 및 퇴근 상태를 정의합니다.', 'admin');
-INSERT INTO `tb_code` (`group_code`, `code`, `name`, `description`, `created_by`)
+INSERT IGNORE INTO `tb_code` (`group_code`, `code`, `name`, `description`, `created_by`)
 VALUES ('ATTENDANCE_STATUS', 'CHECK_IN', '출근', '직원 출근', 'seed');
-INSERT INTO `tb_code` (`group_code`, `code`, `name`, `description`, `created_by`)
+INSERT IGNORE INTO `tb_code` (`group_code`, `code`, `name`, `description`, `created_by`)
 VALUES ('ATTENDANCE_STATUS', 'CHECK_OUT', '퇴근', '직원 퇴근', 'seed');

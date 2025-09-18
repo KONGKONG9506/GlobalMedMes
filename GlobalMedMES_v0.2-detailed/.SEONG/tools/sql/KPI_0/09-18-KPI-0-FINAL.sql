@@ -145,26 +145,27 @@ ON DUPLICATE KEY UPDATE
     parameters = VALUES(parameters),
     unit = VALUES(unit);
 
-INSERT INTO `tb_code_group` (`group_code`, `group_name`, `description`, `created_by`)
+-- 코드 그룹: 집계 유형
+INSERT IGNORE INTO `tb_code_group` (`group_code`, `group_name`, `description`, `created_by`)
 VALUES
 ('KPI_DATA_TYPE', 'KPI 집계 유형', 'KPI 데이터의 집계 기준을 정의합니다.', 'seed');
 
 -- 코드: 집계 유형
-INSERT INTO `tb_code` (`group_code`, `code`, `name`, `sort_order`, `created_by`)
+INSERT IGNORE INTO `tb_code` (`group_code`, `code`, `name`, `sort_order`, `created_by`)
 VALUES
 ('KPI_DATA_TYPE', 'REALTIME', '실시간', 1, 'seed'),
-('KPI_DATA_TYPE', 'DAILY_BATCH', '일일 배치', 2, 'seed')
+('KPI_DATA_TYPE', 'DAILY_BATCH', '일일 배치', 2, 'seed');
 
 -- 코드 그룹: 계산 상태
-INSERT INTO `tb_code_group` (`group_code`, `group_name`, `description`, `created_by`)
+INSERT IGNORE INTO `tb_code_group` (`group_code`, `group_name`, `description`, `created_by`)
 VALUES
 ('KPI_CALC_STATUS', 'KPI 계산 상태', 'KPI 계산 작업의 상태를 정의합니다.', 'seed');
 
 -- 코드: 계산 상태
-INSERT INTO `tb_code` (`group_code`, `code`, `name`, `sort_order`, `created_by`)
+INSERT IGNORE INTO `tb_code` (`group_code`, `code`, `name`, `sort_order`, `created_by`)
 VALUES
 ('KPI_CALC_STATUS', 'SUCCESS', '성공', 1, 'seed'),
-('KPI_CALC_STATUS', 'FAIL', '실패', 2, 'seed')
+('KPI_CALC_STATUS', 'FAIL', '실패', 2, 'seed');
 
 SET @EVT_REALTIME  := (SELECT code_id FROM tb_code WHERE group_code='KPI_DATA_TYPE' AND code='REALTIME');
 SET @EVT_DAILY_BATCH  := (SELECT code_id FROM tb_code WHERE group_code='KPI_DATA_TYPE' AND code='DAILY_BATCH');
@@ -175,13 +176,13 @@ SET @EVT_FAIL  := (SELECT code_id FROM tb_code WHERE group_code='KPI_CALC_STATUS
 
 
 -- 실시간 KPI (WORK ORDER 단위)
-INSERT INTO tb_kpi_data (kpi_date, equipment_id, process_id, item_id, work_order_id, actual_oee, actual_yield, actual_defect_rate, actual_productivity, aggregation_type_id, start_time, end_time, calc_status_code_id, created_by)
+INSERT IGNORE INTO tb_kpi_data (kpi_date, equipment_id, process_id, item_id, work_order_id, actual_oee, actual_yield, actual_defect_rate, actual_productivity, aggregation_type_id, start_time, end_time, calc_status_code_id, created_by)
 VALUES
 (CURRENT_DATE(), 'E-0001', 'P-0001', 'I-0001', 'WO-0001', 85.00, 98.50, 1.50, 120.0000, @EVT_REALTIME, CONCAT(CURRENT_DATE(),' 08:00:00'), CONCAT(CURRENT_DATE(),' 10:00:00'), @EVT_SUCCESS, 'seed'),
 (CURRENT_DATE(), 'E-0002', 'P-0002', 'I-0001', 'WO-0002', 82.00, 97.00, 3.50, 110.0000, @EVT_REALTIME, CONCAT(CURRENT_DATE(),' 08:10:00'), CONCAT(CURRENT_DATE(),' 10:20:00'), @EVT_SUCCESS, 'seed');
 
 -- 배치 KPI (DAILY_TOTAL 단위)
-INSERT INTO tb_kpi_data (kpi_date, equipment_id, process_id, item_id, actual_oee, actual_yield, actual_defect_rate, actual_productivity, aggregation_type_id, batch_group_key, start_time, end_time, calc_status_code_id, created_by)
+INSERT IGNORE INTO tb_kpi_data (kpi_date, equipment_id, process_id, item_id, actual_oee, actual_yield, actual_defect_rate, actual_productivity, aggregation_type_id, batch_group_key, start_time, end_time, calc_status_code_id, created_by)
 VALUES
 (CURRENT_DATE(), 'E-0001', 'P-0001', 'I-0001', 83.00, 98.00, 2.00, 118.0000, @EVT_DAILY_BATCH, 'DAILY', CONCAT(CURRENT_DATE(),' 08:00:00'), CONCAT(CURRENT_DATE(),' 18:00:00'), @EVT_SUCCESS, 'seed'),
 (CURRENT_DATE(), 'E-0002', 'P-0002', 'I-0002', 80.00, 97.00, 3.00, 112.0000, @EVT_DAILY_BATCH, 'DAILY', CONCAT(CURRENT_DATE(),' 08:00:00'), CONCAT(CURRENT_DATE(),' 18:00:00'), @EVT_SUCCESS, 'seed');
