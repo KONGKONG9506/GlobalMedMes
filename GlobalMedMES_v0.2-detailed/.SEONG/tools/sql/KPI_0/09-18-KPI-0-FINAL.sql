@@ -122,7 +122,7 @@ SET @EVT_DEFECTQTY := (SELECT code_id FROM tb_code WHERE group_code='PROD_EVENT'
 SET @EVT_DOWNTIME_START  := (SELECT code_id FROM tb_code WHERE group_code='PROD_EVENT' AND code='DOWNTIME_START');
 SET @EVT_DOWNTIME_END  := (SELECT code_id FROM tb_code WHERE group_code='PROD_EVENT' AND code='DOWNTIME_END');
 
-INSERT INTO tb_production_log (work_order_id, equipment_id, process_id, event_type, event_timestamp, event_value) VALUES
+INSERT IGNORE INTO tb_production_log (work_order_id, equipment_id, process_id, event_type, event_timestamp, event_value) VALUES
 ('WO-0001','E-0001','P-0001', @EVT_START, CONCAT(CURRENT_DATE(),' 08:00:00'), 0),
 ('WO-0001','E-0001','P-0001', @EVT_GOODQTY, CONCAT(CURRENT_DATE(),' 09:30:00'), 100),
 ('WO-0001','E-0001','P-0001', @EVT_DEFECTQTY, CONCAT(CURRENT_DATE(),' 09:30:00'), 5),
