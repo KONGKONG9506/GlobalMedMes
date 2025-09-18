@@ -20,7 +20,7 @@ public final class CmmsMapper {
 
     public static FaultLogDto.Res toRes(CmmsFaultLog e){
         return new FaultLogDto.Res(e.getId(),e.getEquipmentId(), e.getLossCategoryCodeId(), e.getSymptom()
-        , e.getAction(), e.getOccurredAt(), e.getResolvedAt(), e.getWorkOrderId());
+        , e.getAction(), e.getOccurredAt(), e.getResolvedAt(), e.getCmmsWoId());
     }
 
 }

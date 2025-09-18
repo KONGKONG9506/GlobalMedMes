@@ -11,6 +11,7 @@ import lombok.*;
     uniqueConstraints =@UniqueConstraint(name="uq_cmms_wo_request_id", columnNames = "request_id")
 )
 @Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class CmmsWorkOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

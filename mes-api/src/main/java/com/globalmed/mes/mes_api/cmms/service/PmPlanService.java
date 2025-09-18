@@ -41,6 +41,7 @@ public class PmPlanService {
         .cycleTypeCodeId(req.getCycleTypeCodeId())
         .cycleValue(req.getCycleValue())
         .lastDoneAt(req.getLastDoneAt())
+        .nextDueAt(nextDueAt)
         .status("ACTIVE")
         .build();
 

@@ -1,11 +1,12 @@
 package com.globalmed.mes.mes_api.employee.shift.service;
 
-import com.globalmed.mes.mes_api.A_Tamporary.EquipRepo;
-import com.globalmed.mes.mes_api.A_Tamporary.EquipmentEntity;
+
 import com.globalmed.mes.mes_api.employee.shift.domain.ShiftCalendarEntity;
 import com.globalmed.mes.mes_api.employee.shift.domain.ShiftEntity;
 import com.globalmed.mes.mes_api.employee.shift.repository.ShiftCalendarRepo;
 import com.globalmed.mes.mes_api.employee.shift.repository.ShiftRepo;
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
+import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,14 +22,14 @@ import java.util.List;
 public class ShiftCalendarService {
     private final ShiftRepo shiftRepo;
     private final ShiftCalendarRepo calendarRepo;
-    private final EquipRepo equipRepo;
+    private final EquipmentRepo equipmentRepo;
     @Transactional
     public List<ShiftCalendarEntity> generateCalendarForDateAndEquipment(LocalDate shiftDate, String equipmentId, String workcenterId) {
         // 1. 설비 존재 여부 확인t
-        EquipmentEntity equipment = equipRepo.findById(equipmentId)
+        EquipmentEntity equipment = equipmentRepo.findById(equipmentId)
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
         // 2. 워크센터 매치 확인
-        if (!equipment.getWorkcenterId().equals(workcenterId)) {
+        if (!equipment.getWorkcenter().getWorkcenterId().equals(workcenterId)) {
             throw new IllegalArgumentException("WC_MISMATCH");
         }
         List<ShiftEntity> shifts = shiftRepo.findAll();

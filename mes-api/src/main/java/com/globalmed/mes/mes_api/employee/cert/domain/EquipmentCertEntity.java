@@ -1,6 +1,7 @@
 package com.globalmed.mes.mes_api.employee.cert.domain;
 
-import com.globalmed.mes.mes_api.A_Tamporary.EquipmentEntity;
+
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

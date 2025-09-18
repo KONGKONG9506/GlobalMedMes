@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "tb_cmms_work_order_log")
 @Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class CmmsWorkOrderLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

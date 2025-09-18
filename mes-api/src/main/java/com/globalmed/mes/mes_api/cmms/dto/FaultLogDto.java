@@ -21,7 +21,7 @@ public class FaultLogDto {
             String action;
             @NotNull OffsetDateTime occurredAt;
             OffsetDateTime resolvedAt;
-            Long workOrderId;
+            Long cmmsWoId;
 }
     @Getter
     @Builder

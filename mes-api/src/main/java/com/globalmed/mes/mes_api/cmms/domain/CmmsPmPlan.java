@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "tb_cmms_pm_plan")
 @Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class CmmsPmPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
