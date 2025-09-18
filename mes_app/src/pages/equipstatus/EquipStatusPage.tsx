@@ -1,4 +1,3 @@
-// src/pages/equip/EquipStatusPage.tsx
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toPage } from "../../adapters/page";
@@ -8,32 +7,33 @@ import { fetchEquipStatus, createEquipStatus } from "../../lib/equip";
 import { isAxiosError } from "axios";
 import CanWrite from "../../components/common/perm/CanWrite";
 
+const statusColors = {
+  RUN: "bg-green-100 text-green-800",
+  IDLE: "bg-yellow-100 text-yellow-800",
+  DOWN: "bg-red-100 text-red-800",
+};
+
 export default function EquipStatusPage() {
   const qc = useQueryClient();
 
   // 필터 상태
   const [equipmentId, setEqp] = useState<string>("E-0001");
-  const today = new Date().toISOString().slice(0, 10); // yyyy-MM-dd (UTC 기준 잘라 사용)
-  const [date, setDate] = useState<string>(today);     // From(시작 날짜)
-  const [toDate, setToDate] = useState<string>(today); // To(끝 날짜)
+  const today = new Date().toISOString().slice(0, 10);
+  const [date, setDate] = useState<string>(today);
+  const [toDate, setToDate] = useState<string>(today);
 
   // 생성 폼 상태
   const [statusCode, setStatus] = useState<"RUN" | "IDLE" | "DOWN">("RUN");
-  const [time, setTime] = useState<string>("09:00"); // HH:mm
+  const [time, setTime] = useState<string>("00:00");
   const [err, setErr] = useState<string>("");
 
-  // 목록 로드 (from/to 둘 다 적용)
+  // 목록 로드
   const { data, isLoading, error } = useQuery<PageResult<EquipStatusItem>>({
     queryKey: ["equip-status", equipmentId, date, toDate, 0, 20],
     queryFn: async () => {
-      // from: 해당 날짜 00:00:00Z
       const fromMs = Date.parse(`${date}T00:00:00Z`);
-      // to: 끝 날짜 23:59:59Z (끝 날짜가 시작보다 빠르면 시작 날짜로 보정)
       const rawToMs = Date.parse(`${toDate}T23:59:59Z`);
-      const toMs = Number.isFinite(rawToMs)
-        ? Math.max(fromMs, rawToMs)
-        : fromMs; // 파싱 실패 시 from으로 보정
-
+      const toMs = Number.isFinite(rawToMs) ? Math.max(fromMs, rawToMs) : fromMs;
       const fromIso = new Date(fromMs).toISOString();
       const toIso = new Date(toMs).toISOString();
 
@@ -54,8 +54,6 @@ export default function EquipStatusPage() {
     e.preventDefault();
     setErr("");
 
-    // 입력 date+time → UTC ISO(Z)로 조합
-    // type="time"은 HH:mm을 보장하므로 바로 합쳐도 안전
     const startIso = new Date(`${date}T${time}:00Z`).toISOString();
 
     try {
@@ -75,34 +73,35 @@ export default function EquipStatusPage() {
   }
 
   return (
- <div>
-      <h1 className="text-lg font-semibold mb-3">설비 상태</h1>
+    <div className="max-w-5xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-5 text-black-700">설비 상태</h1>
 
       {/* 검색 바 */}
-      <form onSubmit={submit} className="flex flex-wrap items-end gap-2 mb-4">
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">설비</label>
+      <form className="flex flex-wrap items-end gap-4 mb-6">
+        <div className="flex flex-col w-40">
+          <label className="text-sm font-medium text-gray-700 mb-1">설비</label>
           <input
-            className="border px-2 py-1"
+            className="border border-gray-300 rounded px-1 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={equipmentId}
             onChange={(e) => setEqp(e.target.value)}
+            placeholder="설비 ID"
           />
         </div>
 
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">시작 날짜(From)</label>
+        <div className="flex flex-col w-40">
+          <label className="text-sm font-medium text-gray-700 mb-1">시작 날짜 (From)</label>
           <input
-            className="border px-2 py-1"
+            className="border border-gray-300 rounded px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
 
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">끝 날짜(To)</label>
+        <div className="flex flex-col w-40">
+          <label className="text-sm font-medium text-gray-700 mb-1">끝 날짜 (To)</label>
           <input
-            className="border px-2 py-1"
+            className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
@@ -111,84 +110,108 @@ export default function EquipStatusPage() {
       </form>
 
       {/* 등록 바 */}
-      <form onSubmit={submit} className="flex flex-wrap items-end gap-2 mb-4">
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">등록 날짜</label>
-          <input
-            className="border px-2 py-1"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">등록 시각(UTC)</label>
-          <input
-            className="border px-2 py-1"
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-          />
-        </div>
-        <div className="flex flex-col">
-          <label className="text-sm text-gray-600">상태</label>
-          <select
-            className="border px-2 py-1"
-            value={statusCode}
-            onChange={(e) => setStatus(e.target.value as "RUN" | "IDLE" | "DOWN")}
-          >
-            <option value="RUN">RUN</option>
-            <option value="IDLE">IDLE</option>
-            <option value="DOWN">DOWN</option>
-          </select>
-        </div>
+      <form onSubmit={submit} className="flex flex-wrap items-end gap-4 mb-8">
+        <CanWrite>
+          <div className="flex flex-col w-36">
+            <label className="text-sm font-medium text-gray-700 mb-1">등록 날짜</label>
+            <input
+              className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+        </CanWrite>
 
         <CanWrite>
-          <button className="bg-green-500 text-white px-3 py-2 rounded" type="submit">
-            RUN 등록
+          <div className="flex flex-col w-31">
+            <label className="text-sm font-medium text-gray-700 mb-1">등록 시각 (UTC)</label>
+            <input
+              className="border border-gray-300 rounded px-2 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+            />
+          </div>
+        </CanWrite>
+
+        <CanWrite>
+          <div className="flex flex-col w-28">
+            <label className="text-sm font-medium text-gray-700 mb-1">상태</label>
+            <select
+              className="border border-gray-300 rounded px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-400"
+              value={statusCode}
+              onChange={(e) => setStatus(e.target.value as "RUN" | "IDLE" | "DOWN")}
+            >
+              <option value="RUN" className="bg-green-100 text-green-800">
+                RUN
+              </option>
+              <option value="IDLE" className="bg-yellow-100 text-yellow-800">
+                IDLE
+              </option>
+              <option value="DOWN" className="bg-red-100 text-red-800">
+                DOWN
+              </option>
+            </select>
+          </div>
+        </CanWrite>
+
+        <CanWrite>
+          <button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded font-semibold transition-colors"
+          >
+            등록
           </button>
         </CanWrite>
-        {err && <span className="text-red-600 ml-2">{err}</span>}
+
+        {err && <p className="text-red-600 ml-4 font-medium">{err}</p>}
       </form>
 
       {/* 목록 */}
       <div>
-        <h2 className="font-semibold mb-2">최근 상태</h2>
+        <h2 className="text-xl font-semibold mb-3 text-gray-800">최근 상태</h2>
         {isLoading ? (
-          <div>로딩...</div>
+          <div className="text-gray-600">로딩 중...</div>
         ) : error ? (
-          <div>오류</div>
+          <div className="text-red-600">오류가 발생했습니다.</div>
         ) : !data ? null : (
-          <table className="w-full border">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-2">ID</th>
-                <th className="p-2">설비</th>
-                <th className="p-2">상태</th>
-                <th className="p-2">시작(KST)</th>
-                <th className="p-2">종료(KST)</th>
+          <table className="w-full border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+            <thead className="sticky top-0 bg-blue-100 text-gray-800 font-semibold z-10 shadow-sm">
+              <tr>
+                <th className="p-3 border-b border-gray-500 text-left">ID</th>
+                <th className="p-3 border-b border-gray-500 text-left">설비</th>
+                <th className="p-3 border-b border-gray-500 text-left">상태</th>
+                <th className="p-3 border-b border-gray-500 text-left">시작</th>
+                <th className="p-3 border-b border-gray-500 text-left">종료</th>
               </tr>
             </thead>
             <tbody>
-              {data.items.map((it: EquipStatusItem) => (
-                <tr key={it.logId} className="border-t">
-                  <td className="p-2">{it.logId}</td>
-                  <td className="p-2">{it.equipmentId}</td>
-                  <td className="p-2">{it.status ?? "-"}</td>
-                  <td className="p-2">
-                    {new Date(it.startTime).toLocaleString("ko-KR", {
-                      timeZone: "Asia/Seoul",
-                    })}
-                  </td>
-                  <td className="p-2">
-                    {it.endTime
-                      ? new Date(it.endTime).toLocaleString("ko-KR", {
-                          timeZone: "Asia/Seoul",
-                        })
-                      : "-"}
-                  </td>
-                </tr>
-              ))}
+              {data.items.map((it: EquipStatusItem) => {
+                const statusClass = statusColors[it.status as keyof typeof statusColors] || "text-gray-700";
+
+                return (
+                  <tr key={it.logId} className="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td className="p-3">{it.logId}</td>
+                    <td className="p-3">{it.equipmentId}</td>
+                    <td>
+                      <span
+                        className={`inline-block px-3 py-1 rounded-full font-semibold text-sm ${statusClass}`}
+                      >
+                        {it.status ?? "-"}
+                      </span>
+                    </td>
+                    <td className="p-3">
+                      {new Date(it.startTime).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}
+                    </td>
+                    <td className="p-3">
+                      {it.endTime
+                        ? new Date(it.endTime).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })
+                        : "-"}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

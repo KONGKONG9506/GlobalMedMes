@@ -11,6 +11,12 @@ import WorkOrderCreate from "./pages/workorders/WorkOrderCreate";
 import PerformanceCreate from "./pages/performances/PerformanceCreate";
 import PermRoute from "./routes/PermRoute";
 import Forbidden from "./pages/Forbidden";
+import QualityPage  from "./pages/quality/quality";
+import Management from "./pages/Management/Managementcreate";
+// import CmmsPage from "./pages/CMMS/cmms pm-plan";
+// import CmmsFault from "./pages/CMMS/cmms faultlogs";
+import CmmsTotal from "./pages/CMMS/cmms total";
+
 
 export default function App() {
   return (
@@ -20,7 +26,7 @@ export default function App() {
         <Route path="/" element={
           <ProtectedRoute><AppLayout/></ProtectedRoute>
         }>
-          <Route index element={<Dashboard/>}/>
+          <Route path="dashboard" element={<Dashboard/>}/>
           <Route path="work-orders" element={<WorkOrdersList/>}/>
           <Route path="performances" element={<PerformancesList/>}/>
           <Route path="performances/new" element={
@@ -28,6 +34,41 @@ export default function App() {
               <PerformanceCreate/>
             </PermRoute>
           }/>
+
+          <Route path="quality" element={
+          <PermRoute require="read">
+          <QualityPage />
+          </PermRoute>
+          }/>
+
+         <Route path="management" element={
+         <PermRoute require="write">
+         <Management />
+         </PermRoute>
+         } />
+
+      {/* <Route path="cmms">
+      <Route index element={
+      <PermRoute require="write">
+      <CmmsPage />
+      </PermRoute>
+      }/>
+      <Route path="faults" element={
+      <PermRoute require="write">
+      <CmmsFault />
+      </PermRoute>
+      }/>
+      </Route> */}
+
+      
+      <Route path="cmms">
+      <Route index element={
+      <PermRoute require="write">
+      <CmmsTotal />
+      </PermRoute>
+      }/>
+      </Route>
+
           <Route path="403" element={<Forbidden/>}/>
 
           <Route path="equip-status" element={<EquipStatusPage/>}/>

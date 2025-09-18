@@ -1,4 +1,3 @@
-// src/lib/api.ts
 import axios, { type AxiosInstance } from "axios";
 import { useAuthStore } from "../store/auth";
 import { isAxiosError } from "axios";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api } from "../../lib/api";
 import type { KpiRes } from "../../types/kpi";
-import KpiCard from "../../components/kpi/KpiCard";
+import KpiCard from "../../pages/kpi/KpiCard";
 import { statusColor, fmtPercent, fmtNumber } from "../../lib/kpi";
 import { isAxiosError } from "axios";
 
@@ -14,7 +14,7 @@ export default function KpiPage() {
   async function load() {
     try {
       setErr("");
-      const res = await api.get<KpiRes>("/kpi/actuals", { params: { kpiDate: date, equipmentId: eqp }});
+      const res = await api.get<KpiRes>("/kpi/datalist", { params: { kpiDate: date, equipmentId: eqp }});
       setData(res.data);
     } catch (error: unknown) {
       const msg = isAxiosError<{ message?: string }>(error)
