@@ -204,6 +204,11 @@ FROM tb_role r JOIN tb_menu m ON m.menu_code IN ('CMMS','CMMS_WO','CMMS_PM','CMM
 WHERE r.role_code='ROLE_ADMIN'
   AND NOT EXISTS (SELECT 1 FROM tb_role_menu x WHERE x.role_id=r.role_id AND x.menu_id=m.menu_id);
 
+
+
+
+
+
 -- 4) 코드ID 변수 (일관명)
 SET @WO_OPEN    := (SELECT code_id FROM tb_code WHERE group_code='CMMS_WO_STATUS' AND code='OPEN'        LIMIT 1);
 SET @WO_ASSIGNED:= (SELECT code_id FROM tb_code WHERE group_code='CMMS_WO_STATUS' AND code='ASSIGNED'    LIMIT 1);
@@ -230,13 +235,13 @@ SET @OP  := '00000000-0000-0000-0000-0000000000OP';
 
 -- 6) PM 계획 데모 (equipment_id+task_name 멱등)
 INSERT INTO tb_cmms_pm_plan
-(equipment_id, task_name, cycle_type_code_id, cycle_value, last_done_at, next_due_at, status, created_by)
-SELECT @EQP, '윤활 점검(주1회)', @CYCLE_D, 7, NULL, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 3 DAY), 'ACTIVE', 'seed'
+(equipment_id, task_name, cycle_type_code_id, cycle_value, last_done_at, next_due_at, status, created_by, estimated_take_time)
+SELECT @EQP, '윤활 점검(주1회)', @CYCLE_D, 7, NULL, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 3 DAY), 'ACTIVE', 'seed', 30
 WHERE NOT EXISTS (SELECT 1 FROM tb_cmms_pm_plan WHERE equipment_id=@EQP AND task_name='윤활 점검(주1회)');
 
 INSERT INTO tb_cmms_pm_plan
-(equipment_id, task_name, cycle_type_code_id, cycle_value, last_done_at, next_due_at, status, created_by)
-SELECT @EQP, '모터 베어링 교체(500h)', @CYCLE_H, 500, NULL, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 10 DAY), 'ACTIVE', 'seed'
+(equipment_id, task_name, cycle_type_code_id, cycle_value, last_done_at, next_due_at, status, created_by, estimated_take_time)
+SELECT @EQP, '모터 베어링 교체(500h)', @CYCLE_H, 500, NULL, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 10 DAY), 'ACTIVE', 'seed', 120
 WHERE NOT EXISTS (SELECT 1 FROM tb_cmms_pm_plan WHERE equipment_id=@EQP AND task_name='모터 베어링 교체(500h)');
 
 -- 7) WO 데모 (request_id 멱등)
