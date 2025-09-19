@@ -12,9 +12,9 @@ type WorkOrderCreateProps = {
 
 export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
   const [workOrderNumber, setNo] = useState("");
-  const [itemId, setItem] = useState("I-0001");
-  const [processId, setProc] = useState("P-0001");
-  const [equipmentId, setEqp] = useState("E-0001");
+  const [itemId, setItem] = useState("STENT_01");
+  const [processId, setProc] = useState("STENT_PROC_A");
+  const [equipmentId, setEqp] = useState("STENT_LINE_01");
   const [orderQty, setQty] = useState<number>(100);
   const [err, setErr] = useState("");
   const nav = useNavigate();
