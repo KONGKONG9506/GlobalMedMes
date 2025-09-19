@@ -28,7 +28,7 @@ export default function KpiPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">KPI 대시보드</h1>
+      <h1 className="text-2xl font-bold mb-4">KPI</h1>
 
       <div className="flex gap-2 mb-5">
         <input

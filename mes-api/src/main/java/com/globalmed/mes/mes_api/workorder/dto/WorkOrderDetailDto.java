@@ -11,7 +11,7 @@ public record WorkOrderDetailDto(
         String workOrderNumber,
         BigDecimal orderQty,
         BigDecimal producedQty,
-        String status,
+        String statusCode,
         // 상태 코드 이름 추가
         OffsetDateTime startTs,
         OffsetDateTime createdAt,
@@ -42,7 +42,7 @@ public record WorkOrderDetailDto(
         String equipmentName = (entity.getEquipmentId() != null) ? entity.getEquipmentId().getEquipmentName() : null;
         String workcenterName = (entity.getEquipmentId() != null && entity.getEquipmentId().getWorkcenter() != null)
                 ? entity.getEquipmentId().getWorkcenter().getWorkcenterName() : null;
-        String status = (entity.getStatusCode() != null) ? entity.getStatusCode().getCode() : null;
+        String statusCode = (entity.getStatusCode() != null) ? entity.getStatusCode().getCode() : null;
 
         return new WorkOrderDetailDto(
                 entity.getWorkOrderId(),

@@ -2,6 +2,7 @@
 package com.globalmed.mes.mes_api.workorder.repository;
 
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +14,7 @@ public interface WorkOrderRepo extends JpaRepository<WorkOrderEntity, String>,
         JpaSpecificationExecutor<WorkOrderEntity> {
     Optional<WorkOrderEntity> findFirstByEquipment_EquipmentIdOrderByCreatedAtDesc(String equipmentId);
 
+    // 상세보기를 위한 단일 WorkOrder 조회 시 N+1 방지 쿼리
     Optional<WorkOrderEntity> findByWorkOrderNumber(String workOrderNumber);
     // 상세보기를 위한 단일 WorkOrder 조회 시 N+1 방지 쿼리
     @Query("SELECT wo FROM WorkOrderEntity wo " +

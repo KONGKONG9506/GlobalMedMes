@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
 import WorkOrdersList from "./pages/workorders/WorkOrdersList";
 import PerformancesList from "./pages/performances/PerformancesList";
 import EquipStatusPage from "./pages/equipstatus/EquipStatusPage";
@@ -11,74 +10,77 @@ import WorkOrderCreate from "./pages/workorders/WorkOrderCreate";
 import PerformanceCreate from "./pages/performances/PerformanceCreate";
 import PermRoute from "./routes/PermRoute";
 import Forbidden from "./pages/Forbidden";
-import QualityPage  from "./pages/quality/quality";
 import Management from "./pages/Management/Managementcreate";
-// import CmmsPage from "./pages/CMMS/cmms pm-plan";
-// import CmmsFault from "./pages/CMMS/cmms faultlogs";
 import CmmsTotal from "./pages/CMMS/cmms total";
-
+import Dashboards from "./pages/Dashboards/dashboards";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login/>} />
-        <Route path="/" element={
-          <ProtectedRoute><AppLayout/></ProtectedRoute>
-        }>
-          <Route path="dashboard" element={<Dashboard/>}/>
-          <Route path="work-orders" element={<WorkOrdersList/>}/>
-          <Route path="performances" element={<PerformancesList/>}/>
-          <Route path="performances/new" element={
-            <PermRoute require="write">
-              <PerformanceCreate/>
-            </PermRoute>
-          }/>
+        {/* 로그인은 레이아웃 없이 별도 */}
+        <Route path="/login" element={<Login />} />
 
-          <Route path="quality" element={
-          <PermRoute require="read">
-          <QualityPage />
-          </PermRoute>
-          }/>
+        {/* ProtectedRoute + AppLayout 안에 들어가는 페이지들 */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          {/* Dashboard */}
+          <Route path="dashboard" element={<Dashboards />} />
 
-         <Route path="management" element={
-         <PermRoute require="write">
-         <Management />
-         </PermRoute>
-         } />
+          {/* Work Orders */}
+          <Route path="work-orders" element={<WorkOrdersList />} />
+          <Route
+            path="work-orders/new"
+            element={
+              <PermRoute require="write">
+                <WorkOrderCreate />
+              </PermRoute>
+            }
+          />
 
-      {/* <Route path="cmms">
-      <Route index element={
-      <PermRoute require="write">
-      <CmmsPage />
-      </PermRoute>
-      }/>
-      <Route path="faults" element={
-      <PermRoute require="write">
-      <CmmsFault />
-      </PermRoute>
-      }/>
-      </Route> */}
+          {/* Performances */}
+          <Route path="performances" element={<PerformancesList />} />
+          <Route
+            path="performances/new"
+            element={
+              <PermRoute require="write">
+                <PerformanceCreate />
+              </PermRoute>
+            }
+          />
 
-      
-      <Route path="cmms">
-      <Route index element={
-      <PermRoute require="write">
-      <CmmsTotal />
-      </PermRoute>
-      }/>
-      </Route>
+          {/* Management */}
+          <Route
+            path="management"
+            element={
+              <PermRoute require="write">
+                <Management />
+              </PermRoute>
+            }
+          />
 
-          <Route path="403" element={<Forbidden/>}/>
+          {/* CMMS */}
+          <Route path="cmms">
+            <Route
+              index
+              element={
+                <PermRoute require="write">
+                  <CmmsTotal />
+                </PermRoute>
+              }
+            />
+          </Route>
 
-          <Route path="equip-status" element={<EquipStatusPage/>}/>
-          <Route path="kpi" element={<KpiPage/>}/>
-          <Route path="work-orders" element={<WorkOrdersList/>}/>
-          <Route path="work-orders/new" element={
-            <PermRoute require="write">
-              <WorkOrderCreate/>
-            </PermRoute>
-            }/>
+          {/* 기타 페이지 */}
+          <Route path="equip-status" element={<EquipStatusPage />} />
+          <Route path="kpi" element={<KpiPage />} />
+          <Route path="403" element={<Forbidden />} />
         </Route>
       </Routes>
     </BrowserRouter>

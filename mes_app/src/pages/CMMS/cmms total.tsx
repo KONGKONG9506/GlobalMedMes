@@ -32,7 +32,7 @@ export default function CmmsTotal() {
             activeTab === "fault" ? "bg-blue-500 text-white" : "bg-gray-200"
           }`}
         >
-          고장 로그
+          고장&수리
         </button>
       </div>
 

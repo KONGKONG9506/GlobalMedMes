@@ -1,15 +1,15 @@
 export type WorkOrderItem = {
   workOrderId: string;
   workOrderNumber: string;
-  itemId: string;
-  processId: string;
-  equipmentId: string;
-  orderQty: number;
-  producedQty: number;
-  status: string | null; // "P"|"R"|"C"|null
-  startTs?: string | null;      // UTC ISO
-  createdAt: string;
-  modifiedAt?: string | null;
+  orderQty: string;
+  produceQty: string;
+  statusCode: string;
+  itemName: number;
+  itemType: number;
+  unit: string | null; // "P"|"R"|"C"|null
+  processName: string | null;      // UTC ISO
+  equipmentName: string;
+  workcenterName: string | null;
 };
 
 export type WorkOrderCreateReq = {

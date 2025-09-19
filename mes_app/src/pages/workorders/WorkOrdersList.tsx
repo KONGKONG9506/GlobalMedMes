@@ -1,3 +1,4 @@
+// WorkOrdersList.tsx
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { toPage } from "../../adapters/page";
@@ -12,6 +13,7 @@ import { useState } from "react";
 import { useToast } from "../../store/toast";
 import CanWrite from "../../components/common/perm/CanWrite";
 import GuardButton from "../../components/common/perm/GuardButton";
+import RightSidebar from "./RightSidebar"; 
 
 const sortOptions = [
   { label: "최신 생성순", value: "createdAt,desc" },
@@ -35,6 +37,9 @@ export default function WorkOrdersList() {
   const [status, setStatus] = useState<string>("");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
+
+  // 사이드바 상태
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery<PageResult<WorkOrderItem>>({
     queryKey: ["work-orders", page, size, sort, equipmentId, status, from, to],
@@ -64,40 +69,65 @@ export default function WorkOrdersList() {
     }
   }
 
+  // 사이드바 열기/닫기
+  const toggleRightSidebar = () => setSidebarOpen(!isSidebarOpen);
+
   return (
     <div>
-      {/* 🔍 필터 영역 */}
+      {/* 필터 영역 */}
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
-        <input className="border px-3 py-2 rounded" placeholder="설비ID"
-          value={equipmentId} onChange={(e) => { setPage(0); setEqp(e.target.value); }} />
-        <select className="border px-3 py-2 rounded" value={status}
-          onChange={(e) => { setPage(0); setStatus(e.target.value); }}>
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-gray-700">조회 :</span>
+          <input
+            className="border px-3 py-2 rounded"
+            placeholder="작업ID"
+            value={equipmentId}
+            onChange={(e) => { setPage(0); setEqp(e.target.value); }}
+          />
+        </div>
+        <select
+          className="border px-3 py-2 rounded"
+          value={status}
+          onChange={(e) => { setPage(0); setStatus(e.target.value); }}
+        >
           <option value="">상태(전체)</option>
           <option value="P">P</option>
           <option value="R">R</option>
           <option value="C">C</option>
         </select>
-        <input className="border px-3 py-2 rounded" type="date"
-          value={from} onChange={(e) => { setPage(0); setFrom(e.target.value); }} />
-        <input className="border px-3 py-2 rounded" type="date"
-          value={to} onChange={(e) => { setPage(0); setTo(e.target.value); }} />
+        <input
+          className="border px-3 py-2 rounded"
+          type="date"
+          value={from}
+          onChange={(e) => { setPage(0); setFrom(e.target.value); }}
+        />
+        <input
+          className="border px-3 py-2 rounded"
+          type="date"
+          value={to}
+          onChange={(e) => { setPage(0); setTo(e.target.value); }}
+        />
       </div>
 
-      {/* 🔤 헤더 + 정렬 + 새 지시 버튼 */}
+      {/* 헤더 + 정렬 + 사이드바 버튼 */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-gray-800">작업지시 목록</h1>
         <div className="flex items-center gap-3">
           <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
+
+          {/* 오른쪽 사이드바 버튼 */}
           <CanWrite>
-            <Link className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow-sm"
-              to="/work-orders/new">
-              + 새 지시
-            </Link>
+            <button
+              onClick={toggleRightSidebar}
+              className="p-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white py-1"
+            >
+              작업지시 생성
+            </button>
           </CanWrite>
         </div>
       </div>
 
-      {/* 🔄 로딩 / 에러 / 데이터 */}
+      {/* 로딩 / 에러 / 데이터 */}
       {isLoading && <div className="text-center text-gray-600 py-10">로딩 중...</div>}
       {error && <div className="text-center text-red-500 py-10">데이터 불러오기 오류</div>}
 
@@ -121,18 +151,18 @@ export default function WorkOrdersList() {
                 </thead>
                 <tbody>
                   {data.items.map((it, idx) => {
-                    const canToR = it.status === "P";
-                    const canToC = it.status === "R";
+                    const canToR = it.statusCode === "P";
+                    const canToC = it.statusCode === "R";
                     return (
                       <tr key={it.workOrderId} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}>
                         <td className="p-3">{it.workOrderNumber}</td>
-                        <td className="p-3">{it.itemId}</td>
-                        <td className="p-3">{it.equipmentId}</td>
+                        <td className="p-3">{it.itemName}</td>
+                        <td className="p-3">{it.equipmentName}</td>
                         <td className="p-3 text-right">{it.orderQty}</td>
-                        <td className="p-3 text-right">{it.producedQty}</td>
+                        <td className="p-3 text-right">{it.produceQty}</td>
                         <td className="p-3">
-                          <span className={`px-2 py-1 rounded text-sm font-medium ${statusColor[it.status] ?? "bg-gray-100 text-gray-600"}`}>
-                            {it.status ?? "-"}
+                          <span className={`px-2 py-1 rounded text-sm font-medium ${statusColor[it.statusCode] ?? "bg-gray-100 text-gray-600"}`}>
+                            {it.statusCode ?? "-"}
                           </span>
                         </td>
                         <td className="p-3 text-center">
@@ -155,11 +185,11 @@ export default function WorkOrdersList() {
                               R→C
                             </GuardButton>
 
-                            {it.status === "R" && (
+                            {it.statusCode === "R" && (
                               <CanWrite>
                                 <Link
                                   className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 text-sm"
-                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemId}&processId=${it.processId}&equipmentId=${it.equipmentId}&status=${it.status ?? ""}`}
+                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemName}&processId=${it.processName}&equipmentId=${it. equipmentName}&status=${it.statusCode ?? ""}`}
                                 >
                                   실적 등록
                                 </Link>
@@ -175,7 +205,7 @@ export default function WorkOrdersList() {
             </div>
           )}
 
-          {/* ⏩ 페이지네이션 */}
+          {/* 페이지네이션 */}
           <Pagination
             page={page}
             size={size}
@@ -184,6 +214,9 @@ export default function WorkOrdersList() {
           />
         </>
       )}
+
+      {/* 오른쪽 사이드바 */}
+      <RightSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
     </div>
   );
 }

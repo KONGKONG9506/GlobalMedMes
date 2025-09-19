@@ -63,15 +63,15 @@ export default function CmmsPage() {
           <tr className="bg-gray-100">
             <th className="border px-2 py-1">ID</th>
             <th className="border px-2 py-1">equipmentId</th>
-            <th className="border px-2 py-1">title</th>
-            <th className="border px-2 py-1">statusCodeId</th>
-            <th className="border px-2 py-1">priorityCodeId</th>
+            <th className="border px-7 py-1">title</th>
+            <th className="border px-0.5 py-1">statusCodeId</th>
+            <th className="border px-0.5 py-1">priorityCodeId</th>
             <th className="border px-2 py-1">assigneeUserId</th>
             <th className="border px-2 py-1">requestId</th>
             <th className="border px-2 py-1">createdAt</th>
             <th className="border px-2 py-1">startedAt</th>
             <th className="border px-2 py-1">finishedAt</th>
-            <th className="border px-2 py-1">actualMinutes</th>
+            <th className="border px-0.5 py-1">actualMinutes</th>
             <th className="border px-2 py-1">partsCost</th>
           </tr>
         </thead>

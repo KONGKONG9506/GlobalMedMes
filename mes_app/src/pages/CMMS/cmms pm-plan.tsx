@@ -6,10 +6,10 @@ type CmmsPmPlan = {
   equipmentId: string;
   taskName: string;
   cycleTypeCodeId: number;
-  cycleValue:number;
-  lastDoneAt:string;
-  nextDueAt:string;
-  status:string;
+  cycleValue: number;
+  lastDoneAt: string;
+  nextDueAt: string;
+  status: string;
 };
 
 type CmmsApiResponse = {
@@ -71,7 +71,10 @@ export default function CmmsPage() {
         </thead>
         <tbody>
           {pmPlans.map((plan) => (
-            <tr key={plan.id}>
+            <tr
+              key={plan.id}
+              className="hover:bg-gray-50 transition-colors"
+            >
               <td className="border px-2 py-1">{plan.id}</td>
               <td className="border px-2 py-1">{plan.equipmentId}</td>
               <td className="border px-2 py-1">{plan.taskName}</td>
@@ -79,7 +82,19 @@ export default function CmmsPage() {
               <td className="border px-2 py-1">{plan.cycleValue}</td>
               <td className="border px-2 py-1">{plan.lastDoneAt}</td>
               <td className="border px-2 py-1">{plan.nextDueAt}</td>
-              <td className="border px-2 py-1">{plan.status}</td>
+              <td className="border px-2 py-1">
+                <span
+                  className={`px-2 py-1 rounded text-white text-sm font-medium ${
+                    plan.status === "DUE"
+                      ? "bg-red-500"
+                      : plan.status === "IN_PROGRESS"
+                      ? "bg-yellow-500"
+                      : "bg-green-500"
+                  }`}
+                >
+                  {plan.status}
+                </span>
+              </td>
             </tr>
           ))}
         </tbody>
