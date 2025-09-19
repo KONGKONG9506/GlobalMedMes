@@ -49,7 +49,7 @@ public record WorkOrderDetailDto(
                 entity.getWorkOrderNumber(),
                 entity.getOrderQty(),
                 entity.getProducedQty(),
-                status,
+                statusCode,
                 entity.getStartTs() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getStartTs()) : null,
                 entity.getCreatedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getCreatedAt()) : null,
                 entity.getModifiedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getModifiedAt()) : null,
