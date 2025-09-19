@@ -1,15 +1,15 @@
 package com.globalmed.mes.mes_api.cmms.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 
 
 @Entity
 @Table(name = "tb_cmms_pm_plan")
-@Getter @Setter
+@Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class CmmsPmPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,10 +35,10 @@ public class CmmsPmPlan {
     private OffsetDateTime nextDueAt;
 
     @Column(name="status", length=20, nullable = false)
-    private String status = "ACTIVE";
+    private String status; // 기본값  = "ACTIVE";
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean deleted = false;
+    private boolean deleted; // 기본값  = false;
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
@@ -55,4 +55,6 @@ public class CmmsPmPlan {
     @Column(name = "modified_at")
     private OffsetDateTime modifiedAt;
 
+    @Column(name = "estimated_take_time")
+    private Integer estimatedTakeTime;
 }

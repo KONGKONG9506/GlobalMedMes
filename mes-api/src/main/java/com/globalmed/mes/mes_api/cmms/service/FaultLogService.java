@@ -18,16 +18,22 @@ public class FaultLogService {
 
     @Transactional
     public FaultLogDto.Res create(FaultLogDto.CreateReq req, String actorUserId){
-        var e = new CmmsFaultLog();
-        e.setEquipmentId(req.equipmentId());
-        e.setLossCategoryCodeId(req.lossCategoryCodeId());
-        e.setSymptom(req.symptom());
-        e.setAction(req.action());
-        e.setOccurredAt(req.occurredAt());
-        e.setResolvedAt(req.resolvedAt());
-        e.setWorkOrderId(req.workOrderId());
-        e.setCreatedBy(actorUserId);
-        return CmmsMapper.toRes(repo.save(e));
+        CmmsFaultLog e = CmmsFaultLog.builder()
+        .equipmentId(req.getEquipmentId())
+        .lossCategoryCodeId(req.getLossCategoryCodeId())
+        .symptom(req.getSymptom())
+        .action(req.getAction())
+        .occurredAt(req.getOccurredAt())
+        .resolvedAt(req.getResolvedAt())
+        .cmmsWoId(req.getCmmsWoId())
+        .build();
+
+        if (actorUserId != null){
+            e.setCreatedBy(actorUserId);
+        }
+
+        CmmsFaultLog saved = repo.save(e);
+        return CmmsMapper.toRes(saved);
     }
 
     public Page<FaultLogDto.Res> search(String equipmentId, OffsetDateTime from, OffsetDateTime to, Pageable pageable){

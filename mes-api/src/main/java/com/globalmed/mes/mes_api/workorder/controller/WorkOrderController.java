@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 import static com.globalmed.mes.mes_api.workorder.specs.WorkOrderSpecs.*;
@@ -59,36 +60,19 @@ public class WorkOrderController {
     @PreAuthorize("@permChecker.has(authentication, '/work-orders','write') or hasAnyRole('ADMIN','OP')")
     @PutMapping("/{id}/status")
     public ResponseEntity<?> changeStatus(@PathVariable("id") String workOrderId,
-                                          @RequestBody StatusChangeReq req) {
-        var wo = workOrderService.transition(workOrderId, req.toStatus());
+                                          @RequestBody StatusChangeReq req,
+                                          @RequestParam(name = "now", required = false) OffsetDateTime now) {
+//        전이가드 테스트를 위해 offsetDateTime 추가
+//        offsetDateTime이 null일시 현재 시간으로 계산
+        var wo = workOrderService.transition(workOrderId, req.toStatus(), now);
         return ResponseEntity.ok(Map.of("workOrderId", wo.getWorkOrderId(),
                 "status", wo.getStatusCode().getCode()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<WorkOrderDetailDto> get(@PathVariable String id){
-        var wo = workOrderRepo.findById(id).orElseThrow();
 
-        // 엔티티 LocalDateTime 값을 “UTC 벽시계”로 간주 → 오프셋만 UTC로 부여
-        // src/main/java/.../workorder/WorkOrderController.java (상세)
-        var startTsUtc = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getStartTs());
-        var createdUtc  = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getCreatedAt());
-        var modifiedUtc = com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(wo.getModifiedAt());
-        // DTO 생성 시 createdAt/modifiedAt에 위 값 전달
-
-        var dto = new WorkOrderDetailDto(
-                wo.getWorkOrderId(),
-                wo.getWorkOrderNumber(),
-                wo.getItemId(),
-                wo.getProcessId(),
-                wo.getEquipmentId(),
-                wo.getOrderQty(),
-                wo.getProducedQty(),
-                wo.getStatusCode()!=null ? wo.getStatusCode().getCode() : null,
-                startTsUtc,
-                createdUtc,
-                modifiedUtc
-        );
+        var dto = workOrderService.findById(id);
         return ResponseEntity.ok(dto);
     }
 
@@ -116,23 +100,11 @@ public class WorkOrderController {
 
         Page<WorkOrderEntity> result = workOrderRepo.findAll(spec, pageable);
 
-        Page<WorkOrderListDto> dtoPage = result.map(wo -> new WorkOrderListDto(
-                wo.getWorkOrderId(),
-                wo.getWorkOrderNumber(),
-                wo.getItemId(),
-                wo.getProcessId(),
-                wo.getEquipmentId(),
-                wo.getOrderQty(),
-                wo.getProducedQty(),
-                (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null)
-        ));
+        Page<WorkOrderListDto> dtoPage = result.map(WorkOrderListDto::fromEntity);
 
         return ResponseEntity.ok(PageResponse.of(dtoPage, sort));
     }
 
     public record StatusChangeReq(@NotBlank String toStatus) {}
-
-
-
 
 }

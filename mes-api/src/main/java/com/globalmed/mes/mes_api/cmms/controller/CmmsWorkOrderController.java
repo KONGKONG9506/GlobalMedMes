@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/cmms/work-orders")
+@RequestMapping("/cmms/work-orders")
 @RequiredArgsConstructor
 public class CmmsWorkOrderController {
     private final CmmsWorkOrderService service;
@@ -37,7 +37,7 @@ public class CmmsWorkOrderController {
     @PreAuthorize("@permChecker.has(authentication, '/cmms/work-orders','write') or hasAnyRole('ADMIN','OP')")
     @PostMapping("/{id}/start")
     public CmmsWorkOrderDto.Res start(@PathVariable Long id,
-                                      @RequestBody CmmsWorkOrderDto.UpdateReq req,
+                                      @RequestBody CmmsWorkOrderDto.startReq req,
                                       Authentication auth) {
         String actorUserId = principalToUserId(auth);
         return service.start(id, req, actorUserId);
@@ -46,7 +46,7 @@ public class CmmsWorkOrderController {
     @PreAuthorize("@permChecker.has(authentication, '/cmms/work-orders','write') or hasAnyRole('ADMIN','OP')")
     @PostMapping("/{id}/complete")
     public CmmsWorkOrderDto.Res complete(@PathVariable Long id,
-                                         @RequestBody CmmsWorkOrderDto.UpdateReq req,
+                                         @RequestBody CmmsWorkOrderDto.finishReq req,
                                          Authentication auth) {
         String actorUserId = principalToUserId(auth);
         return service.complete(id, req, actorUserId);

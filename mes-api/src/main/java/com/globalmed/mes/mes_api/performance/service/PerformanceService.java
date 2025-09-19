@@ -1,7 +1,9 @@
 package com.globalmed.mes.mes_api.performance.service;
 
+import com.globalmed.mes.mes_api.kpi.service.RealTimeKpiService;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
+import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
 import jakarta.transaction.Transactional;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +20,8 @@ public class PerformanceService {
 
     private final PerformanceRepo performanceRepo;
     private final WorkOrderRepo workOrderRepo;
+    private final ProductionLogService productionLogService;
+    private final RealTimeKpiService realTimeKpiService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
@@ -83,14 +88,25 @@ public class PerformanceService {
 
         try {
             p = performanceRepo.save(p);
+
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
-
+        //KPI DATA 실시간 저장
+        realTimeKpiService.saveKpiFromPerformance(p);
         // 누적 갱신
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
-
         BigDecimal good = req.producedQty().subtract(req.defectQty());
+
+        // Good/Defect 이벤트 로그 남기기
+        if (good.compareTo(BigDecimal.ZERO) > 0) {
+            productionLogService.logGood(woId, eqp, proc, good.intValue());
+        }
+        if (req.defectQty().compareTo(BigDecimal.ZERO) > 0) {
+            productionLogService.logDefect(woId, eqp, proc, req.defectQty().intValue());
+        }
+
+
         return new Res(p.getPerformanceId(), good);
     }
 
@@ -98,4 +114,6 @@ public class PerformanceService {
     private LocalDateTime toUtcLdt(String isoZ) {
         return OffsetDateTime.parse(isoZ).atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
+
+
 }

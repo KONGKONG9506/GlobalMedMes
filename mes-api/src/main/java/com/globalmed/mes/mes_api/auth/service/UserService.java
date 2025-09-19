@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Service
-@RequiredArgsConstructor
+@Service @RequiredArgsConstructor
 public class UserService {
     private final UserRepo userRepo;
     private final UserRoleRepo userRoleRepo; // ← 추가

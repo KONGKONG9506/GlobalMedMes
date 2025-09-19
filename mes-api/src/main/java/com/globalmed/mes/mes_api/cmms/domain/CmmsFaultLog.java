@@ -8,7 +8,8 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name="tb_cmms_fault_log")
-@Getter @Setter
+@Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class CmmsFaultLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,10 +36,10 @@ public class CmmsFaultLog {
     private OffsetDateTime resolvedAt;
 
     @Column(name="cmms_wo_id")
-    private Long workOrderId;  // ← 스칼라 FK (선택 연결)
+    private Long cmmsWoId;  // ← 스칼라 FK (선택 연결)
 
     @Column(name="is_deleted", nullable = false)
-    private boolean deleted = false;
+    private boolean deleted; // 기본값  = false;
 
     @Column(name="deleted_at")
     private OffsetDateTime deletedAt;

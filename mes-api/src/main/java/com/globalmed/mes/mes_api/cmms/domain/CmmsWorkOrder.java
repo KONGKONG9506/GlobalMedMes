@@ -10,7 +10,8 @@ import lombok.*;
 @Table(name = "tb_cmms_work_order",
     uniqueConstraints =@UniqueConstraint(name="uq_cmms_wo_request_id", columnNames = "request_id")
 )
-@Getter @Setter
+@Getter @Setter @Builder
+@NoArgsConstructor @AllArgsConstructor
 public class CmmsWorkOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +52,7 @@ public class CmmsWorkOrder {
     private BigDecimal partsCost;
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean deleted = false;
+    private boolean deleted; // 기본값 = false;
 
     @Column(name="deleted_at")
     private OffsetDateTime deletedAt;
