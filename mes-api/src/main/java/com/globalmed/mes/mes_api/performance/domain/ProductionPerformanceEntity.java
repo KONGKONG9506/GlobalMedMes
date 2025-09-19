@@ -19,6 +19,7 @@ public class ProductionPerformanceEntity {
     @Column(name = "performance_id")
     private Long performanceId;
 
+
     @Column(name = "work_order_id", length = 36, nullable = false)
     private String workOrderId;
 
