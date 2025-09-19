@@ -29,7 +29,7 @@ export default function CmmsFault() {
       setErr("");
       setLoading(true);
 
-      const res = await api.get<CmmsFaultResponse>("/api/cmms/fault-logs", {
+      const res = await api.get<CmmsFaultResponse>("/cmms/fault-logs", {
         params: {equipmentId: "E-0001",from: "2025-09-04T00:00:00Z",to: "2025-09-06T00:00:00Z",sort: "occurredAt,desc"},
       });
 

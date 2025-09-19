@@ -4,8 +4,13 @@ import { createWorkOrder } from "../../lib/wo";
 import { isAxiosError } from "axios";
 import { useToast } from "../../store/toast";
 import { usePerms } from "../../hooks/usePerms";
+ import { useQueryClient } from "@tanstack/react-query";
 
-export default function WorkOrderCreate() {
+type WorkOrderCreateProps = {
+  onClose?: () => void;
+}
+
+export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
   const [workOrderNumber, setNo] = useState("");
   const [itemId, setItem] = useState("I-0001");
   const [processId, setProc] = useState("P-0001");
@@ -18,6 +23,7 @@ export default function WorkOrderCreate() {
   const { canWrite } = usePerms();
   const [isSubmitting, setSubmitting] = useState(false);
   const canSave = canWrite && !isSubmitting;
+   const qc = useQueryClient();
 
   function validate() {
     const e: {[k:string]: string} = {};
@@ -40,7 +46,9 @@ export default function WorkOrderCreate() {
       setSubmitting(true);
       await createWorkOrder({ workOrderNumber, itemId, processId, equipmentId, orderQty });
       toast.push("지시가 생성되었습니다.", "success");
+        await qc.invalidateQueries({ queryKey: ["work-orders"] });
       nav("/work-orders", { replace: true });
+      
     } catch (error: unknown) {
       const msg = isAxiosError<{ message?: string }>(error)
         ? error.response?.data?.message ?? "생성 실패"
@@ -69,7 +77,7 @@ export default function WorkOrderCreate() {
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
         <div className="flex gap-2">
           <button className="bg-black text-white px-3 py-1 rounded" disabled={!canSave} type="submit">{isSubmitting ? "생성 중..." : "생성"}</button>
-          <button className="border px-3 py-1 rounded" type="button" onClick={()=>nav(-1)}>취소</button>
+          <button className="border px-3 py-1 rounded" type="button" onClick={onClose}>취소</button>
         </div>
       </form>
     </div>
