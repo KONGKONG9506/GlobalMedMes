@@ -27,4 +27,6 @@ public interface EmployeeRepo extends JpaRepository<EmployeeEntity, String> {
     """)
     List<Object[]> findRawAssignments(@Param("name") String name);
 
+    List<EmployeeEntity> findShiftWorkers(List<String> employeeIds);
+
 }
