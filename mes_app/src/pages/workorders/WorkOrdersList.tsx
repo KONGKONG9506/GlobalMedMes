@@ -121,7 +121,7 @@ export default function WorkOrdersList() {
               onClick={toggleRightSidebar}
               className="p-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white py-1"
             >
-              ⚙
+              작업지시 생성
             </button>
           </CanWrite>
         </div>
@@ -151,18 +151,18 @@ export default function WorkOrdersList() {
                 </thead>
                 <tbody>
                   {data.items.map((it, idx) => {
-                    const canToR = it.status === "P";
-                    const canToC = it.status === "R";
+                    const canToR = it.statusCode === "P";
+                    const canToC = it.statusCode === "R";
                     return (
                       <tr key={it.workOrderId} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}>
                         <td className="p-3">{it.workOrderNumber}</td>
-                        <td className="p-3">{it.itemId}</td>
-                        <td className="p-3">{it.equipmentId}</td>
+                        <td className="p-3">{it.itemName}</td>
+                        <td className="p-3">{it.equipmentName}</td>
                         <td className="p-3 text-right">{it.orderQty}</td>
-                        <td className="p-3 text-right">{it.producedQty}</td>
+                        <td className="p-3 text-right">{it.produceQty}</td>
                         <td className="p-3">
-                          <span className={`px-2 py-1 rounded text-sm font-medium ${statusColor[it.status] ?? "bg-gray-100 text-gray-600"}`}>
-                            {it.status ?? "-"}
+                          <span className={`px-2 py-1 rounded text-sm font-medium ${statusColor[it.statusCode] ?? "bg-gray-100 text-gray-600"}`}>
+                            {it.statusCode ?? "-"}
                           </span>
                         </td>
                         <td className="p-3 text-center">
@@ -185,11 +185,11 @@ export default function WorkOrdersList() {
                               R→C
                             </GuardButton>
 
-                            {it.status === "R" && (
+                            {it.statusCode === "R" && (
                               <CanWrite>
                                 <Link
                                   className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 text-sm"
-                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemId}&processId=${it.processId}&equipmentId=${it.equipmentId}&status=${it.status ?? ""}`}
+                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemName}&processId=${it.processName}&equipmentId=${it. equipmentName}&status=${it.statusCode ?? ""}`}
                                 >
                                   실적 등록
                                 </Link>

@@ -72,9 +72,6 @@ export default function RightSidebar({ isOpen, onClose, onCreated }: RightSideba
     <aside className="w-80 bg-white border-l shadow fixed right-0 top-0 bottom-0 z-50 flex flex-col">
       <div className="p-4 border-b flex items-center justify-between">
         <span className="text-lg font-semibold"></span>
-        <button onClick={onClose} className="text-gray-500 hover:text-red-500 text-xl">
-          ×
-        </button>
       </div>
       <WorkOrderCreate
       onClose={onClose}

@@ -25,6 +25,7 @@ export default function EquipStatusPage() {
   // 생성 폼 상태
   const [statusCode, setStatus] = useState<"RUN" | "IDLE" | "DOWN">("RUN");
   const [time, setTime] = useState<string>("00:00");
+  const [endTime, setEndTime] = useState<string>("00:00");
   const [err, setErr] = useState<string>("");
 
   // 목록 로드
@@ -54,13 +55,20 @@ export default function EquipStatusPage() {
     e.preventDefault();
     setErr("");
 
+    const confirmed = window.confirm("정말로 등록하시겠습니까?");
+    if (!confirmed) return; // 취소 시 종료
+
     const startIso = new Date(`${date}T${time}:00Z`).toISOString();
+    const endIso = new Date(`${date}T${endTime}:00Z`).toISOString();
+
+    
 
     try {
       await createEquipStatus({
         equipmentId,
         statusCode,
         startTimeUtc: startIso,
+        endTimeUtc: endIso, 
       });
       await qc.invalidateQueries({ queryKey: ["equip-status"] });
       alert("등록 완료");
@@ -135,6 +143,19 @@ export default function EquipStatusPage() {
           </div>
         </CanWrite>
 
+        {/* ✅ 종료 시간 추가 */}
+       <CanWrite>
+        <div className="flex flex-col w-31">
+        <label className="text-sm font-medium text-gray-700 mb-1">종료 시각 (UTC)</label>
+        <input
+        className="border border-gray-300 rounded px-2 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+        type="time"
+        value={endTime}
+        onChange={(e) => setEndTime(e.target.value)}
+        />
+       </div>
+      </CanWrite>
+
         <CanWrite>
           <div className="flex flex-col w-28">
             <label className="text-sm font-medium text-gray-700 mb-1">상태</label>
@@ -188,7 +209,7 @@ export default function EquipStatusPage() {
             </thead>
             <tbody>
               {data.items.map((it: EquipStatusItem) => {
-                const statusClass = statusColors[it.status as keyof typeof statusColors] || "text-gray-700";
+                const statusClass = statusColors[it.statusCode as keyof typeof statusColors] || "text-gray-700";
 
                 return (
                   <tr key={it.logId} className="border-t border-gray-200 hover:bg-gray-50 transition-colors">
@@ -198,7 +219,7 @@ export default function EquipStatusPage() {
                       <span
                         className={`inline-block px-3 py-1 rounded-full font-semibold text-sm ${statusClass}`}
                       >
-                        {it.status ?? "-"}
+                        {it.statusCode ?? "-"}
                       </span>
                     </td>
                     <td className="p-3">

@@ -62,20 +62,20 @@ export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold mb-3">작업지시 생성</h1>
-      <form onSubmit={submit} className="grid gap-3 max-w-md">
+      <h1 className="text-lg font-semibold mb-3">Create Details</h1>
+      <form onSubmit={submit} className="grid gap-3 w-full px-4">
         {err && <div className="text-red-600">{err}</div>}
-        <input className="border px-2 py-1" placeholder="지시번호" value={workOrderNumber} onChange={(e)=>setNo(e.target.value)} required />
+        <input className="border px-3 py-2 rounded-md w-full" placeholder="지시번호" value={workOrderNumber} onChange={(e)=>setNo(e.target.value)} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <input className="border px-2 py-1" placeholder="품목ID" value={itemId} onChange={(e)=>setItem(e.target.value)} required />
+        <input className="border px-3 py-2 rounded-md w-full" placeholder="품목ID" value={itemId} onChange={(e)=>setItem(e.target.value)} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <input className="border px-2 py-1" placeholder="공정ID" value={processId} onChange={(e)=>setProc(e.target.value)} required />
+        <input className="border px-3 py-2 rounded-md w-full" placeholder="공정ID" value={processId} onChange={(e)=>setProc(e.target.value)} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <input className="border px-2 py-1" placeholder="설비ID" value={equipmentId} onChange={(e)=>setEqp(e.target.value)} required />
+        <input className="border px-3 py-2 rounded-md w-full" placeholder="설비ID" value={equipmentId} onChange={(e)=>setEqp(e.target.value)} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <input className="border px-2 py-1" type="number" step="1" min="0" placeholder="지시수량" value={orderQty} onChange={(e)=>setQty(Number(e.target.value))} required />
+        <input className="border px-3 py-2 rounded-md w-full" type="number" step="1" min="0" placeholder="지시수량" value={orderQty} onChange={(e)=>setQty(Number(e.target.value))} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-end mt-2">
           <button className="bg-black text-white px-3 py-1 rounded" disabled={!canSave} type="submit">{isSubmitting ? "생성 중..." : "생성"}</button>
           <button className="border px-3 py-1 rounded" type="button" onClick={onClose}>취소</button>
         </div>
