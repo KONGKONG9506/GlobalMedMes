@@ -1,6 +1,7 @@
 package com.globalmed.mes.mes_api.performance.controller;
 
 import com.globalmed.mes.mes_api.common.PageResponse;
+import com.globalmed.mes.mes_api.performance.dto.PerformanceListDto;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
 import com.globalmed.mes.mes_api.performance.service.PerformanceService;
 import com.globalmed.mes.mes_api.performance.specs.PerformanceSpecs;
@@ -37,7 +38,7 @@ public class PerformanceController {
         ));
     }
     @GetMapping(params = {"page","size"}) // ← 충돌 방지
-    public PageResponse<ProductionPerformanceEntity> list(
+    public PageResponse<PerformanceListDto> list(
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam(defaultValue = "startTime,desc") String sort,
@@ -55,7 +56,9 @@ public class PerformanceController {
                 PerformanceSpecs.startBetween(from, to)
         );
 
-        Page<ProductionPerformanceEntity> result = performanceRepo.findAll(spec, pageable);
+        Page<PerformanceListDto> result = performanceRepo.findAll(spec, pageable)
+                .map(PerformanceListDto::fromEntity);
+
         return PageResponse.of(result, sort);
     }
 
