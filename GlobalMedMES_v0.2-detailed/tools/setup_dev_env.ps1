@@ -1,9 +1,9 @@
-Param(
+﻿Param(
   [string]$BackendDir = "",
   [string]$FrontendDir = "",
   [int]$ApiPort = 8080,
   [int]$WebPort = 3000,
-  [int]$MysqlPort = 3306,
+  [int]$MysqlPort = 3307,
   [string]$DbName = "globalmed",
   [string]$DbUser = "mes_user",
   [string]$DbPass = "mes_pwd",
@@ -56,7 +56,7 @@ function Test-PortUse {
 }
 function Find-FreePort([int]$Start){ $p=$Start; for($i=0;$i -lt 100;$i++){ $t=Test-PortUse -Port $p; if(-not $t.Used){return $p}; $p++ }; return $null }
 function Remove-ContainerIfExists([string]$NamePart){
-  $names = (docker ps -a --filter "name=$NamePart" --format "{{.Names}") 2>$null
+  $names = (docker ps -a --filter "name=$NamePart" --format "{{.Names}}") 2>$null
   if ($names) {
     Warn "기존 컨테이너 감지: $names → 제거"
     $names -split "\r?\n" | ForEach-Object { if ($_ -ne "") { docker rm -f $_ | Out-Null } }
