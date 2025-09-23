@@ -1,5 +1,6 @@
 package com.globalmed.mes.mes_api.equipstatus.dto;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -11,8 +12,8 @@ public record EquipDetailDto(
         OffsetDateTime createAt,
         String workOrederName,
         String itemName,
-        Long produceQty,
-        Long orderQty,
+        BigDecimal produceQty,
+        BigDecimal orderQty,
         List<EWorkerDto> workers,
         String shiftName,
         OffsetDateTime shiftStartTs,
@@ -27,12 +28,12 @@ public record EquipDetailDto(
             String workerNumber // 작업자 사원 번호
     ) {}
     public record ECertDto(
-            Long certId,    // 자격증 코드
+            String certCode,    // 자격증 코드
             String certName,    // 자격증 이름
-            String certDescription  //
+            String certDescription  // 자격증 설명
     ) {}
     public record EProcessDto(
-            Long processId,
+            String processId,
             String processName,
             String processDescription
     ) {}
