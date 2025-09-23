@@ -14,18 +14,18 @@ export default function RightSidebar({ isOpen, onClose, onCreated }: RightSideba
   const toast = useToast();
 
   const [workOrderNumber, setNo] = useState("");
-  const [itemName, setItem] = useState("");        // itemId → itemName
-  const [processName, setProc] = useState("");     // processId → processName
-  const [equipmentName, setEqp] = useState("");    // equipmentId → equipmentName
+  const [itemId, setItem] = useState("");
+  const [processId, setProc] = useState("");
+  const [equipmentId, setEqp] = useState("");
   const [orderQty, setQty] = useState<number>(0);
   const [isSubmitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const canSave =
     workOrderNumber.trim() &&
-    itemName.trim() &&
-    processName.trim() &&
-    equipmentName.trim() &&
+    itemId.trim() &&
+    processId.trim() &&
+    equipmentId.trim() &&
     orderQty > 0;
 
   const submit = async (e: React.FormEvent) => {
@@ -38,9 +38,9 @@ export default function RightSidebar({ isOpen, onClose, onCreated }: RightSideba
     try {
       await createWorkOrder({
         workOrderNumber,
-        itemName,
-        processName,
-        equipmentName,
+        itemId,
+        processId,
+        equipmentId,
         orderQty,
       });
 

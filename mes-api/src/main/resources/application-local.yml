@@ -3,7 +3,11 @@ server:
 
 spring:
   datasource:
+<<<<<<< HEAD
     url: jdbc:mysql://51.21.198.27:3306/globalmed?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+=======
+    url: jdbc:mysql://16.171.143.246:3306/globalmed?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+>>>>>>> origin/범수
     username: mes_user
     password: mes_pwd
   jpa:

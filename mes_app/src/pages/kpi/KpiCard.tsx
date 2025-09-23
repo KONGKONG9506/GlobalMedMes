@@ -1,21 +1,19 @@
+import { statusColor, StatusColor } from "../../lib/kpi";
+
 type Props = {
   title: string;
   targetLabel?: string;
-  target?: number | string; // 숫자 기반으로 비교 가능하도록 number도 허용
+  target?: number | string; 
   actualLabel?: string;
   actual?: number | string;
+  status?: StatusColor;
 };
 
 export default function KpiCard({ title, targetLabel, target, actualLabel, actual }: Props) {
   // 숫자로 변환 (문자열로 들어올 수도 있으므로)
   const actualNum = typeof actual === "string" ? parseFloat(actual) : actual ?? 0;
-  const targetNum = typeof target === "string" ? parseFloat(target) : target ?? 0;
-
-  // 색상 규칙 적용
-  const status =
-    actualNum >= targetNum ? "ok"
-    : actualNum >= targetNum * 0.95 ? "warn"
-    : "bad";
+  const targetNum = target != null ? (typeof target === "string" ? parseFloat(target) : target) : 100;
+  const status: StatusColor = statusColor(targetNum, actualNum);
 
   const color =
     status === "ok" ? "border-green-600 text-green-700 bg-green-50"

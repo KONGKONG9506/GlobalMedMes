@@ -1,4 +1,3 @@
-// WorkOrdersList.tsx
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { toPage } from "../../adapters/page";
@@ -38,8 +37,8 @@ export default function WorkOrdersList() {
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
 
-  // 사이드바 상태
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+
 
   const { data, isLoading, error } = useQuery<PageResult<WorkOrderItem>>({
     queryKey: ["work-orders", page, size, sort, equipmentId, status, from, to],
@@ -109,7 +108,7 @@ export default function WorkOrdersList() {
         />
       </div>
 
-      {/* 헤더 + 정렬 + 사이드바 버튼 */}
+      {/* 헤더 + 정렬 */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-gray-800">작업지시 목록</h1>
         <div className="flex items-center gap-3">
@@ -142,6 +141,7 @@ export default function WorkOrdersList() {
                   <tr>
                     <th className="p-3 text-left">번호</th>
                     <th className="p-3 text-left">품목</th>
+                    <th className="p-3 text-left">공정</th>
                     <th className="p-3 text-left">설비</th>
                     <th className="p-3 text-right">지시</th>
                     <th className="p-3 text-right">누적</th>
@@ -157,6 +157,7 @@ export default function WorkOrdersList() {
                       <tr key={it.workOrderId} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}>
                         <td className="p-3">{it.workOrderNumber}</td>
                         <td className="p-3">{it.itemName}</td>
+                        <td className="p-3">{it.processName}</td>
                         <td className="p-3">{it.equipmentName}</td>
                         <td className="p-3 text-right">{it.orderQty}</td>
                         <td className="p-3 text-right">{it.produceQty}</td>
@@ -189,7 +190,7 @@ export default function WorkOrdersList() {
                               <CanWrite>
                                 <Link
                                   className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 text-sm"
-                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemName}&processId=${it.processName}&equipmentId=${it. equipmentName}&status=${it.statusCode ?? ""}`}
+                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemId}&processId=${it.processId}&equipmentId=${it. equipmentId}&status=${it.statusCode ?? ""}`}
                                 >
                                   실적 등록
                                 </Link>

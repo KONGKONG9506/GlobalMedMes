@@ -11,7 +11,11 @@ public record WorkOrderListDto(
         String workOrderNumber,
         BigDecimal orderQty,
         BigDecimal producedQty,
+<<<<<<< HEAD
         String status,
+=======
+        String statusCode,
+>>>>>>> origin/범수
         OffsetDateTime startTs,
         OffsetDateTime createdAt,
         OffsetDateTime modifiedAt,
@@ -21,6 +25,10 @@ public record WorkOrderListDto(
         String unit,
         String itemDescription,
         String processId,
+<<<<<<< HEAD
+=======
+        String processName,
+>>>>>>> origin/범수
         String processDescription,
         String equipmentId,
         String equipmentName,
@@ -32,7 +40,12 @@ public record WorkOrderListDto(
         String itemType = (entity.getItemId() != null) ? entity.getItemId().getItemType() : null;
         String unit = (entity.getItemId() != null) ? entity.getItemId().getUnit() : null;
         String itemDescription = (entity.getItemId() != null) ? entity.getItemId().getDescription() : null;
+<<<<<<< HEAD
         String processId = (entity.getProcessId() != null) ? entity.getProcessId().getProcessName() : null;
+=======
+        String processId = (entity.getProcessId() != null) ? entity.getProcessId().getProcessId() : null;
+        String processName = (entity.getProcessId() != null) ? entity.getProcessId().getProcessName() : null;
+>>>>>>> origin/범수
         String processDescription = (entity.getProcessId() != null) ? entity.getProcessId().getDescription() : null;
         String equipmentId = (entity.getEquipmentId() != null) ? entity.getEquipmentId().getEquipmentId() : null;
         String equipmentName = (entity.getEquipmentId() != null) ? entity.getEquipmentId().getEquipmentName() : null;
@@ -50,8 +63,13 @@ public record WorkOrderListDto(
                 entity.getStartTs() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getStartTs()) : null,
                 entity.getCreatedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getCreatedAt()) : null,
                 entity.getModifiedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getModifiedAt()) : null,
+<<<<<<< HEAD
                 itemName, itemType, unit, itemDescription, processDescription,equipmentName, workcenterName,
                 processId,itemId,equipmentId
+=======
+                itemName, itemId ,itemType, unit, itemDescription,processId,processName,processDescription,equipmentId,equipmentName, workcenterName
+
+>>>>>>> origin/범수
         );
     }
 }
