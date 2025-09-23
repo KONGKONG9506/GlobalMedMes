@@ -11,7 +11,9 @@ import java.util.Optional;
 
 public interface WorkOrderRepo extends JpaRepository<WorkOrderEntity, String>,
         JpaSpecificationExecutor<WorkOrderEntity> {
+    Optional<WorkOrderEntity> findFirstByEquipmentId_EquipmentIdOrderByCreatedAtDesc(String equipmentId);
 
+    // 상세보기를 위한 단일 WorkOrder 조회 시 N+1 방지 쿼리
     Optional<WorkOrderEntity> findByWorkOrderNumber(String workOrderNumber);
     // 상세보기를 위한 단일 WorkOrder 조회 시 N+1 방지 쿼리
     @Query("SELECT wo FROM WorkOrderEntity wo " +

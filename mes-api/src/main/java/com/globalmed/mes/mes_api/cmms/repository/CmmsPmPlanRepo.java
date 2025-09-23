@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface CmmsPmPlanRepo extends JpaRepository<CmmsPmPlan, Long> {
@@ -20,4 +21,8 @@ public interface CmmsPmPlanRepo extends JpaRepository<CmmsPmPlan, Long> {
                              );
 
     Optional<CmmsPmPlan> findByIdAndDeletedFalse(Long id);
+
+    // DowntimeService에 필요한 메서드 추가
+    List<CmmsPmPlan> findByEquipmentIdAndLastDoneAtBetween(String equipmentId, OffsetDateTime from, OffsetDateTime to);
+
 }

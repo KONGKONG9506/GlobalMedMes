@@ -1,7 +1,7 @@
 export type EquipStatusItem = {
   logId: number;
   equipmentId: string;
-  status: string | null;        // RUN/IDLE/DOWN
+  statusCode: string | null;        // RUN/IDLE/DOWN
   startTime: string;            // ISO
   endTime: string | null;
 };

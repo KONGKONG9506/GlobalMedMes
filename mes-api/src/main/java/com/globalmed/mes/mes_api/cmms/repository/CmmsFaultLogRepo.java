@@ -19,4 +19,7 @@ public interface CmmsFaultLogRepo extends JpaRepository<CmmsFaultLog, Long> {
                               @Param("from") OffsetDateTime from,
                               @Param("to") OffsetDateTime to,
                               Pageable pageable);
+    // DowntimeService에 필요한 메서드 추가
+    long countByEquipmentIdAndOccurredAtBetween(String equipmentId, OffsetDateTime from, OffsetDateTime to);
+
 }

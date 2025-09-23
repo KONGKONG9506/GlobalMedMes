@@ -17,13 +17,16 @@ public class EquipmentCertCheckService {
      */
     public void check(String employeeId, String equipmentId) {
         // 설비가 요구하는 자격증
-        var requiredCerts = equipmentCertRepo.findAll().stream()
-                .filter(ec -> ec.getEquipment().getEquipmentId().equals(equipmentId))
+        var requiredCerts = equipmentCertRepo
+                .findByEquipment_EquipmentIdAndDeletedFalse(equipmentId).stream()
                 .map(ec -> ec.getCert().getCertCode())
                 .toList();
 
+        if (requiredCerts.isEmpty()) {
+            return;
+        }
         // 직원이 가진 자격증
-        var employeeCerts = employeeCertRepo.findByEmployee_EmployeeId(employeeId).stream()
+        var employeeCerts = employeeCertRepo.findByEmployee_EmployeeIdAndDeletedFalse(employeeId).stream()
                 .map(ec -> ec.getCert().getCertCode())
                 .toList();
 

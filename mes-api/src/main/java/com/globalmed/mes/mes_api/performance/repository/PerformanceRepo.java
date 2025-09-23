@@ -31,8 +31,27 @@ public interface PerformanceRepo extends JpaRepository<ProductionPerformanceEnti
                             @Param("toTs") LocalDateTime toTs);
     Optional<ProductionPerformanceEntity> findByRequestId(String requestId);
 
+
+
+
     @Query("select pp from ProductionPerformanceEntity pp " +
             "where pp.startTime >= :fromTs and pp.startTime < :toTs ORDER BY pp.startTime")
     List<ProductionPerformanceEntity> findPerformancesForDay(@Param("fromTs") LocalDateTime fromTs,
                                                              @Param("toTs") LocalDateTime toTs);
+
+    /**
+     * 워크 오더 ID, 설비, 공정, 품목 ID로 모든 성과 데이터를 조회
+     */
+    @Query("select pp from ProductionPerformanceEntity pp " +
+            "where pp.workOrderId = :workOrderId " +
+            "and pp.equipmentId = :equipmentId " +
+            "and pp.processId = :processId " +
+            "and pp.itemId = :itemId " +
+            "order by pp.startTime")
+    List<ProductionPerformanceEntity> findPerformancesByWorkOrder(
+            @Param("workOrderId") String workOrderId,
+            @Param("equipmentId") String equipmentId,
+            @Param("processId") String processId,
+            @Param("itemId") String itemId
+    );
 }

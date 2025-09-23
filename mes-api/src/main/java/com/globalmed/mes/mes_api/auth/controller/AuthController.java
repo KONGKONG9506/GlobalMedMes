@@ -3,7 +3,6 @@ package com.globalmed.mes.mes_api.auth.controller;
 
 import com.globalmed.mes.mes_api.auth.service.CaptchaService;
 import com.globalmed.mes.mes_api.auth.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReq req, HttpSession session){
-        //captchaService.validateCaptcha(session, req.captcha());
+//        captchaService.validateCaptcha(session, req.captcha());
         var res = userService.authenticate(req.username(), req.password());
         return ResponseEntity.ok(Map.of(
                 "token", res.token(),

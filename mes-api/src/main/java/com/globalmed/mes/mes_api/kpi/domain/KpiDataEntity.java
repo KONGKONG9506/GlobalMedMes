@@ -9,14 +9,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "tb_kpi_data",
         uniqueConstraints = {
-                // 실시간 KPI
-                @UniqueConstraint(name = "uk_kpi_realtime", columnNames = {"kpi_date", "work_order_id", "equipment_id", "process_id", "item_id", "aggregation_type"}),
-                // 배치 KPI
-                @UniqueConstraint(name = "uk_kpi_daily", columnNames = {"kpi_date",  "equipment_id", "process_id", "item_id", "aggregation_type", "batch_check"})
+                // 실시간 KPI: aggregation_type -> aggregation_type_id
+                @UniqueConstraint(name = "uk_kpi_realtime", columnNames = {"kpi_date", "work_order_id", "equipment_id", "process_id", "item_id", "aggregation_type_id"}),
+                // 배치 KPI: aggregation_type -> aggregation_type_id, batch_check -> batch_group_key
+                @UniqueConstraint(name = "uk_kpi_daily", columnNames = {"kpi_date",  "equipment_id", "process_id", "item_id", "batch_group_key", "aggregation_type_id"})
         })
 @Getter
 @Setter
@@ -55,18 +56,24 @@ public class KpiDataEntity {
     @Column(name = "actual_defect_rate", precision = 5, scale = 2, nullable = false)
     private BigDecimal actualDefectRate = BigDecimal.ZERO;
 
+    @Column(name="is_deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name="deleted_at")
+    private OffsetDateTime deletedAt;
+
     @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
-    // 새로 추가된 컬럼
-    @Column(name = "aggregation_type", length = 20, nullable = false)
-    private String aggregationType;
+    // 새로운 컬럼
+    @Column(name = "aggregation_type_id", nullable = false)
+    private Long aggregationTypeId;
 
-    @Column(name = "batch_check", length = 20)
-    private String batchCheck;
+    @Column(name = "batch_group_key", length = 20)
+    private String batchGroupKey;
 
-    @Column(name = "calc_success_check", nullable = false)
-    private Byte calcSuccessCheck = 1; // 0=FAIL, 1=SUCCESS, 2=IN_PROGRESS, 3=RETRY
+    @Column(name = "calc_status_code_id", nullable = false)
+    private Long calcStatusCodeId;
 
     @Column(name = "calc_at", nullable = false)
     private LocalDateTime calcAt;

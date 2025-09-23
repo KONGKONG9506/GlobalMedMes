@@ -22,7 +22,7 @@ import java.util.Map;
 @RequestMapping("/kpi")
 @RequiredArgsConstructor
 public class KpiController {
-
+    private final KpiDataRepo kpiDataRepo;
     private final KpiService kpiService;
 
     // GET /kpi/actuals?kpiDate=2025-08-10&equipmentId=E-0001
@@ -41,19 +41,9 @@ public class KpiController {
                 "actualYield", res.actualYield()
         ));
     }
-    private final KpiDataRepo kpiDataRepo;
 
     /**
-     * KPI 데이터를 날짜, 장비, 공정, 품목, 집계 유형별로 조회합니다.
-     * @param kpiDate KPI 기준 날짜 (YYYY-MM-DD)
-     * @param equipmentId 설비 ID
-     * @param processId 공정 ID
-     * @param itemId 품목 ID
-     * @param aggregationType 집계 유형 (REALTIME, DAILY_BATCH 등)
-     * @param page 페이지 번호 (0부터 시작)
-     * @param size 페이지 크기
-     * @param sort 정렬 기준 (예: `kpiDate,desc`)
-     * @return 필터링된 KPI 데이터의 페이지 응답
+     * KPI 데이터를 날짜, 장비, 공정, 품목, 집계 유형별로 조회
      */
     @GetMapping("/datalist")
     public ResponseEntity<PageResponse<KpiDataListDto>> list(
@@ -63,7 +53,7 @@ public class KpiController {
             @RequestParam(required = false) String equipmentId,
             @RequestParam(required = false) String processId,
             @RequestParam(required = false) String itemId,
-            @RequestParam(required = false) String aggregationType,
+            @RequestParam(required = false) Long aggregationTypeId,
             @RequestParam(defaultValue = "kpiDate,desc") String sort) {
 
         Sort s = Sort.by(sort.split(",")[0]).descending();
@@ -75,9 +65,9 @@ public class KpiController {
         // 검색 조건에 따라 적절한 Repository 메서드 호출
         Page<KpiDataEntity> result;
         if (kpiDate != null) {
-            result = kpiDataRepo.findByKpiDateAndFilters(kpiDate, equipmentId, processId, itemId, aggregationType, pageable);
+            result = kpiDataRepo.findByKpiDateAndFilters(kpiDate, equipmentId, processId, itemId, aggregationTypeId, pageable);
         } else {
-            result = kpiDataRepo.findByFilters(equipmentId, processId, itemId, aggregationType, pageable);
+            result = kpiDataRepo.findByFilters(equipmentId, processId, itemId, aggregationTypeId, pageable);
         }
 
         var dtoPage = result.map(KpiDataListDto::fromEntity);

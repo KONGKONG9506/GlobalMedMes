@@ -20,14 +20,10 @@ public class KpiCalculationService {
      */
     public Map<String, BigDecimal> calculateFromPerformance(BigDecimal goodQty, BigDecimal defectQty, BigDecimal runSeconds, BigDecimal plannedSeconds) {
         BigDecimal totalQty = goodQty.add(defectQty);
-        //run second를 hour 로 변환(나중에 제거)
-        BigDecimal runHours = runSeconds.divide(BigDecimal.valueOf(3600), 4, RoundingMode.HALF_UP);
-        BigDecimal plannedHours = plannedSeconds.divide(BigDecimal.valueOf(3600), 4, RoundingMode.HALF_UP);
-
         BigDecimal yield = calculateYieldFromValues(goodQty, totalQty);
         BigDecimal defectRate = calculateDefectRateFromValues(defectQty, totalQty);
-        BigDecimal oee = calculateOeeFromValues(goodQty, totalQty, runHours, plannedHours);
-        BigDecimal productivity = calculateProductivity(totalQty, runHours);
+        BigDecimal oee = calculateOeeFromValues(goodQty, totalQty, runSeconds, plannedSeconds);
+        BigDecimal productivity = calculateProductivity(totalQty, runSeconds);
 
         return Map.of(
                 "yield", yield,
@@ -41,9 +37,11 @@ public class KpiCalculationService {
      * 생산성 계산
      */
     public BigDecimal calculateProductivity(BigDecimal producedQty, BigDecimal runSeconds) {
+        //초 기준에서 시간 기준으로 전환
+        BigDecimal runHours = runSeconds.divide(BigDecimal.valueOf(3600), 4, RoundingMode.HALF_UP);
         KpiDataParams params = new KpiDataParams()
                 .setProducedQty(producedQty)
-                .setRunTime(runSeconds);
+                .setRunTime(runHours);
         return definitionService.calculate("Productivity", params.toMap());
     }
 

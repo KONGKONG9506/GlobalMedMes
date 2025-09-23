@@ -22,7 +22,9 @@ public class PmPlanDto{
             @NotNull Integer cycleValue;
             OffsetDateTime lastDoneAt;
             OffsetDateTime nextDueAt;
-}
+            Integer estimatedTakeTime;
+    }
+
     @Getter
     @Builder
     @NoArgsConstructor

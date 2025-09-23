@@ -1,6 +1,6 @@
 package com.globalmed.mes.mes_api.performance.service;
 
-import com.globalmed.mes.mes_api.kpi.service.KpiDataService;
+import com.globalmed.mes.mes_api.kpi.service.RealTimeKpiService;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
 import com.globalmed.mes.mes_api.production.service.ProductionLogService;
@@ -21,7 +21,7 @@ public class PerformanceService {
     private final PerformanceRepo performanceRepo;
     private final WorkOrderRepo workOrderRepo;
     private final ProductionLogService productionLogService;
-    private final KpiDataService kpiDataService;
+    private final RealTimeKpiService realTimeKpiService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
@@ -93,7 +93,7 @@ public class PerformanceService {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
         //KPI DATA 실시간 저장
-        kpiDataService.saveKpiFromPerformance(p);
+        realTimeKpiService.saveKpiFromPerformance(p);
         // 누적 갱신
         wo.setProducedQty(wo.getProducedQty().add(req.producedQty()));
         BigDecimal good = req.producedQty().subtract(req.defectQty());

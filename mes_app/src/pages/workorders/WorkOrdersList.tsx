@@ -1,3 +1,4 @@
+// WorkOrdersList.tsx
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { toPage } from "../../adapters/page";
@@ -12,6 +13,7 @@ import { useState } from "react";
 import { useToast } from "../../store/toast";
 import CanWrite from "../../components/common/perm/CanWrite";
 import GuardButton from "../../components/common/perm/GuardButton";
+import RightSidebar from "./RightSidebar"; 
 
 const sortOptions = [
   { label: "최신 생성순", value: "createdAt,desc" },
@@ -20,25 +22,33 @@ const sortOptions = [
   { label: "지시수량↑", value: "orderQty,asc" }
 ];
 
+const statusColor: Record<string, string> = {
+  P: "bg-yellow-100 text-yellow-800",
+  R: "bg-blue-100 text-blue-800",
+  C: "bg-green-100 text-green-800"
+};
+
 export default function WorkOrdersList() {
   const qc = useQueryClient();
   const [page, setPage] = useState<number>(0);
   const [size] = useState<number>(20);
   const [sort, setSort] = useState<string>("createdAt,desc");
   const [equipmentId, setEqp] = useState<string>("");
-  const [status, setStatus] = useState<string>(""); // "", "P", "R", "C"
-  const [from, setFrom] = useState<string>("");     // ISO yyyy-MM-dd
+  const [status, setStatus] = useState<string>("");
+  const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
+
+  // 사이드바 상태
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery<PageResult<WorkOrderItem>>({
     queryKey: ["work-orders", page, size, sort, equipmentId, status, from, to],
     queryFn: async () => {
-      const params: Record<string,string|number> = { page, size, sort };
+      const params: Record<string, string | number> = { page, size, sort };
       if (equipmentId) params.equipmentId = equipmentId;
       if (status) params.status = status;
-      // 날짜는 UTC ISO로 변환해서 전달(00:00 기준)
       if (from) params.from = new Date(`${from}T00:00:00Z`).toISOString();
-      if (to)   params.to   = new Date(`${to}T23:59:59Z`).toISOString();
+      if (to) params.to = new Date(`${to}T23:59:59Z`).toISOString();
       const res = await api.get<PageResponse<WorkOrderItem>>("/work-orders", { params });
       return toPage(res.data);
     }
@@ -59,100 +69,143 @@ export default function WorkOrdersList() {
     }
   }
 
+  // 사이드바 열기/닫기
+  const toggleRightSidebar = () => setSidebarOpen(!isSidebarOpen);
+
   return (
     <div>
-        // 렌더 내 검색바 추가
-      <div className="flex flex-wrap gap-2 mb-2">
-        <input className="border px-2 py-1" placeholder="설비ID"
-              value={equipmentId} onChange={(e)=>{ setPage(0); setEqp(e.target.value); }} />
-        <select className="border px-2 py-1" value={status}
-                onChange={(e)=>{ setPage(0); setStatus(e.target.value); }}>
+      {/* 필터 영역 */}
+      <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-gray-700">조회 :</span>
+          <input
+            className="border px-3 py-2 rounded"
+            placeholder="작업ID"
+            value={equipmentId}
+            onChange={(e) => { setPage(0); setEqp(e.target.value); }}
+          />
+        </div>
+        <select
+          className="border px-3 py-2 rounded"
+          value={status}
+          onChange={(e) => { setPage(0); setStatus(e.target.value); }}
+        >
           <option value="">상태(전체)</option>
           <option value="P">P</option>
           <option value="R">R</option>
           <option value="C">C</option>
         </select>
-        <input className="border px-2 py-1" type="date"
-              value={from} onChange={(e)=>{ setPage(0); setFrom(e.target.value); }} />
-        <input className="border px-2 py-1" type="date"
-              value={to} onChange={(e)=>{ setPage(0); setTo(e.target.value); }} />
+        <input
+          className="border px-3 py-2 rounded"
+          type="date"
+          value={from}
+          onChange={(e) => { setPage(0); setFrom(e.target.value); }}
+        />
+        <input
+          className="border px-3 py-2 rounded"
+          type="date"
+          value={to}
+          onChange={(e) => { setPage(0); setTo(e.target.value); }}
+        />
       </div>
-      <div className="flex items-center justify-between mb-3">
-        <h1 className="text-lg font-semibold">작업지시</h1>
-        <div className="flex items-center gap-2">
+
+      {/* 헤더 + 정렬 + 사이드바 버튼 */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-semibold text-gray-800">작업지시 목록</h1>
+        <div className="flex items-center gap-3">
           <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
+
+          {/* 오른쪽 사이드바 버튼 */}
           <CanWrite>
-            <Link className="border px-3 py-1 rounded" to="/work-orders/new">+ 새 지시</Link>
+            <button
+              onClick={toggleRightSidebar}
+              className="p-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white py-1"
+            >
+              작업지시 생성
+            </button>
           </CanWrite>
         </div>
       </div>
 
-      {isLoading && <div>로딩...</div>}
-      {error && <div>오류</div>}
+      {/* 로딩 / 에러 / 데이터 */}
+      {isLoading && <div className="text-center text-gray-600 py-10">로딩 중...</div>}
+      {error && <div className="text-center text-red-500 py-10">데이터 불러오기 오류</div>}
+
       {data && (
         <>
-          <table className="w-full border">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="p-2 text-left">번호</th>
-                <th className="p-2 text-left">품목</th>
-                <th className="p-2 text-left">설비</th>
-                <th className="p-2 text-right">지시</th>
-                <th className="p-2 text-right">누적</th>
-                <th className="p-2 text-left">상태</th>
-                <th className="p-2 text-center">액션</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((it: WorkOrderItem) => {
-                const canToR = it.status === "P";
-                const canToC = it.status === "R";
-                return (
-                  <tr key={it.workOrderId} className="border-t">
-                    <td className="p-2">{it.workOrderNumber}</td>
-                    <td className="p-2">{it.itemId}</td>
-                    <td className="p-2">{it.equipmentId}</td>
-                    <td className="p-2 text-right">{it.orderQty}</td>
-                    <td className="p-2 text-right">{it.producedQty}</td>
-                    <td className="p-2">{it.status ?? "-"}</td>
-
-                    <td className="p-2 text-center space-x-2">
-                      <div className="flex gap-2 justify-center">
-                        <GuardButton require="write"
-                          className={`px-2 py-1 rounded ${canToR ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                          onClick={() => canToR && transition(it.workOrderId, "R")}
-                          renderDisabled={!canToR}
-                        >
-                          P→R
-                        </GuardButton>
-
-                        <GuardButton require="write"
-                          className={`px-2 py-1 rounded ${canToC ? "bg-green-600 text-white" : "bg-gray-300 text-gray-600"}`}
-                          onClick={() => canToC && transition(it.workOrderId, "C")}
-                          renderDisabled={!canToC}
-                        >
-                          R→C
-                        </GuardButton>
-
-                        {/* 실적 등록 링크(쓰기 권한일 때만 노출) */}
-                        {it.status === "R" && (
-                        <CanWrite>
-                          <Link
-                            className="px-2 py-1 rounded border"
-                            to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemId}&processId=${it.processId}&equipmentId=${it.equipmentId}&status=${it.status ?? ""}`}
-                          >
-                            실적 등록
-                          </Link>
-                        </CanWrite>
-                        )}
-                      </div>
-                    </td>
+          {data.items.length === 0 ? (
+            <div className="text-center text-gray-500 py-10">표시할 작업지시가 없습니다.</div>
+          ) : (
+            <div className="overflow-x-auto border rounded shadow-sm">
+              <table className="min-w-full table-fixed text-sm">
+                <thead className="sticky top-0 bg-blue-100 z-10 shadow-sm text-gray-700">
+                  <tr>
+                    <th className="p-3 text-left">번호</th>
+                    <th className="p-3 text-left">품목</th>
+                    <th className="p-3 text-left">설비</th>
+                    <th className="p-3 text-right">지시</th>
+                    <th className="p-3 text-right">누적</th>
+                    <th className="p-3 text-left">상태</th>
+                    <th className="p-3 text-center">액션</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {data.items.map((it, idx) => {
+                    const canToR = it.statusCode === "P";
+                    const canToC = it.statusCode === "R";
+                    return (
+                      <tr key={it.workOrderId} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}>
+                        <td className="p-3">{it.workOrderNumber}</td>
+                        <td className="p-3">{it.itemName}</td>
+                        <td className="p-3">{it.equipmentName}</td>
+                        <td className="p-3 text-right">{it.orderQty}</td>
+                        <td className="p-3 text-right">{it.produceQty}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded text-sm font-medium ${statusColor[it.statusCode] ?? "bg-gray-100 text-gray-600"}`}>
+                            {it.statusCode ?? "-"}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center">
+                          <div className="flex justify-center gap-2">
+                            <GuardButton require="write"
+                              className={`px-3 py-1 rounded text-sm font-semibold ${
+                                canToR ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              }`}
+                              onClick={() => canToR && transition(it.workOrderId, "R")}
+                              renderDisabled={!canToR}>
+                              P→R
+                            </GuardButton>
 
+                            <GuardButton require="write"
+                              className={`px-3 py-1 rounded text-sm font-semibold ${
+                                canToC ? "bg-green-600 text-white hover:bg-green-700" : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                              }`}
+                              onClick={() => canToC && transition(it.workOrderId, "C")}
+                              renderDisabled={!canToC}>
+                              R→C
+                            </GuardButton>
+
+                            {it.statusCode === "R" && (
+                              <CanWrite>
+                                <Link
+                                  className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 text-sm"
+                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemName}&processId=${it.processName}&equipmentId=${it. equipmentName}&status=${it.statusCode ?? ""}`}
+                                >
+                                  실적 등록
+                                </Link>
+                              </CanWrite>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* 페이지네이션 */}
           <Pagination
             page={page}
             size={size}
@@ -161,6 +214,9 @@ export default function WorkOrdersList() {
           />
         </>
       )}
+
+      {/* 오른쪽 사이드바 */}
+      <RightSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
     </div>
   );
 }

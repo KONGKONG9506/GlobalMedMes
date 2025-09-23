@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface EmployeeCertRepo extends JpaRepository<EmployeeCertEntity, Long> {
-    List<EmployeeCertEntity> findByEmployee_EmployeeId(String employeeId);
+    List<EmployeeCertEntity> findByEmployee_EmployeeIdAndDeletedFalse(String employeeId);
 }

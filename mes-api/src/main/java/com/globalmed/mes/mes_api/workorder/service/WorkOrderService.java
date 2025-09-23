@@ -42,7 +42,6 @@ public class WorkOrderService {
         });
 
         // 1. 각 ID로 관련 엔티티 객체 조회
-
         var item = itemRepo.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("ITEM_NOT_FOUND"));
         var process = processRepo.findById(processId)

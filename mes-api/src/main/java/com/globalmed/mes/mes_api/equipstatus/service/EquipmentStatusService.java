@@ -16,6 +16,7 @@ import java.time.*;
 public class EquipmentStatusService {
     private final EquipmentStatusRepo repo;
     private final CodeRepo codeRepo;
+    private final EquipmentDowntimeLogService downtimeLogService;
 
     @Transactional
     public EquipmentStatusLogEntity startRun(EquipStatusReq req) {
@@ -26,6 +27,14 @@ public class EquipmentStatusService {
         LocalDateTime start = parseUtc(req.startTimeUtc());
         LocalDateTime end = req.endTimeUtc() == null || req.endTimeUtc().isBlank() ? null : parseUtc(req.endTimeUtc());
         if (end != null && end.isBefore(start)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
+
+
+        // downtime용 직전 상태 조회
+        EquipmentStatusLogEntity lastLog = repo.findTopByEquipmentIdOrderByStartTimeDesc(req.equipmentId())
+                .orElse(null);
+
+        // 다운타임 로직은 분리된 서비스에서 처리
+        downtimeLogService.handleStatusChange(lastLog, status, req);
 
 
 

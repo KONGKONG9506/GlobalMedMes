@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = "tb_process_cert",
         uniqueConstraints = @UniqueConstraint(columnNames = {"process_id", "cert_id"}))
@@ -28,4 +30,9 @@ public class ProcessCertEntity {
     @JoinColumn(name = "cert_id", nullable = false, foreignKey = @ForeignKey(name = "fk_proc_cert_cert"))
     private CertEntity cert;
 
+    @Column(name="is_deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name="deleted_at")
+    private OffsetDateTime deletedAt;
 }

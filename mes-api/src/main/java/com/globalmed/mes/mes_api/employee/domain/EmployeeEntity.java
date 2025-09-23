@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = "tb_employee")
 @Getter
@@ -27,6 +29,12 @@ public class EmployeeEntity {
 
     @Column(name = "modified_by", length = 50)
     private String modifiedBy;
+
+    @Column(name="is_deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name="deleted_at")
+    private OffsetDateTime deletedAt;
 
     // User와의 1:1 관계 (employee_id = user_id)
     @OneToOne
