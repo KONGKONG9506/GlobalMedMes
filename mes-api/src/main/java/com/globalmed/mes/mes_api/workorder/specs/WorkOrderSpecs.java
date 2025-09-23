@@ -11,10 +11,24 @@ import java.time.LocalDateTime;
 public final class WorkOrderSpecs {
     private WorkOrderSpecs(){}
 
+    // ✅ fetch join 추가용 spec
+    public static Specification<WorkOrderEntity> withFetchJoins() {
+        return (root, query, cb) -> {
+            // 중복 방지 (count 쿼리일 땐 fetch join 쓰면 에러남)
+            if (query.getResultType() != Long.class) {
+                root.fetch("item");
+                root.fetch("process");
+                root.fetch("equipment").fetch("workcenter");
+                root.fetch("statusCode");
+            }
+            return cb.conjunction();
+        };
+    }
+
     public static Specification<WorkOrderEntity> equipmentIdEquals(String equipmentId) {
         return (root, q, cb) -> (equipmentId == null || equipmentId.isBlank())
                 ? cb.conjunction()
-                : cb.equal(root.get("equipmentId"), equipmentId);
+                : cb.equal(root.get("equipmentId").get("equipmentId"), equipmentId);
     }
 
     public static Specification<WorkOrderEntity> statusEquals(String statusCode) {

@@ -1,4 +1,3 @@
-// WorkOrdersList.tsx
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { toPage } from "../../adapters/page";
@@ -109,7 +108,7 @@ export default function WorkOrdersList() {
         />
       </div>
 
-      {/* 헤더 + 정렬 + 사이드바 버튼 */}
+      {/* 헤더 + 정렬 */}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-semibold text-gray-800">작업지시 목록</h1>
         <div className="flex items-center gap-3">
@@ -189,7 +188,7 @@ export default function WorkOrdersList() {
                               <CanWrite>
                                 <Link
                                   className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 text-sm"
-                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemName}&processId=${it.processName}&equipmentId=${it. equipmentName}&status=${it.statusCode ?? ""}`}
+                                  to={`/performances/new?woId=${it.workOrderId}&woNumber=${it.workOrderNumber}&itemId=${it.itemName}&processId=${it.processId}&equipmentId=${it. equipmentName}&status=${it.statusCode ?? ""}`}
                                 >
                                   실적 등록
                                 </Link>

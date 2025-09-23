@@ -5,6 +5,9 @@ import { isAxiosError } from "axios";
 import { useToast } from "../../store/toast";
 import { usePerms } from "../../hooks/usePerms";
  import { useQueryClient } from "@tanstack/react-query";
+import NamesSelect, { nameOptions } from "./Workorderitem";
+import ProcessingSelect, { processOptions } from "./WorkOrderprocess";
+import EquipmentsSelect,{equipmentOptions} from "./WorkOrderequipment";
 
 type WorkOrderCreateProps = {
   onClose?: () => void;
@@ -12,9 +15,9 @@ type WorkOrderCreateProps = {
 
 export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
   const [workOrderNumber, setNo] = useState("");
-  const [itemId, setItem] = useState("STENT_01");
-  const [processId, setProc] = useState("STENT_PROC_A");
-  const [equipmentId, setEqp] = useState("STENT_LINE_01");
+  const [itemId, setItem] = useState(nameOptions[0]?.Id || ""); // 초기값 첫 번째 옵션
+  const [processId, setProcess] = useState(processOptions[0]?.Id || ""); // 초기값 첫 번째 옵션
+  const [equipmentId, setequipment] = useState(equipmentOptions[0]?.Id || ""); // 초기값 첫 번째 옵션
   const [orderQty, setQty] = useState<number>(100);
   const [err, setErr] = useState("");
   const nav = useNavigate();
@@ -44,7 +47,7 @@ export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
     if (!validate()) return;
     try {
       setSubmitting(true);
-      await createWorkOrder({ workOrderNumber, itemId, processId, equipmentId, orderQty });
+      await createWorkOrder({ workOrderNumber, itemId, processId, equipmentId, orderQty});
       toast.push("지시가 생성되었습니다.", "success");
         await qc.invalidateQueries({ queryKey: ["work-orders"] });
       nav("/work-orders", { replace: true });
@@ -67,12 +70,12 @@ export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
         {err && <div className="text-red-600">{err}</div>}
         <input className="border px-3 py-2 rounded-md w-full" placeholder="지시번호" value={workOrderNumber} onChange={(e)=>setNo(e.target.value)} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <input className="border px-3 py-2 rounded-md w-full" placeholder="품목ID" value={itemId} onChange={(e)=>setItem(e.target.value)} required />
-        {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <input className="border px-3 py-2 rounded-md w-full" placeholder="공정ID" value={processId} onChange={(e)=>setProc(e.target.value)} required />
-        {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
-        <input className="border px-3 py-2 rounded-md w-full" placeholder="설비ID" value={equipmentId} onChange={(e)=>setEqp(e.target.value)} required />
-        {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
+        {/* 품목 부분을 콤보박스로 변경 */}
+        <NamesSelect Id="itemId" options={nameOptions} onChange={(v) => setItem(nameOptions.find(o => o.name === v)?.Id || "")}/>
+        {/*품목 부분을 콤보박스로 변경 */}
+        <ProcessingSelect Id="processId" options={processOptions} onChange={(v) => setProcess(processOptions.find(o => o.name === v)?.Id || "")}/>
+        {/*품목 부분을 콤보박스로 변경 */}
+        <EquipmentsSelect Id="equipmentId" options={equipmentOptions} onChange={(v) => setequipment(equipmentOptions.find(o => o.name === v)?.Id || "")}/>
         <input className="border px-3 py-2 rounded-md w-full" type="number" step="1" min="0" placeholder="지시수량" value={orderQty} onChange={(e)=>setQty(Number(e.target.value))} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
         <div className="flex gap-2 justify-end mt-2">

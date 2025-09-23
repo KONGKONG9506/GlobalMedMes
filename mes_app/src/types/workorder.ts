@@ -1,13 +1,16 @@
 export type WorkOrderItem = {
   workOrderId: string;
   workOrderNumber: string;
-  orderQty: string;
-  produceQty: string;
+  orderQty: number;
+  produceQty: number;
   statusCode: string;
   itemName: number;
   itemType: number;
   unit: string | null; // "P"|"R"|"C"|null
-  processName: string | null;      // UTC ISO
+  itemDescription:string;
+  processId: string;
+  processDescription:string;
+  equipmentId: string;
   equipmentName: string;
   workcenterName: string | null;
 };
