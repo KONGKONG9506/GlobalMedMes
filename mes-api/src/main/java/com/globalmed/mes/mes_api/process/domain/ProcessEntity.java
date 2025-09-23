@@ -1,7 +1,10 @@
-package com.globalmed.mes.mes_api.code.domain;
+package com.globalmed.mes.mes_api.process.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -36,6 +39,24 @@ public class ProcessEntity {
     private String modifiedBy;
 
     @Column(name = "modified_at", insertable = false, updatable = false)
+
     private LocalDateTime modifiedAt;
+    @PrePersist
+    void prePersist() {
+        if (createdBy == null || createdBy.isBlank()) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            createdBy = (auth != null && auth.isAuthenticated())
+                    ? String.valueOf(auth.getPrincipal())
+                    : "system";
+        }
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        modifiedBy = (auth != null && auth.isAuthenticated())
+                ? String.valueOf(auth.getPrincipal())
+                : "system";
+    }
 }
 

@@ -1,7 +1,7 @@
 package com.globalmed.mes.mes_api.employee.cert.domain;
 
 
-import com.globalmed.mes.mes_api.code.domain.ProcessEntity;
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
