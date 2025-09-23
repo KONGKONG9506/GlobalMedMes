@@ -38,6 +38,7 @@ export default function PerformanceCreate() {
     const eqp = t(sp.get("equipmentId"));
     const stat = t(sp.get("status")).toUpperCase();
 
+
     if (woId) setWo(woId);
     if (woNo) setWoNumber(woNo);
     if (itm) setItem(itm);
@@ -49,7 +50,7 @@ export default function PerformanceCreate() {
 
     api.get<WorkOrderItem>(`/work-orders/${encodeURIComponent(woId)}`)
       .then(({ data: wo }) => {
-        setWoStatus((wo.status ?? stat ?? "").toUpperCase() || null);
+        setWoStatus((wo.statusCode ?? stat ?? "").toUpperCase() || null);
         setItem((wo.itemId || itm).trim());
         setProc((wo.processId || proc).trim());
         setEqp((wo.equipmentId || eqp).trim());
@@ -72,17 +73,23 @@ export default function PerformanceCreate() {
     producedQty >= 0 &&
     defectQty >= 0 &&
     defectQty <= producedQty;
-  // 기준 날짜(UTC): baseline 있으면 그 날짜(UTC), 없으면 오늘(UTC)
-  const baseDateStr = useMemo(
-    () => toBaseDateStrFromIso(woBaselineIso ?? null),
-    [woBaselineIso]
-  );
 
+    // 아래가 기존 코드 - 태영 임시
+  // 기준 날짜(UTC): baseline 있으면 그 날짜(UTC), 없으면 오늘(UTC)
+  // const baseDateStr = useMemo(
+  //   () => toBaseDateStrFromIso(woBaselineIso ?? null),
+  //   [woBaselineIso]
+  // );
   // HH:mm → UTC ISO(Z) 변환(유효할 때만)
-  const stIso = useMemo(() => toUtcIsoFromTime(startTime, baseDateStr), [startTime, baseDateStr]);
-  const etIso = useMemo(() => toUtcIsoFromTime(endTime, baseDateStr),   [endTime, baseDateStr]);
-const stMs = stIso ? new Date(stIso).getTime() : NaN;
-const etMs = etIso ? new Date(etIso).getTime() : NaN;
+  // const stIso = useMemo(() => toUtcIsoFromTime(startTime, baseDateStr), [startTime, baseDateStr]);
+  // const etIso = useMemo(() => toUtcIsoFromTime(endTime, baseDateStr),   [endTime, baseDateStr]);
+  
+  // 아래가 변경코드 - 태영 임시
+  const stIso = new Date(`${date}T${startTime}:00Z`).toISOString();
+  const etIso = new Date(`${date}T${endTime}:00Z`).toISOString();
+  const stMs = stIso ? new Date(stIso).getTime() : NaN;
+  const etMs = etIso ? new Date(etIso).getTime() : NaN;
+
   // 유효성
   const timeOk  = isValidTimeStr(startTime) && isValidTimeStr(endTime) && !!stIso && !!etIso;
   const orderOk = timeOk ? new Date(stIso!).getTime() <= new Date(etIso!).getTime() : false;
@@ -108,7 +115,7 @@ const etMs = etIso ? new Date(etIso).getTime() : NaN;
     }
 
     const dto = {
-      workOrderId: workOrderId.trim(),
+      workOrderId: workOrderId.trim(), 
       itemId: itemId.trim(),
       processId: processId.trim(),
       equipmentId: equipmentId.trim(),
@@ -141,7 +148,7 @@ const etMs = etIso ? new Date(etIso).getTime() : NaN;
         {err && <div className="text-red-600">{err}</div>}
 
         <input className="border px-2 py-1 bg-gray-50" placeholder="지시번호" value={workOrderNumber} readOnly />
-        <input className="border px-2 py-1 bg-gray-50" placeholder="작업지시ID(UUID)" value={workOrderId} readOnly required />
+        <input className="border px-2 py-1 bg-gray-50" placeholder="작업지시ID(UUID)" value={workOrderId} readOnly required hidden />
         <input className="border px-2 py-1 bg-gray-50" placeholder="품목ID" value={itemId} readOnly required />
         <input className="border px-2 py-1 bg-gray-50" placeholder="공정ID" value={processId} readOnly required />
         <input className="border px-2 py-1 bg-gray-50" placeholder="설비ID" value={equipmentId} readOnly required />

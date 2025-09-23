@@ -4,15 +4,20 @@ export type WorkOrderItem = {
   orderQty: number;
   produceQty: number;
   statusCode: string;
-  itemName: number;
-  itemType: number;
+  startTs:string | null;
+  createdAt:string;
+  modifiedAt:string | null;
+  itemName: string;
+  itemId:string;
+  itemType: string;
   unit: string | null; // "P"|"R"|"C"|null
   itemDescription:string;
   processId: string;
   processDescription:string;
+  processName:string;
   equipmentId: string;
   equipmentName: string;
-  workcenterName: string | null;
+  workcenterName: string | null; 
 };
 
 export type WorkOrderCreateReq = {
