@@ -1,5 +1,9 @@
 package com.globalmed.mes.mes_api.performance.domain;
 
+import com.globalmed.mes.mes_api.item.ItemEntity;
+import com.globalmed.mes.mes_api.process.ProcessEntity;
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
+import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,17 +24,17 @@ public class ProductionPerformanceEntity {
     private Long performanceId;
 
 
-    @Column(name = "work_order_id", length = 36, nullable = false)
-    private String workOrderId;
-
-    @Column(name = "item_id", length = 36, nullable = false)
-    private String itemId;
-
-    @Column(name = "process_id", length = 36, nullable = false)
-    private String processId;
-
-    @Column(name = "equipment_id", length = 36, nullable = false)
-    private String equipmentId;
+//    @Column(name = "work_order_id", length = 36, nullable = false)
+//    private String workOrderId;
+//
+//    @Column(name = "item_id", length = 36, nullable = false)
+//    private String itemId;
+//
+//    @Column(name = "process_id", length = 36, nullable = false)
+//    private String processId;
+//
+//    @Column(name = "equipment_id", length = 36, nullable = false)
+//    private String equipmentId;
 
     @Column(name = "produced_qty", nullable = false, precision = 10, scale = 4)
     private BigDecimal producedQty;
@@ -52,6 +56,22 @@ public class ProductionPerformanceEntity {
 
     @Column(name = "request_id", length = 64, unique = true)
     private String requestId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "work_order_id", insertable = false, updatable = false)
+    private WorkOrderEntity workOrder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id", insertable = false, updatable = false)
+    private ItemEntity item;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "process_id", insertable = false, updatable = false)
+    private ProcessEntity process;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipment_id", insertable = false, updatable = false)
+    private EquipmentEntity equipment;
 
     @PrePersist
     void prePersist() {

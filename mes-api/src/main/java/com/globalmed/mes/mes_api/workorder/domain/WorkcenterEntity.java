@@ -1,31 +1,27 @@
-package com.globalmed.mes.mes_api.code.domain;
+package com.globalmed.mes.mes_api.workorder.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.Getter;
+import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tb_item",
-        uniqueConstraints = @UniqueConstraint(name = "uk_item_code", columnNames = {"item_code"}))
+@Table(name = "tb_workcenter",
+        uniqueConstraints = @UniqueConstraint(name = "uk_workcenter_name", columnNames = {"workcenter_name"}))
 @Getter
 @Setter
-public class ItemEntity {
+public class WorkcenterEntity {
+
     @Id
-    @Column(name = "item_id", length = 36, nullable = false)
-    private String itemId;
+    @Column(name = "workcenter_id", length = 36, nullable = false)
+    private String workcenterId;
 
-    @Column(name = "item_code", length = 50, nullable = false)
-    private String itemCode;
+    @Column(name = "workcenter_name", length = 255, nullable = false)
+    private String workcenterName;
 
-    @Column(name = "item_name", length = 255, nullable = false)
-    private String itemName;
-
-    @Column(name = "item_type", columnDefinition = "char(1)", nullable = false)
-    private String itemType;
-
-    @Column(name = "unit", length = 10, nullable = false)
-    private String unit;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workshop_id", nullable = false)
+    private WorkshopEntity workshop;
 
     @Column(name = "description", length = 255)
     private String description;

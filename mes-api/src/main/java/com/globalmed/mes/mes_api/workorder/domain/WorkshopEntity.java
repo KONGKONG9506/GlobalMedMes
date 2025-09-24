@@ -1,4 +1,4 @@
-package com.globalmed.mes.mes_api.code.domain;
+package com.globalmed.mes.mes_api.workorder.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

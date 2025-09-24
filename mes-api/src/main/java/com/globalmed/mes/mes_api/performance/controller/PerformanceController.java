@@ -42,9 +42,13 @@ public class PerformanceController {
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam(defaultValue = "startTime,desc") String sort,
-            @RequestParam(required = false) String equipmentId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            // 여기에 추가된 부분 ↓
+            @RequestParam(required = false) String workOrderNumber,
+            @RequestParam(required = false) String itemName,
+            @RequestParam(required = false) String processName,
+            @RequestParam(required = false) String equipmentName
     ) {
         String[] sp = sort.split(",");
         Sort s = (sp.length == 2 && "asc".equalsIgnoreCase(sp[1]))
@@ -52,8 +56,12 @@ public class PerformanceController {
         Pageable pageable = PageRequest.of(page, size, s);
 
         Specification<ProductionPerformanceEntity> spec = Specification.allOf(
-                PerformanceSpecs.equipmentIdEquals(equipmentId),
-                PerformanceSpecs.startBetween(from, to)
+                PerformanceSpecs.startBetween(from, to),
+                // 여기에 추가된 부분 ↓
+                PerformanceSpecs.workOrderNumberLike(workOrderNumber),
+                PerformanceSpecs.itemNameLike(itemName),
+                PerformanceSpecs.processNameLike(processName),
+                PerformanceSpecs.equipmentNameLike(equipmentName)
         );
 
         Page<PerformanceListDto> result = performanceRepo.findAll(spec, pageable)

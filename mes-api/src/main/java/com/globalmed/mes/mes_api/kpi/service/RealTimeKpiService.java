@@ -30,10 +30,10 @@ public class RealTimeKpiService {
     public void saveKpiFromPerformance(ProductionPerformanceEntity newPerformance) {
         // 1. 주어진 작업 순서에 대한 모든 성과 기록을 가져옵니다.
         List<ProductionPerformanceEntity> allPerformancesForWorkOrder = performanceRepo.findPerformancesByWorkOrder(
-                newPerformance.getWorkOrderId(),
-                newPerformance.getEquipmentId(),
-                newPerformance.getProcessId(),
-                newPerformance.getItemId()
+                newPerformance.getWorkOrder().getWorkOrderId(),
+                newPerformance.getEquipment().getEquipmentId(),
+                newPerformance.getProcess().getProcessId(),
+                newPerformance.getItem().getItemId()
         );
 
         if (allPerformancesForWorkOrder.isEmpty()) {
@@ -59,11 +59,11 @@ public class RealTimeKpiService {
 
         // 3. 누적된 시간을 기준으로 계획된/계획되지 않은 다운타임을 계산합니다.
         long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
-        long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(newPerformance.getEquipmentId(),
+        long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(newPerformance.getEquipment().getEquipmentId(),
                 firstStartTime,
                 lastEndTime);
 
-        long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(newPerformance.getEquipmentId(),
+        long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(newPerformance.getEquipment().getEquipmentId(),
                 firstStartTime.atOffset(ZoneOffset.UTC),
                 lastEndTime.atOffset(ZoneOffset.UTC));
 
@@ -71,19 +71,19 @@ public class RealTimeKpiService {
         BigDecimal runSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeSeconds));
         // 4. 기존 KPI 기록을 찾거나 새로 만듭니다.
         Optional<KpiDataEntity> existingKpi =  kpiDataRepo.findRealtimeKpiByWorkOrderId(
-                newPerformance.getWorkOrderId(),
-                newPerformance.getEquipmentId(),
-                newPerformance.getProcessId(),
-                newPerformance.getItemId(),
+                newPerformance.getWorkOrder().getWorkOrderId(),
+                newPerformance.getEquipment().getEquipmentId(),
+                newPerformance.getProcess().getProcessId(),
+                newPerformance.getItem().getItemId(),
                 kpiDataService.getRealtimeAggregationTypeId()
         );
 
         KpiDataEntity kpi = existingKpi.orElseGet(KpiDataEntity::new);
         kpi.setKpiDate(newPerformance.getStartTime().toLocalDate());
-        kpi.setEquipmentId(newPerformance.getEquipmentId());
-        kpi.setProcessId(newPerformance.getProcessId());
-        kpi.setItemId(newPerformance.getItemId());
-        kpi.setWorkOrderId(newPerformance.getWorkOrderId());
+        kpi.setEquipmentId(newPerformance.getEquipment().getEquipmentId());
+        kpi.setProcessId(newPerformance.getProcess().getProcessId());
+        kpi.setItemId(newPerformance.getItem().getItemId());
+        kpi.setWorkOrderId(newPerformance.getWorkOrder().getWorkOrderId());
         kpi.setAggregationTypeId(kpiDataService.getRealtimeAggregationTypeId());
         kpi.setBatchGroupKey(null);
         kpi.setStartTime(firstStartTime);

@@ -16,19 +16,19 @@ public final class WorkOrderSpecs {
         return (root, query, cb) -> {
             // 중복 방지 (count 쿼리일 땐 fetch join 쓰면 에러남)
             if (query.getResultType() != Long.class) {
-                root.fetch("item");
-                root.fetch("process");
-                root.fetch("equipment").fetch("workcenter");
+                root.fetch("itemId");
+                root.fetch("processId");
+                root.fetch("equipmentId").fetch("workcenter");
                 root.fetch("statusCode");
             }
             return cb.conjunction();
         };
     }
 
-    public static Specification<WorkOrderEntity> equipmentIdEquals(String equipmentId) {
-        return (root, q, cb) -> (equipmentId == null || equipmentId.isBlank())
+    public static Specification<WorkOrderEntity> workOrderNumberContains(String workOrderNumber) {
+        return (root, q, cb) -> (workOrderNumber == null || workOrderNumber.isBlank())
                 ? cb.conjunction()
-                : cb.equal(root.get("equipmentId").get("equipmentId"), equipmentId);
+                : cb.like(cb.lower(root.get("workOrderNumber")), "%" + workOrderNumber.toLowerCase() + "%");
     }
 
     public static Specification<WorkOrderEntity> statusEquals(String statusCode) {

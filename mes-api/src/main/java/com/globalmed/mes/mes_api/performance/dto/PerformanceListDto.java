@@ -19,10 +19,10 @@ public record PerformanceListDto(
 ) {
     public static PerformanceListDto fromEntity(ProductionPerformanceEntity e) {
         return new PerformanceListDto(
-                e.getWorkOrderId(),
-                e.getItemId(),
-                e.getProcessId(),
-                e.getEquipmentId(),
+                e.getWorkOrder().getWorkOrderId(),
+                e.getItem().getItemId(),
+                e.getProcess().getProcessId(),
+                e.getEquipment().getEquipmentId(),
                 e.getProducedQty(),
                 e.getDefectQty(),
                 e.getStartTime(),

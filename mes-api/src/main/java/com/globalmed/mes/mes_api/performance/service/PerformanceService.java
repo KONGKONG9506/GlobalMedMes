@@ -76,10 +76,10 @@ public class PerformanceService {
         }
         // 저장
         var p = new ProductionPerformanceEntity();
-        p.setWorkOrderId(woId);
-        p.setItemId(item);
-        p.setProcessId(proc);
-        p.setEquipmentId(eqp);
+        p.getWorkOrder().setWorkOrderId(woId);
+        p.getItem().setItemId(item);
+        p.getProcess().setProcessId(proc);
+        p.getEquipment().setEquipmentId(eqp);
         p.setProducedQty(req.producedQty());
         p.setDefectQty(req.defectQty());
         p.setStartTime(st);

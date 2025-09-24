@@ -3,8 +3,8 @@ export type StatusColor = "ok" | "warn" | "bad" | "none";
 export function statusColor(target?: number | null, actual?: number | null): StatusColor {
   if (target == null || actual == null) return "none";
   if (actual >= target) return "ok";
-  const gap = (target - actual) / target;
-  return gap <= 0.05 ? "warn" : "bad";
+  if (actual >= target * 0.95) return "warn"; // 95% 이상 ~ 100% 미만
+  return "bad"; // 그 외
 }
 
 export function fmtPercent(v?: number | null): string {
