@@ -1,7 +1,7 @@
 package com.globalmed.mes.mes_api.performance.domain;
 
-import com.globalmed.mes.mes_api.code.domain.ItemEntity;
-import com.globalmed.mes.mes_api.code.domain.ProcessEntity;
+import com.globalmed.mes.mes_api.item.ItemEntity;
+import com.globalmed.mes.mes_api.process.ProcessEntity;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import jakarta.persistence.*;
