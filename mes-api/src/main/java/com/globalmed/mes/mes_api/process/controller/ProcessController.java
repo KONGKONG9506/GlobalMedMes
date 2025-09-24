@@ -1,19 +1,18 @@
 package com.globalmed.mes.mes_api.process.controller;
 
+import com.globalmed.mes.mes_api.process.dto.ProcessCreationDto;
 import com.globalmed.mes.mes_api.process.dto.ProcessDetailDto;
 import com.globalmed.mes.mes_api.process.dto.ProcessListDto;
 import com.globalmed.mes.mes_api.process.service.ProcessService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -39,6 +38,12 @@ public class ProcessController {
         return ResponseEntity.ok(processes);
     }
 
+    @PostMapping
+    public ResponseEntity<ProcessDetailDto> createProcess(@Valid @RequestBody ProcessCreationDto creationDto) {
+        ProcessDetailDto newProcess = processService.createProcess(creationDto);
+        return new ResponseEntity<>(newProcess, HttpStatus.CREATED);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getProcessDetail(@PathVariable("id") String processId, HttpServletRequest req) {
         try {
@@ -60,6 +65,18 @@ public class ProcessController {
                     "path", req.getRequestURI(),
                     "method", req.getMethod()
             ));
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProcessDetailDto> updateProcess(
+            @PathVariable("id") String processId,
+            @Valid @RequestBody ProcessCreationDto creationDto) {
+        try {
+            ProcessDetailDto updatedProcess = processService.updateProcess(processId, creationDto);
+            return ResponseEntity.ok(updatedProcess);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 }
