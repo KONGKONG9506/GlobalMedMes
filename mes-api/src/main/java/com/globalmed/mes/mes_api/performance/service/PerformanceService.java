@@ -52,24 +52,14 @@ public class PerformanceService {
         if (req.defectQty().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("VALIDATION_ERROR");
         if (req.defectQty().compareTo(req.producedQty()) > 0) throw new IllegalArgumentException("VALIDATION_ERROR");
 
-        // good = produced - defect
-        BigDecimal goodQty = req.producedQty().subtract(req.defectQty());
-
-        // WorkOrderEntity 조회
-        WorkOrderEntity wo = workOrderRepo.findById(req.workOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
-
-        // 지시 수량과 검증
-        if (wo.getOrderQty().compareTo(goodQty) != 0) {
-            throw new IllegalArgumentException("생산 수량이 일치하지 않습니다.");
-        }
-
         // 시간 파싱(UTC) 및 검증
         LocalDateTime st = toUtcLdt(req.startTime());
         LocalDateTime et = toUtcLdt(req.endTime());
         if (et.isBefore(st)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
 
         // WO 상태 검증(Released만 허용)
+        WorkOrderEntity wo = workOrderRepo.findById(req.workOrderId())
+                .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
         String cur = (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null);
         if (!"R".equals(cur)) throw new IllegalStateException("WO_STATUS_INVALID");
 
@@ -78,20 +68,18 @@ public class PerformanceService {
         // st/et는 이미 OffsetDateTime→UTC LocalDateTime 변환된 값
         if (baseline != null) {
             if (st.isBefore(baseline) || et.isBefore(baseline)) {
-                System.out.println("오류: 실적 시간이 기준시간보다 이전입니다.");
                 throw new IllegalArgumentException("PERF_BEFORE_WO"); // 400으로 매핑됨
             }
-            System.out.println("시간 검증 통과");
         }
         if (rid != null && !rid.isEmpty() && performanceRepo.findByRequestId(rid).isPresent()) {
             throw new IllegalStateException("DUPLICATE_KEY");
         }
         // 저장
         var p = new ProductionPerformanceEntity();
-        p.setWorkOrderId(woId);
-        p.setItemId(item);
-        p.setProcessId(proc);
-        p.setEquipmentId(eqp);
+        p.getWorkOrder().setWorkOrderId(woId);
+        p.getItem().setItemId(item);
+        p.getProcess().setProcessId(proc);
+        p.getEquipment().setEquipmentId(eqp);
         p.setProducedQty(req.producedQty());
         p.setDefectQty(req.defectQty());
         p.setStartTime(st);

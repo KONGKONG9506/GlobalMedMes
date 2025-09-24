@@ -37,10 +37,15 @@ public record WorkOrderDetailDto(
         String itemType = (entity.getItemId() != null) ? entity.getItemId().getItemType() : null;
         String unit = (entity.getItemId() != null) ? entity.getItemId().getUnit() : null;
         String itemDescription = (entity.getItemId() != null) ? entity.getItemId().getDescription() : null;
+<<<<<<< HEAD
 
         String processId = (entity.getProcessId() != null) ? entity.getProcessId().getProcessId() : null;
         String processName = (entity.getProcessId() != null) ? entity.getProcessId().getProcessName() : null;
 
+=======
+        String processId = (entity.getProcessId() != null) ? entity.getProcessId().getProcessId() : null;
+        String processName = (entity.getProcessId() != null) ? entity.getProcessId().getProcessName() : null;
+>>>>>>> origin/revert-11-태영
         String processDescription = (entity.getProcessId() != null) ? entity.getProcessId().getDescription() : null;
         String equipmentId = (entity.getEquipmentId() != null) ? entity.getEquipmentId().getEquipmentId() : null;
         String equipmentName = (entity.getEquipmentId() != null) ? entity.getEquipmentId().getEquipmentName() : null;

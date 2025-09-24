@@ -53,6 +53,10 @@ public record WorkOrderListDto(
                 entity.getCreatedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getCreatedAt()) : null,
                 entity.getModifiedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getModifiedAt()) : null,
                 itemName, itemId ,itemType, unit, itemDescription,processId,processName,processDescription,equipmentId,equipmentName, workcenterName
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/revert-11-태영
         );
     }
 }
