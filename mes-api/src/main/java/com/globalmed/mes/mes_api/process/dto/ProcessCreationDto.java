@@ -15,6 +15,6 @@ public record ProcessCreationDto(
 
         @Size(max = 255, message = "공정 설명은 최대 255자를 초과할 수 없습니다.")
         String description,
-        @Size(max = 50, message = "자격 코드는 최대 50자를 초과할 수 없습니다.")
+        @Size(max = 50, message = "자격 코드는 각각 최대 50자를 초과할 수 없습니다.")
         List<String> requiredCertCodes
 ) {}
