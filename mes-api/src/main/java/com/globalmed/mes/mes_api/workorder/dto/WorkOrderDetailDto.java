@@ -24,10 +24,7 @@ public record WorkOrderDetailDto(
         String itemDescription,
         // Process 관련 정보 추가
         String processId,
-<<<<<<< HEAD
-=======
         String processName,
->>>>>>> origin/범수
         String processDescription,
         // Equipment 관련 정보 추가
         String equipmentId,
@@ -40,12 +37,10 @@ public record WorkOrderDetailDto(
         String itemType = (entity.getItemId() != null) ? entity.getItemId().getItemType() : null;
         String unit = (entity.getItemId() != null) ? entity.getItemId().getUnit() : null;
         String itemDescription = (entity.getItemId() != null) ? entity.getItemId().getDescription() : null;
-<<<<<<< HEAD
-        String processId = (entity.getProcessId() != null) ? entity.getProcessId().getProcessName() : null;
-=======
+
         String processId = (entity.getProcessId() != null) ? entity.getProcessId().getProcessId() : null;
         String processName = (entity.getProcessId() != null) ? entity.getProcessId().getProcessName() : null;
->>>>>>> origin/범수
+
         String processDescription = (entity.getProcessId() != null) ? entity.getProcessId().getDescription() : null;
         String equipmentId = (entity.getEquipmentId() != null) ? entity.getEquipmentId().getEquipmentId() : null;
         String equipmentName = (entity.getEquipmentId() != null) ? entity.getEquipmentId().getEquipmentName() : null;
@@ -62,15 +57,9 @@ public record WorkOrderDetailDto(
                 entity.getStartTs() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getStartTs()) : null,
                 entity.getCreatedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getCreatedAt()) : null,
                 entity.getModifiedAt() != null ? com.globalmed.mes.mes_api.common.DateTimeMapper.attachKst(entity.getModifiedAt()) : null,
-<<<<<<< HEAD
-                itemName, itemId, itemType, unit, itemDescription,equipmentId,
-                processId, processDescription,
-                equipmentName, workcenterName
-=======
                 itemName, itemId, itemType, unit, itemDescription,
                 processId, processName,processDescription,
                 equipmentId, equipmentName, workcenterName
->>>>>>> origin/범수
         );
         }
 }
