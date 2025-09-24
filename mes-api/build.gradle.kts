@@ -26,7 +26,6 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 	implementation("org.apache.commons:commons-lang3:3.18.0")
 
-	implementation("com.github.whvcse:easy-captcha:1.6.2") // easy-captcha 라이브러리 추가
 	// 마이그레이션(원하면) — 아직 사용 안 하면 주석
 	// implementation("org.flywaydb:flyway-core")
 
