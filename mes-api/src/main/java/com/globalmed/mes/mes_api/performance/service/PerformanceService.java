@@ -52,14 +52,24 @@ public class PerformanceService {
         if (req.defectQty().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("VALIDATION_ERROR");
         if (req.defectQty().compareTo(req.producedQty()) > 0) throw new IllegalArgumentException("VALIDATION_ERROR");
 
+        // good = produced - defect
+        BigDecimal goodQty = req.producedQty().subtract(req.defectQty());
+
+        // WorkOrderEntity 조회
+        WorkOrderEntity wo = workOrderRepo.findById(req.workOrderId())
+                .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
+
+        // 지시 수량과 검증
+        if (wo.getOrderQty().compareTo(goodQty) != 0) {
+            throw new IllegalArgumentException("생산 수량이 일치하지 않습니다.");
+        }
+
         // 시간 파싱(UTC) 및 검증
         LocalDateTime st = toUtcLdt(req.startTime());
         LocalDateTime et = toUtcLdt(req.endTime());
         if (et.isBefore(st)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
 
         // WO 상태 검증(Released만 허용)
-        WorkOrderEntity wo = workOrderRepo.findById(req.workOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
         String cur = (wo.getStatusCode() != null ? wo.getStatusCode().getCode() : null);
         if (!"R".equals(cur)) throw new IllegalStateException("WO_STATUS_INVALID");
 

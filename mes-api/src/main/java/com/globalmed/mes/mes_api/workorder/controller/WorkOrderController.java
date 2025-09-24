@@ -81,7 +81,8 @@ public class WorkOrderController {
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort,
-            @RequestParam(required = false) String equipmentId,
+            @RequestParam(required = false) String workOrderNumber,
+            @RequestParam(required = false) String q, // 프론트에서 'q'로 보낼 수도 있음
             @RequestParam(required = false) String status, // "P"|"R"|"C"
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
@@ -92,8 +93,10 @@ public class WorkOrderController {
                 : Sort.by(sp[0]).descending();
         Pageable pageable = PageRequest.of(page, size, s);
 
+        String keyword = (workOrderNumber != null && !workOrderNumber.isBlank()) ? workOrderNumber : q;
+
         Specification<WorkOrderEntity> spec = Specification.allOf(
-                equipmentIdEquals(equipmentId),
+                workOrderNumberContains(keyword),
                 statusEquals(status),
                 startBetween(from, to)
         );
