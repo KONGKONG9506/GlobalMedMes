@@ -13,6 +13,7 @@ export default function AppLayout() {
 
   return (
     <div className="flex min-h-screen bg-blue-50 relative">
+       {/* <div className="flex min-h-screen bg-blue-50 relative"> */}
       {/* 왼쪽 사이드바 */}
       <LeftSidebar
         isOpen={isSidebarOpen}
@@ -22,6 +23,7 @@ export default function AppLayout() {
       {/* 메인 콘텐츠 영역 */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex items-center justify-between p-4 bg-blue-100 border-b shadow">
+          {/* <header className="flex items-center justify-between p-4 bg-blue-100 border-b shadow">*/}
           <button
             onClick={toggleSidebar}
             className="p-4 rounded hover:bg-gray-300 , py-2"
