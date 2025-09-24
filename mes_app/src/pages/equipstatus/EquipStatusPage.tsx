@@ -6,6 +6,7 @@ import type { EquipStatusItem } from "../../types/equip";
 import { fetchEquipStatus, createEquipStatus } from "../../lib/equip";
 import { isAxiosError } from "axios";
 import CanWrite from "../../components/common/perm/CanWrite";
+import EquipStatusSelect,{StatusOptions} from "./Equipstatussearch";
 
 const statusColors = {
   RUN: "bg-green-100 text-green-800",
@@ -88,12 +89,12 @@ export default function EquipStatusPage() {
       <form className="flex flex-wrap items-end gap-4 mb-6">
         <div className="flex flex-col w-40">
           <label className="text-sm font-medium text-gray-700 mb-1">설비</label>
-          <input
-            className="border border-gray-300 rounded px-1 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={equipmentId}
-            onChange={(e) => setEqp(e.target.value)}
-            placeholder="설비 ID"
-          />
+
+         <EquipStatusSelect
+         equId={equipmentId}
+         options={StatusOptions}
+         onChange={(v)=>setEqp(v)}
+         />
         </div>
 
         <div className="flex flex-col w-40">
