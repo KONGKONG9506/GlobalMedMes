@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +37,7 @@ public class ProcessService {
     @Transactional
     public Page<ProcessListDto> getProcessList(Pageable pageable) {
         return processRepo.findAllByIsDeletedFalse(pageable)
-                .map(entity -> new ProcessListDto(entity.getProcessId(), entity.getProcessName()));
+                .map(entity -> new ProcessListDto(entity.getProcessId(),entity.getProcessName(), entity.getDescription()));
     }
 
     @Transactional
@@ -104,12 +101,9 @@ public class ProcessService {
             return toProcessDetailDto(revivedProcess, getCertDtosForProcess(revivedProcess));
         }
 
-        if (processRepo.existsByProcessId(creationDto.processId())) {
-            throw new IllegalArgumentException("동일한 아이디의 공정이 이미 존재합니다.");
-        }
 
         ProcessEntity newProcess = new ProcessEntity();
-        newProcess.setProcessId(creationDto.processId());
+        newProcess.setProcessId(UUID.randomUUID().toString());
         newProcess.setProcessName(creationDto.processName());
         newProcess.setDescription(creationDto.description());
         newProcess.setCreatedAt(LocalDateTime.now());
@@ -137,8 +131,6 @@ public class ProcessService {
         process.setProcessName(creationDto.processName());
         process.setDescription(creationDto.description());
         process.setModifiedAt(LocalDateTime.now());
-        // TODO: 로그인 사용자 ID로 변경
-        process.setModifiedBy("system");
 
         // 자격증 갱신
         updateProcessCerts(process, creationDto.requiredCertCodes());
@@ -162,7 +154,7 @@ public class ProcessService {
 
 
     private void updateProcessCerts(ProcessEntity process, List<String> certCodes) {
-// 1. 현재 공정의 모든 자격증 매핑 (삭제된 것 포함)을 가져옵니다.
+        // 1. 현재 공정의 모든 자격증 매핑 (삭제된 것 포함)을 가져옵니다.
 
         List<ProcessCertEntity> existingCerts = proCertRepo.findAllByProcess(process);
         Map<String, ProcessCertEntity> certCodeMap = existingCerts.stream()
@@ -178,7 +170,7 @@ public class ProcessService {
                     .orElseThrow(() -> new IllegalArgumentException("자격증 Code를 찾을 수 없습니다: " + certCode));
 
             if (certCodeMap.containsKey(certCode)) {
-                 // 기존에 존재하면 (소프트 삭제 여부와 상관없이)
+                // 기존에 존재하면 (소프트 삭제 여부와 상관없이)
                 ProcessCertEntity existingEntity = certCodeMap.get(certCode);
                 if (existingEntity.isDeleted()) {
                     // 소프트 삭제된 상태라면 다시 활성화

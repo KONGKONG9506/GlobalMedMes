@@ -124,22 +124,21 @@ public class EquipmentDetailService {
                 .toList();
 
         return new EquipDetailDto(
-                equipmentId,
-                equipment.getEquipmentName(),
-                equipment.getWorkcenter().getWorkcenterId(),
-                equipment.getStatusCode().getName(),
-                equipment.getCreatedAt().atOffset(ZoneOffset.UTC),
-                workOrder != null ? workOrder.getWorkOrderNumber() : null,
-                workOrder != null ? workOrder.getItemId().getItemName() : null,
-                workOrder != null ? workOrder.getProducedQty() : null,
-                workOrder != null ? workOrder.getOrderQty() : null,
-                workers,
-                shiftName,
-                shiftStartTs,
-                shiftEndTs,
-                equipCertDtos,
-                equipPro,
-                userEqPro
+                equipmentId, // 설비 아이디
+                equipment.getEquipmentName(), // 설비 명
+                equipment.getWorkcenter().getWorkcenterName(), // 워크센터 네임
+                equipment.getStatusCode().getName(), // 상태 이름(RUN)
+                equipment.getCreatedAt().atOffset(ZoneOffset.UTC), // 만들어진 시간(점검, 기계 수명 계산옹)
+                workOrder != null ? workOrder.getWorkOrderNumber() : null, // 작업지시(있으면)
+                workOrder != null ? workOrder.getItemId().getItemName() : null, // 만드는 아이템(있으면)
+                workOrder != null ? workOrder.getProducedQty() : null, // 제작 수량(있으면)
+                workOrder != null ? workOrder.getOrderQty() : null, // 목표 수량(있으면)
+                workers, // 현재 작업자 목록(여러명일 수 있음)(workerName{이름},workerNumber{사원번호})
+                shiftName, // 현재 시프트(교대) 시간(주간,전반야,후반야)
+                shiftStartTs, // 현재 시프트 시작시간
+                shiftEndTs, // 현재 시프트 종료 시간
+                equipCertDtos, // 해당 설비를 가동하는데 필요한 자격증 들
+                equipPro // 설비에서 연결된 공정 목록(processId, processName, Description)
         );
     }
 }

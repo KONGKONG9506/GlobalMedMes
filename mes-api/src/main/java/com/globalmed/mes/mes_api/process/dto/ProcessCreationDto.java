@@ -8,9 +8,6 @@ import java.util.List;
 
 // 공정 생성 요청을 위한 DTO
 public record ProcessCreationDto(
-        @NotBlank(message = "공정코드는 필수 항목입니다.")
-        @Size(max = 36, message = "공정코드는 최대 36자를 초과할 수 없습니다.")
-        String processId,
 
         @NotBlank(message = "공정명은 필수 항목입니다.")
         @Size(max = 255, message = "공정명은 최대 255자를 초과할 수 없습니다.")

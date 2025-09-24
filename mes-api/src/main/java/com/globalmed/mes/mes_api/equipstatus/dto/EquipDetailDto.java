@@ -22,8 +22,7 @@ public record EquipDetailDto(
         OffsetDateTime shiftStartTs,
         OffsetDateTime shiftEndTs,
         List<CertDto> requiredCerts,
-        List<ProcessDto> equipProcess,
-        List<ProcessDto> userEProcess
+        List<ProcessDto> equipProcess
 
 ) {
     public record EWorkerDto(
