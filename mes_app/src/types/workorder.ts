@@ -13,8 +13,8 @@ export type WorkOrderItem = {
   unit: string | null; // "P"|"R"|"C"|null
   itemDescription:string;
   processId: string;
-  processDescription:string;
   processName:string;
+  processDescription:string;
   equipmentId: string;
   equipmentName: string;
   workcenterName: string | null; 

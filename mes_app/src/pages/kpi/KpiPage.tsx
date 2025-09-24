@@ -4,12 +4,15 @@ import { getErrorMessage } from "../../lib/error";
 import { statusColor, fmtPercent, fmtNumber } from "../../lib/kpi";
 import KpiCard from "../kpi/KpiCard";
 import type { KpiRes, KpiApiResponse } from "../../types/kpi";
+import KpisSelect,{KpiOptions} from "./Kpiequipment";
 
 export default function KpiPage() {
+  //fixedDate.setHours(fixedDate.getHours() + 9)
   const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [eqp, setEqp] = useState<string>("E-0001");
+  const [eqp, setEqp] = useState<string>("");
   const [dataList, setDataList] = useState<KpiRes[]>([]);
   const [err, setErr] = useState<string>("");
+
 
   const load = async () => {
     try {
@@ -37,11 +40,10 @@ export default function KpiPage() {
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
-        <input
-          className="border px-3 py-2 rounded w-40"
-          placeholder="설비 ID"
-          value={eqp}
-          onChange={(e) => setEqp(e.target.value)}
+        <KpisSelect
+        equId={eqp}
+        options={KpiOptions}
+        onChange={(v)=>setEqp(v)}
         />
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
