@@ -68,8 +68,10 @@ public class PerformanceService {
         // st/et는 이미 OffsetDateTime→UTC LocalDateTime 변환된 값
         if (baseline != null) {
             if (st.isBefore(baseline) || et.isBefore(baseline)) {
+                System.out.println("오류: 실적 시간이 기준시간보다 이전입니다.");
                 throw new IllegalArgumentException("PERF_BEFORE_WO"); // 400으로 매핑됨
             }
+            System.out.println("시간 검증 통과");
         }
         if (rid != null && !rid.isEmpty() && performanceRepo.findByRequestId(rid).isPresent()) {
             throw new IllegalStateException("DUPLICATE_KEY");

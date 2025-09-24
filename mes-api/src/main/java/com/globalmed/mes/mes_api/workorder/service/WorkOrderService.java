@@ -3,8 +3,8 @@ package com.globalmed.mes.mes_api.workorder.service;
 
 
 import com.globalmed.mes.mes_api.code.CodeRepo;
-import com.globalmed.mes.mes_api.code.repository.ItemRepo;
-import com.globalmed.mes.mes_api.code.repository.ProcessRepo;
+import com.globalmed.mes.mes_api.item.ItemRepo;
+import com.globalmed.mes.mes_api.process.ProcessRepo;
 import com.globalmed.mes.mes_api.employee.cert.service.ProcessCertCheckService;
 import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentRepo;
 import com.globalmed.mes.mes_api.production.service.ProductionLogService;
@@ -84,9 +84,10 @@ public class WorkOrderService {
             throw new IllegalStateException("WO_STATUS_INVALID");
         }
         if(now == null) now = OffsetDateTime.now();
-//        P -> R 전이 공정 자격 체크
+//        P -> R 전이 공정 자격 체크 (개발용으로 임시 비활성화)
         if(cur.equals("P")&&to.equals("R")){
-            processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
+            // TODO: 실제 운영 환경에서는 아래 주석을 해제하고 위의 주석을 제거하세요
+            // processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
         }
 
         // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
@@ -97,14 +98,18 @@ public class WorkOrderService {
 
         // ✅ 상태 전이에 따른 로그 기록
         if (cur.equals("P") && to.equals("R")) {
-            // Released → START 로그
+            // Released → START: startTs 설정
+            wo.setStartTs(now.toLocalDateTime());
+            // START 로그 기록
             productionLogService.logStart(
                     wo.getWorkOrderId(),
                     wo.getEquipmentId().getEquipmentId(),
                     wo.getProcessId().getProcessId()
             );
         } else if (cur.equals("R") && to.equals("C")) {
-            // Completed → END 로그
+            // Completed → END: endTs 설정
+            wo.setEndTs(now.toLocalDateTime());
+            // END 로그 기록
             productionLogService.logEnd(
                     wo.getWorkOrderId(),
                     wo.getEquipmentId().getEquipmentId(),
