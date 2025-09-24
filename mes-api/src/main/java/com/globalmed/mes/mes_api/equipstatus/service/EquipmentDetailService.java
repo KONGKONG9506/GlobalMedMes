@@ -62,8 +62,15 @@ public class EquipmentDetailService {
 
         Optional<ShiftAssignmentEntity> shiftAssign = shiftAssignRepo.findEquipShiftNow(equipmentId, now);
         String shiftName = shiftAssign.map(sa -> sa.getShift().getShiftName()).orElse(null);
-        OffsetDateTime shiftStartTs = shiftAssign.map(ShiftAssignmentEntity::getStartTs).orElse(null);
-        OffsetDateTime shiftEndTs = shiftAssign.map(ShiftAssignmentEntity::getEndTs).orElse(null);
+        LocalDateTime shiftStartTs = shiftAssign
+                .map(ShiftAssignmentEntity::getStartTs)
+                .map(ts -> ts.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()) // 서버 타임존
+                .orElse(null);
+
+        LocalDateTime shiftEndTs = shiftAssign
+                .map(ShiftAssignmentEntity::getEndTs)
+                .map(ts -> ts.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime())
+                .orElse(null);
 
         List<EquipDetailDto.EWorkerDto> workers = shiftAssign.stream()
                 .map(sa -> employeeRepo.findById(sa.getWorkerId()))

@@ -4,6 +4,7 @@ import com.globalmed.mes.mes_api.code.dto.CertDto;
 import com.globalmed.mes.mes_api.code.dto.ProcessDto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public record EquipDetailDto(
         BigDecimal orderQty,
         List<EWorkerDto> workers,
         String shiftName,
-        OffsetDateTime shiftStartTs,
-        OffsetDateTime shiftEndTs,
+        LocalDateTime shiftStartTs,
+        LocalDateTime shiftEndTs,
         List<CertDto> requiredCerts,
         List<ProcessDto> equipProcess
 
