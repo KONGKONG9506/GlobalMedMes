@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface ProcessRepo extends JpaRepository<ProcessEntity, String> {
-    boolean existsByProcessId(String processId);
     boolean existsByProcessName(String processName);
     Optional<ProcessEntity>findByProcessName(String processName);
     Page<ProcessEntity> findAllByIsDeletedFalse(Pageable pageable);

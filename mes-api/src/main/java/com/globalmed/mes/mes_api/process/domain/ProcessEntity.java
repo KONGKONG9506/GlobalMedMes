@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:mes-api/src/main/java/com/globalmed/mes/mes_api/process/domain/ProcessEntity.java
 package com.globalmed.mes.mes_api.process.domain;
-========
-package com.globalmed.mes.mes_api.process;
->>>>>>>> 40ff64610fe22957b7150194922f0e6788b7d7e6:mes-api/src/main/java/com/globalmed/mes/mes_api/process/ProcessEntity.java
 
 import jakarta.persistence.*;
 import lombok.*;
