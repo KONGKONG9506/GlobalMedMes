@@ -32,7 +32,6 @@ export default function WorkOrdersList() {
   const [page, setPage] = useState<number>(0);
   const [size] = useState<number>(20);
   const [sort, setSort] = useState<string>("createdAt,desc");
-  const [equipmentId, setEqp] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
@@ -45,13 +44,16 @@ export default function WorkOrdersList() {
 
 
   const { data, isLoading, error } = useQuery<PageResult<WorkOrderItem>>({
-    queryKey: ["work-orders", page, size, sort, equipmentId, status, from, to],
+    queryKey: ["work-orders", page, size, sort, workOrderNumber, itemName, processName, equipmentName, status, from, to],
     queryFn: async () => {
       const params: Record<string, string | number> = { page, size, sort };
-      if (equipmentId) params.equipmentId = equipmentId;
       if (status) params.status = status;
       if (from) params.from = new Date(`${from}T00:00:00Z`).toISOString();
       if (to) params.to = new Date(`${to}T23:59:59Z`).toISOString();
+      if (workOrderNumber) params.workOrderNumber = workOrderNumber;
+      if (itemName) params.itemName = itemName;
+      if (processName) params.processName = processName;
+      if (equipmentName) params.equipmentName = equipmentName;
       const res = await api.get<PageResponse<WorkOrderItem>>("/work-orders", { params });
       return toPage(res.data);
     }

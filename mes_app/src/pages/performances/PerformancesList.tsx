@@ -96,7 +96,7 @@ export default function PerformancesList() {
                 <tbody>
                   {data.items.map((it, idx) => (
                     <tr key={it.performanceId} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}>
-                      <td className="p-3">{it.workOrderNumber}</td>
+                      <td className="p-3">{it.workOrderId}</td>
                       <td className="p-3">{it.itemId}</td>
                       <td className="p-3">{it.equipmentId}</td>
                       <td className="p-3 text-right text-blue-900 font-semibold">{it.producedQty}</td>

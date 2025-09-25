@@ -2,9 +2,13 @@
 package com.globalmed.mes.mes_api.workorder.specs;
 
 import com.globalmed.mes.mes_api.code.CodeEntity;
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
+import com.globalmed.mes.mes_api.item.ItemEntity;
+import com.globalmed.mes.mes_api.process.ProcessEntity;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 
@@ -26,24 +30,34 @@ public final class WorkOrderSpecs {
     }
 
     public static Specification<WorkOrderEntity> workOrderNumberContains(String workOrderNumber) {
-        return (root, q, cb) -> (workOrderNumber == null || workOrderNumber.isBlank())
-                ? cb.conjunction()
-                : cb.like(cb.lower(root.get("workOrderNumber")), "%" + workOrderNumber + "%");
+        return (root, q, cb) -> {
+            if (!StringUtils.hasText(workOrderNumber)) return cb.conjunction();
+            return cb.like(cb.lower(root.get("workOrderNumber")), "%" + workOrderNumber + "%");
+        };
     }
+
     public static Specification<WorkOrderEntity> itemNameContains(String itemName) {
-        return (root, q, cb) -> (itemName == null || itemName.isBlank())
-                ? cb.conjunction()
-                : cb.like(cb.lower(root.get("itemName")), "%" + itemName + "%");
+        return (root, q, cb) -> {
+            if (!StringUtils.hasText(itemName)) return cb.conjunction();
+            Join<WorkOrderEntity, ItemEntity> itemJoin = root.join("itemId"); // WorkOrderEntity 필드명
+            return cb.like(cb.lower(itemJoin.get("itemName")), "%" + itemName + "%");
+        };
     }
+
     public static Specification<WorkOrderEntity> processNameContains(String processName) {
-        return (root, q, cb) -> (processName == null || processName.isBlank())
-                ? cb.conjunction()
-                : cb.like(cb.lower(root.get("processName")), "%" + processName + "%");
+        return (root, q, cb) -> {
+            if (!StringUtils.hasText(processName)) return cb.conjunction();
+            Join<WorkOrderEntity, ProcessEntity> processJoin = root.join("processId"); // WorkOrderEntity 필드명
+            return cb.like(cb.lower(processJoin.get("processName")), "%" + processName + "%");
+        };
     }
+
     public static Specification<WorkOrderEntity> equipmentNameContains(String equipmentName) {
-        return (root, q, cb) -> (equipmentName == null || equipmentName.isBlank())
-                ? cb.conjunction()
-                : cb.like(cb.lower(root.get("equipmentName")), "%" + equipmentName + "%");
+        return (root, q, cb) -> {
+            if (!StringUtils.hasText(equipmentName)) return cb.conjunction();
+            Join<WorkOrderEntity, EquipmentEntity> eqpJoin = root.join("equipmentId"); // WorkOrderEntity 필드명
+            return cb.like(cb.lower(eqpJoin.get("equipmentName")), "%" + equipmentName + "%");
+        };
     }
 
     public static Specification<WorkOrderEntity> statusEquals(String statusCode) {
