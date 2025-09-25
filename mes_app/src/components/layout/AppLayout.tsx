@@ -6,10 +6,8 @@ import { Menu } from "lucide-react";
 
 export default function AppLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isRightOpen, setIsRightOpen] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const toggleRight = () => setIsRightOpen(!isRightOpen);
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -21,7 +19,7 @@ export default function AppLayout() {
           className={`flex-1 flex flex-col transition-all duration-300`}
         style={{
           marginLeft: isSidebarOpen ? 256 : 0,   // 왼쪽 사이드바 width 64 * 4 = 256px
-          marginRight: isRightOpen ? 384 : 0, // 오른쪽 사이드바 width 96 * 4 = 384px
+          // marginRight: isRightOpen ? 384 : 0, // 오른쪽 사이드바 width 96 * 4 = 384px
         }}
       >
         {/* 헤더 */}
@@ -44,7 +42,7 @@ export default function AppLayout() {
         {/* 메인 */}
         <main className="flex-1 p-6 bg-gray-50 overflow-auto">
           <div className="bg-white rounded-2xl shadow-lg p-6 h-full">
-            <Outlet context={{ isLeftOpen: isSidebarOpen }}/>
+            <Outlet/>
           </div>
         </main>
       </div>
