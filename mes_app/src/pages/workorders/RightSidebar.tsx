@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createWorkOrder } from "../../lib/wo"; // 실제 API import
+import { createWorkOrder } from "../../lib/wo"; 
 import { isAxiosError } from "axios";
 import { useToast } from "../../store/toast";
 import WorkOrderCreate from "../workorders/WorkOrderCreate";
@@ -69,7 +69,8 @@ export default function RightSidebar({ isOpen, onClose, onCreated }: RightSideba
   if (!isOpen) return null;
 
   return (
-    <aside className="w-80 bg-white border-l shadow fixed right-0 top-0 bottom-0 z-50 flex flex-col">
+    <aside className="w-96 bg-white border-l shadow fixed top-0 bottom-0 right-0 z-50 flex flex-col transform transition-transform duration-300"
+    style={{transform: isOpen ? "translateX(0)" : "translateX(100%)",}}>
       <div className="p-4 border-b flex items-center justify-between">
         <span className="text-lg font-semibold"></span>
       </div>

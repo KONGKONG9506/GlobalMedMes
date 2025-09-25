@@ -63,7 +63,8 @@ export default function Rightbarequ({ isOpen, onClose, onCreated }: RightSidebar
   };
 
   return (
-    <aside className="w-96 bg-white border-l shadow fixed right-0 top-0 bottom-0 z-50 flex flex-col">
+    <aside className="w-96 bg-white border-l shadow fixed top-0 bottom-0 right-0 z-50 flex flex-col transform transition-transform duration-300"
+    style={{transform: isOpen ? "translateX(0)" : "translateX(100%)",}}>
       <div className="p-4 border-b flex items-center justify-between">
         <h2 className="text-lg font-semibold">설비 상태 등록</h2>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-800">✕</button>

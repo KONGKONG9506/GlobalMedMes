@@ -4,7 +4,7 @@ package com.globalmed.mes.mes_api.workorder.specs;
 import com.globalmed.mes.mes_api.code.CodeEntity;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.item.ItemEntity;
-import com.globalmed.mes.mes_api.process.ProcessEntity;
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
