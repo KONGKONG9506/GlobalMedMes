@@ -28,7 +28,22 @@ public final class WorkOrderSpecs {
     public static Specification<WorkOrderEntity> workOrderNumberContains(String workOrderNumber) {
         return (root, q, cb) -> (workOrderNumber == null || workOrderNumber.isBlank())
                 ? cb.conjunction()
-                : cb.like(cb.lower(root.get("workOrderNumber")), "%" + workOrderNumber.toLowerCase() + "%");
+                : cb.like(cb.lower(root.get("workOrderNumber")), "%" + workOrderNumber + "%");
+    }
+    public static Specification<WorkOrderEntity> itemNameContains(String itemName) {
+        return (root, q, cb) -> (itemName == null || itemName.isBlank())
+                ? cb.conjunction()
+                : cb.like(cb.lower(root.get("itemName")), "%" + itemName + "%");
+    }
+    public static Specification<WorkOrderEntity> processNameContains(String processName) {
+        return (root, q, cb) -> (processName == null || processName.isBlank())
+                ? cb.conjunction()
+                : cb.like(cb.lower(root.get("processName")), "%" + processName + "%");
+    }
+    public static Specification<WorkOrderEntity> equipmentNameContains(String equipmentName) {
+        return (root, q, cb) -> (equipmentName == null || equipmentName.isBlank())
+                ? cb.conjunction()
+                : cb.like(cb.lower(root.get("equipmentName")), "%" + equipmentName + "%");
     }
 
     public static Specification<WorkOrderEntity> statusEquals(String statusCode) {
