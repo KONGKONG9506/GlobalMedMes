@@ -18,7 +18,7 @@ export default function AppLayout() {
       <div
           className={`flex-1 flex flex-col transition-all duration-300`}
         style={{
-          marginLeft: isSidebarOpen ? 256 : 0,   // 왼쪽 사이드바 width 64 * 4 = 256px
+          marginLeft: isSidebarOpen ? 170 : 0,   // 왼쪽 사이드바 width 64 * 4 = 256px
           // marginRight: isRightOpen ? 384 : 0, // 오른쪽 사이드바 width 96 * 4 = 384px
         }}
       >

@@ -50,18 +50,18 @@ export default function PerformancesList() {
     <div className="space-y-4">
       {/* 🔍 검색 필터 바 */}
       <div className="flex flex-wrap gap-3 mb-2 p-4 border rounded bg-gray-100 shadow-sm">
-        <input className="border px-3 py-2 rounded" placeholder="작업지시넘버"
+        <input className="border w-32 px-3 py-2 rounded" placeholder="작업지시넘버"
           value={workOrderNumber} onChange={(e) => { setPage(0); setWon(e.target.value); }} />
         <input className="border px-3 py-2 rounded" placeholder="품명"
           value={itemName} onChange={(e) => { setPage(0); setIn(e.target.value); }} />
-        <input className="border px-3 py-2 rounded" placeholder="공정명"
+        <input className="border w-40 px-3 py-2 rounded" placeholder="공정명"
           value={processName} onChange={(e) => { setPage(0); setPn(e.target.value); }} />
-        <input className="border px-3 py-2 rounded" placeholder="설비명"
+        <input className="border w-32 px-3 py-2 rounded" placeholder="설비명"
           value={equipmentName} onChange={(e) => { setPage(0); setEn(e.target.value); }} />
         <span className="self-center text-gray-600">시작기간:</span>
-        <input className="border px-3 py-2 rounded" type="date"
+        <input className="border w-36 px-3 py-2 rounded" type="date"
           value={from} onChange={(e) => { setPage(0); setFrom(e.target.value); }} />
-        <input className="border px-3 py-2 rounded" type="date"
+        <input className="border w-36 px-3 py-2 rounded" type="date"
           value={to} onChange={(e) => { setPage(0); setTo(e.target.value); }} />
       </div>
 
