@@ -36,6 +36,10 @@ export default function WorkOrdersList() {
   const [status, setStatus] = useState<string>("");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
+  const [workOrderNumber, setWon] = useState<string>("");
+  const [itemName, setIn] = useState<string>("");
+  const [processName, setPn] = useState<string>("");
+  const [equipmentName, setEn] = useState<string>("");
 
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
@@ -77,12 +81,14 @@ export default function WorkOrdersList() {
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-gray-700">조회 :</span>
-          <input
-            className="border px-3 py-2 rounded"
-            placeholder="작업ID"
-            value={equipmentId}
-            onChange={(e) => { setPage(0); setEqp(e.target.value); }}
-          />
+        <input className="border px-3 py-2 rounded" placeholder="작업지시넘버"
+          value={workOrderNumber} onChange={(e) => { setPage(0); setWon(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="품명"
+          value={itemName} onChange={(e) => { setPage(0); setIn(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="공정명"
+          value={processName} onChange={(e) => { setPage(0); setPn(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="설비명"
+          value={equipmentName} onChange={(e) => { setPage(0); setEn(e.target.value); }} />
         </div>
         <select
           className="border px-3 py-2 rounded"

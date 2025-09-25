@@ -1,8 +1,8 @@
 //package com.globalmed.mes.mes_api.equipstatus.controller;
 //
-//import com.globalmed.mes.mes_api.code.domain.ItemEntity;
-//import com.globalmed.mes.mes_api.code.repository.ItemRepo;
-//import com.globalmed.mes.mes_api.code.repository.ProcessRepo;
+//import com.globalmed.mes.mes_api.item.ItemEntity;
+//import com.globalmed.mes.mes_api.item.ItemRepo;
+//import com.globalmed.mes.mes_api.process.ProcessRepo;
 //import com.globalmed.mes.mes_api.common.PageResponse;
 //import com.globalmed.mes.mes_api.employee.cert.repository.CertRepo;
 //import com.globalmed.mes.mes_api.employee.cert.repository.EquipmentCertRepo;

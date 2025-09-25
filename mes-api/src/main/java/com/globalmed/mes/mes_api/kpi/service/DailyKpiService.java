@@ -46,7 +46,7 @@ public class DailyKpiService {
         }
 
         Map<String, List<ProductionPerformanceEntity>> groupedPerformances = performances.stream()
-                .collect(Collectors.groupingBy(p -> p.getEquipmentId() + "_" + p.getProcessId() + "_" + p.getItemId()));
+                .collect(Collectors.groupingBy(p -> p.getEquipment().getEquipmentId() + "_" + p.getProcess().getProcessId() + "_" + p.getItem().getItemId()));
 
         groupedPerformances.forEach((key, list) -> {
             BigDecimal totalGoodQty = BigDecimal.ZERO;
@@ -67,8 +67,8 @@ public class DailyKpiService {
             }
 
             long totalPeriodSeconds = Duration.between(firstStartTime, lastEndTime).toSeconds();
-            long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(list.get(0).getEquipmentId(), firstStartTime, lastEndTime);
-            long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(list.get(0).getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
+            long plannedDowntimeSeconds = plannedDowntimeService.calculatePlannedDowntimeSeconds(list.get(0).getEquipment().getEquipmentId(), firstStartTime, lastEndTime);
+            long unplannedDowntimeSeconds = unplannedDowntimeService.calculateUnplannedDowntimeSeconds(list.get(0).getEquipment().getEquipmentId(), firstStartTime.atOffset(ZoneOffset.UTC), lastEndTime.atOffset(ZoneOffset.UTC));
 
             BigDecimal plannedSeconds = BigDecimal.valueOf(totalPeriodSeconds - plannedDowntimeSeconds);
             BigDecimal totalRunSeconds = plannedSeconds.subtract(BigDecimal.valueOf(unplannedDowntimeSeconds));
@@ -76,9 +76,9 @@ public class DailyKpiService {
             ProductionPerformanceEntity representative = list.get(0);
             Optional<KpiDataEntity> existingBatchKpi = kpiDataRepo.findDailyBatchKpi(
                     date,
-                    representative.getEquipmentId(),
-                    representative.getProcessId(),
-                    representative.getItemId(),
+                    representative.getEquipment().getEquipmentId(),
+                    representative.getProcess().getProcessId(),
+                    representative.getItem().getItemId(),
                     kpiDataService.getDailyBatchAggregationTypeId(),
                     "DAILY"
             );
@@ -86,9 +86,9 @@ public class DailyKpiService {
             KpiDataEntity batchKpi = existingBatchKpi.orElseGet(KpiDataEntity::new);
 
             batchKpi.setKpiDate(date);
-            batchKpi.setEquipmentId(representative.getEquipmentId());
-            batchKpi.setProcessId(representative.getProcessId());
-            batchKpi.setItemId(representative.getItemId());
+            batchKpi.setEquipmentId(representative.getEquipment().getEquipmentId());
+            batchKpi.setProcessId(representative.getProcess().getProcessId());
+            batchKpi.setItemId(representative.getItem().getItemId());
             batchKpi.setAggregationTypeId(kpiDataService.getDailyBatchAggregationTypeId());
             batchKpi.setBatchGroupKey("DAILY");
             batchKpi.setStartTime(firstStartTime);

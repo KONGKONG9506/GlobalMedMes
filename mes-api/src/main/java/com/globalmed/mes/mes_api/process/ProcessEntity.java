@@ -1,22 +1,21 @@
-package com.globalmed.mes.mes_api.code.domain;
+package com.globalmed.mes.mes_api.process;
 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tb_workshop",
-        uniqueConstraints = @UniqueConstraint(name = "uk_workshop_name", columnNames = {"workshop_name"}))
+@Table(name = "tb_process",
+        uniqueConstraints = @UniqueConstraint(name = "uk_process_name", columnNames = {"process_name"}))
 @Getter
 @Setter
-public class WorkshopEntity {
-
+public class ProcessEntity {
     @Id
-    @Column(name = "workshop_id", length = 36, nullable = false)
-    private String workshopId;
+    @Column(name = "process_id", length = 36, nullable = false)
+    private String processId;
 
-    @Column(name = "workshop_name", length = 255, nullable = false)
-    private String workshopName;
+    @Column(name = "process_name", length = 255, nullable = false)
+    private String processName;
 
     @Column(name = "description", length = 255)
     private String description;
@@ -38,5 +37,5 @@ public class WorkshopEntity {
 
     @Column(name = "modified_at", insertable = false, updatable = false)
     private LocalDateTime modifiedAt;
-
 }
+

@@ -23,15 +23,22 @@ export default function PerformancesList() {
   const [page, setPage] = useState<number>(0);
   const [size] = useState<number>(20);
   const [sort, setSort] = useState<string>("startTime,desc");
-  const [equipmentId, setEqp] = useState<string>("");
+  const [workOrderNumber, setWon] = useState<string>("");
+  const [itemName, setIn] = useState<string>("");
+  const [processName, setPn] = useState<string>("");
+  const [equipmentName, setEn] = useState<string>("");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
 
   const { data, isLoading, error } = useQuery<PageResult<PerfItem>>({
-    queryKey: ["performances", page, size, sort, equipmentId, from, to],
+    queryKey: ["performances", page, size, sort, workOrderNumber, itemName, processName, equipmentName, from, to],
     queryFn: async () => {
       const params: Record<string, string | number> = { page, size, sort };
-      if (equipmentId) params.equipmentId = equipmentId;
+      if (workOrderNumber) params.workOrderNumber = workOrderNumber;
+      if (itemName) params.itemName = itemName;
+      if (processName) params.processName = processName;
+      if (equipmentName) params.equipmentName = equipmentName;
+
       if (from) params.from = new Date(`${from}T00:00:00Z`).toISOString();
       if (to) params.to = new Date(`${to}T23:59:59Z`).toISOString();
       const res = await api.get<PageResponse<PerfItem>>("/performances", { params });
@@ -43,8 +50,15 @@ export default function PerformancesList() {
     <div className="space-y-4">
       {/* 🔍 검색 필터 바 */}
       <div className="flex flex-wrap gap-3 mb-2 p-4 border rounded bg-gray-100 shadow-sm">
-        <input className="border px-3 py-2 rounded" placeholder="설비ID"
-          value={equipmentId} onChange={(e) => { setPage(0); setEqp(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="작업지시넘버"
+          value={workOrderNumber} onChange={(e) => { setPage(0); setWon(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="품명"
+          value={itemName} onChange={(e) => { setPage(0); setIn(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="공정명"
+          value={processName} onChange={(e) => { setPage(0); setPn(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="설비명"
+          value={equipmentName} onChange={(e) => { setPage(0); setEn(e.target.value); }} />
+        <span className="self-center text-gray-600">시작기간:</span>
         <input className="border px-3 py-2 rounded" type="date"
           value={from} onChange={(e) => { setPage(0); setFrom(e.target.value); }} />
         <input className="border px-3 py-2 rounded" type="date"
@@ -76,6 +90,7 @@ export default function PerformancesList() {
                     <th className="p-3 text-right">생산량</th>
                     <th className="p-3 text-right">불량</th>
                     <th className="p-3 text-left">시작시각</th>
+                    <th className="p-3 text-left">종료시각</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -88,6 +103,12 @@ export default function PerformancesList() {
                       <td className="p-3 text-right text-red-700 font-semibold">{it.defectQty}</td>
                       <td className="p-3">
                         {new Date(it.startTime).toLocaleString("ko-KR", {
+                          year: "numeric", month: "2-digit", day: "2-digit",
+                          hour: "2-digit", minute: "2-digit"
+                        })}
+                      </td>
+                                            <td className="p-3">
+                        {new Date(it.endTime).toLocaleString("ko-KR", {
                           year: "numeric", month: "2-digit", day: "2-digit",
                           hour: "2-digit", minute: "2-digit"
                         })}

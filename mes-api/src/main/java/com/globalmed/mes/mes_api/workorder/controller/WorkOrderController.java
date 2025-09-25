@@ -81,7 +81,10 @@ public class WorkOrderController {
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam(defaultValue = "createdAt,desc") String sort,
-            @RequestParam(required = false) String equipmentId,
+            @RequestParam(required = false) String workOrderNumber,
+            @RequestParam(required = false) String itemName,
+            @RequestParam(required = false) String processName,
+            @RequestParam(required = false) String equipmentName,
             @RequestParam(required = false) String status, // "P"|"R"|"C"
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
@@ -92,8 +95,13 @@ public class WorkOrderController {
                 : Sort.by(sp[0]).descending();
         Pageable pageable = PageRequest.of(page, size, s);
 
+
+
         Specification<WorkOrderEntity> spec = Specification.allOf(
-                equipmentIdEquals(equipmentId),
+                workOrderNumberContains(workOrderNumber),
+                itemNameContains(itemName),
+                processNameContains(processName),
+                equipmentNameContains(equipmentName),
                 statusEquals(status),
                 startBetween(from, to)
         );

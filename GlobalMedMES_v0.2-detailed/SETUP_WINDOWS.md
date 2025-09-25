@@ -13,7 +13,7 @@
 ## 1. 필수 설치
 - Java 17
 - Node 18 / pnpm
-- Docker Desktop(WSL2 활성)
+- Docker Desktop(WSL2 활성) 
 
 버전 확인
 ```
@@ -22,19 +22,24 @@ node -v
 docker compose version
 ```
 
+체크 할것
+-관리자 권한으로 powershell 실행
+-setup_dev_env.ps1 port 3307 names 중괄호 한개 추가
+-다른 이름으로 저장 utf(bom) 으로 저장해야 실행됨.
+
 ## 2. 통합 스크립트 실행
 - 위치: tools/setup_dev_env.ps1
 - 최초 권한
 ```
-Set-ExecutionPolicy RemoteSigned
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 - 기본 실행(자동 경로)
 ```
-.\setup_dev_env.ps1
+.\setup_dev_env.ps1 
 ```
 - 경로/포트 지정 실행
 ```
-.\setup_dev_env.ps1 -BackendDir "C:\dev\backend" -FrontendDir "C:\dev\frontend" -MysqlPort 3307
+.\setup_dev_env.ps1 -BackendDir "C:\dev\backend" -FrontendDir "C:\dev\frontend" -MysqlPort 3307 << powershell 에서 setup_dev_env.ps1 파일 깔려있는 경로로 cd한 후에 해야됨.
 ```
 - 포트 자동 회피
 ```

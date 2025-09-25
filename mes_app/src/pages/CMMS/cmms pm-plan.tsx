@@ -16,7 +16,9 @@ type CmmsApiResponse = {
   content: CmmsPmPlan[];
   page: number;
   size: number;
-  totalElement: number;
+  totalElements: number;   // ✅ 백엔드 응답 키랑 동일하게
+  totalPages: number;      // ✅ 이것도 추가
+  sort: string;            // ✅ 응답에 있음
 };
 
 export default function CmmsPage() {
@@ -30,11 +32,7 @@ export default function CmmsPage() {
       setLoading(true);
 
       const res = await api.get<CmmsApiResponse>("/cmms/pm-plans/due", {
-        params: {
-          to: "2025-09-30T00:00:00Z",
-          equipmentId: "E-0001",
-          sort: "nextDueAt,asc",
-        },
+        params: { to: "2025-09-30T00:00:00Z", equipmentId : "E-0001" , sort : "nextDueAt,asc"},
       });
       console.log("PM 계획 데이터:", res.data.content);
 

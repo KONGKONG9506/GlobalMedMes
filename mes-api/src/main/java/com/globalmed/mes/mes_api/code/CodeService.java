@@ -25,6 +25,11 @@ public class CodeService {
                 + (code == null ? "" : code.trim().toUpperCase());
     }
 
+    public CodeEntity getCode(String groupCode, String code) {
+        return repo.findByGroupCodeAndCodeAndUseYn(groupCode, code, 'Y')
+                .orElseThrow(() -> new IllegalStateException("CODE_NOT_FOUND"));
+    }
+
     /**
      * 활성 코드(use_yn='Y')의 code_id 반환. 없으면 IllegalArgumentException.
      * 예) idOf("CMMS_WO_STATUS", "OPEN")
@@ -55,6 +60,8 @@ public class CodeService {
                                 "Code not found/disabled or group mismatch: id=" + id + ", group=" + expectedGroup))
         );
     }
+
+
 
     /** 특정 키만 캐시 제거 (코드 테이블 변경 후 수동 무효화용) */
     public void evict(String groupCode, String code) {
