@@ -58,19 +58,19 @@ public class ProductionPerformanceEntity {
     private String requestId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_order_id", insertable = false, updatable = false)
+    @JoinColumn(name = "work_order_id")
     private WorkOrderEntity workOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id", insertable = false, updatable = false)
+    @JoinColumn(name = "item_id")
     private ItemEntity item;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "process_id", insertable = false, updatable = false)
+    @JoinColumn(name = "process_id")
     private ProcessEntity process;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "equipment_id", insertable = false, updatable = false)
+    @JoinColumn(name = "equipment_id")
     private EquipmentEntity equipment;
 
     @PrePersist

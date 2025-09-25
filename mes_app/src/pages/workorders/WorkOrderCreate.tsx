@@ -71,11 +71,11 @@ export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
         <input className="border px-3 py-2 rounded-md w-full" placeholder="지시번호" value={workOrderNumber} onChange={(e)=>setNo(e.target.value)} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
         {/* 품목 부분을 콤보박스로 변경 */}
-        <NamesSelect Id="itemId" options={nameOptions} onChange={(v) => setItem(nameOptions.find(o => o.name === v)?.Id || "")}/>
+        <NamesSelect Id={itemId} options={nameOptions} onChange={(v) => setItem(v)}/>
         {/*품목 부분을 콤보박스로 변경 */}
-        <ProcessingSelect Id="processId" options={processOptions} onChange={(v) => setProcess(processOptions.find(o => o.name === v)?.Id || "")}/>
+        <ProcessingSelect Id={processId} options={processOptions} onChange={(v) => setProcess(v)}/>
         {/*품목 부분을 콤보박스로 변경 */}
-        <EquipmentsSelect Id="equipmentId" options={equipmentOptions} onChange={(v) => setequipment(equipmentOptions.find(o => o.name === v)?.Id || "")}/>
+        <EquipmentsSelect Id={equipmentId} options={equipmentOptions} onChange={(v) => setequipment(v)}/>
         <input className="border px-3 py-2 rounded-md w-full" type="number" step="1" min="0" placeholder="지시수량" value={orderQty} onChange={(e)=>setQty(Number(e.target.value))} required />
         {errors.workOrderNumber && <div className="text-red-600 text-sm">{errors.workOrderNumber}</div>}
         <div className="flex gap-2 justify-end mt-2">

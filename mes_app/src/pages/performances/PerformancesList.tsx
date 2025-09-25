@@ -8,7 +8,7 @@ import { useState } from "react";
 
 type PerfItem = {
   performanceId: number;
-  workOrderId: string; itemId: string; processId: string; equipmentId: string;
+  workOrderId: string; workOrderNumber: string; itemId: string; processId: string; equipmentId: string;
   producedQty: number; defectQty: number; startTime: string; endTime: string;
 };
 

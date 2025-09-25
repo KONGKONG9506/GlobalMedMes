@@ -32,22 +32,28 @@ export default function WorkOrdersList() {
   const [page, setPage] = useState<number>(0);
   const [size] = useState<number>(20);
   const [sort, setSort] = useState<string>("createdAt,desc");
-  const [equipmentId, setEqp] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
+  const [workOrderNumber, setWon] = useState<string>("");
+  const [itemName, setIn] = useState<string>("");
+  const [processName, setPn] = useState<string>("");
+  const [equipmentName, setEn] = useState<string>("");
 
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
 
   const { data, isLoading, error } = useQuery<PageResult<WorkOrderItem>>({
-    queryKey: ["work-orders", page, size, sort, equipmentId, status, from, to],
+    queryKey: ["work-orders", page, size, sort, workOrderNumber, itemName, processName, equipmentName, status, from, to],
     queryFn: async () => {
       const params: Record<string, string | number> = { page, size, sort };
-      if (equipmentId) params.equipmentId = equipmentId;
       if (status) params.status = status;
       if (from) params.from = new Date(`${from}T00:00:00Z`).toISOString();
       if (to) params.to = new Date(`${to}T23:59:59Z`).toISOString();
+      if (workOrderNumber) params.workOrderNumber = workOrderNumber;
+      if (itemName) params.itemName = itemName;
+      if (processName) params.processName = processName;
+      if (equipmentName) params.equipmentName = equipmentName;
       const res = await api.get<PageResponse<WorkOrderItem>>("/work-orders", { params });
       return toPage(res.data);
     }
@@ -77,12 +83,14 @@ export default function WorkOrdersList() {
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-gray-700">조회 :</span>
-          <input
-            className="border px-3 py-2 rounded"
-            placeholder="작업ID"
-            value={equipmentId}
-            onChange={(e) => { setPage(0); setEqp(e.target.value); }}
-          />
+        <input className="border px-3 py-2 rounded" placeholder="작업지시넘버"
+          value={workOrderNumber} onChange={(e) => { setPage(0); setWon(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="품명"
+          value={itemName} onChange={(e) => { setPage(0); setIn(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="공정명"
+          value={processName} onChange={(e) => { setPage(0); setPn(e.target.value); }} />
+        <input className="border px-3 py-2 rounded" placeholder="설비명"
+          value={equipmentName} onChange={(e) => { setPage(0); setEn(e.target.value); }} />
         </div>
         <select
           className="border px-3 py-2 rounded"
