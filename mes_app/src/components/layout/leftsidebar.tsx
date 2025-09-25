@@ -7,10 +7,9 @@ import { Link, useLocation } from "react-router-dom";
 
 type LeftSidebarProps = {
   isOpen: boolean;
-  onClose?: () => void;
 };
 
-export default function LeftSidebar({ isOpen, onClose }: LeftSidebarProps) {
+export default function LeftSidebar({ isOpen }: LeftSidebarProps) {
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const setMenusGlobal = useMenusStore((s) => s.setMenus);
   const loc = useLocation();
@@ -19,9 +18,9 @@ export default function LeftSidebar({ isOpen, onClose }: LeftSidebarProps) {
     api
       .get("/menus/my")
       .then((res) => {
-        const uiTree = toMenuItems(res.data.menus);      // 서버 → UI 변환
+        const uiTree = toMenuItems(res.data.menus);
         setMenus(uiTree);
-        const nodes = toMenuNodesFromItems(uiTree);      // UI → 전역(MenuNode)
+        const nodes = toMenuNodesFromItems(uiTree);
         setMenusGlobal(nodes);
       })
       .catch(() => {
@@ -30,31 +29,24 @@ export default function LeftSidebar({ isOpen, onClose }: LeftSidebarProps) {
       });
   }, [setMenusGlobal]);
 
-  if (!isOpen) return null;
-
   return (
-    <aside className="absolute top-0 left-0 w-64 h-full bg-white border-r shadow z-30 flex flex-col transition-transform duration-300">
-      {/* 상단 제목 + 닫기 버튼 */}
-      <div className="p-4 border-b flex justify-between items-center">
-        <span className="font-bold text-lg">GlobalMed MES</span>
-        {onClose && (
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500 text-xl"
-            aria-label="Close Sidebar"
-          >
-            ×
-          </button>
-        )}
-      </div>
+    <aside
+      className={`fixed top-0 left-0 w-64 h-full bg-white border-r shadow z-30
+      transform transition-transform duration-300
+      ${isOpen ? "translate-x-0" : "-translate-x-64"}`}
+    >
+      {/* 상단 제목 */}
+      <div className="p-4 border-b font-bold text-lg">GlobalMed MES</div>
 
       {/* 메뉴 리스트 */}
       <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
         {menus.map((m) => (
           <Link
             key={m.key}
-            className={`px-2 py-1 rounded ${
-              loc.pathname.startsWith(m.path) ? "bg-gray-200 font-semibold" : ""
+            className={`px-3 py-2 rounded-lg transition-colors ${
+              loc.pathname.startsWith(m.path)
+                ? "bg-blue-100 font-semibold text-blue-600"
+                : "hover:bg-gray-100"
             }`}
             to={m.path}
           >
