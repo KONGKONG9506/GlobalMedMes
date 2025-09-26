@@ -14,7 +14,7 @@ public interface ProcessRepo extends JpaRepository<ProcessEntity, String> {
     Optional<ProcessEntity>findByProcessName(String processName);
     Page<ProcessEntity> findAllByIsDeletedFalse(Pageable pageable);
 
-//    @Query("SELECT p.processId FROM ProcessEntity p WHERE p.deleted = false")
-//    List<String> findAllProcessIds();
+    @Query("SELECT p.processId FROM ProcessEntity p WHERE p.isDeleted = false")
+    List<String> findAllProcessIds();
 
 }

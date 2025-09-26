@@ -13,5 +13,5 @@ public interface EquipmentCertRepo extends JpaRepository<EquipmentCertEntity, Lo
 
 
 
-//    boolean existsByEquipmentId(String equipmentId);
+    boolean existsByEquipment_EquipmentId(String equipmentId);
 }

@@ -14,7 +14,6 @@ public interface ProcessCertRepo extends JpaRepository<ProcessCertEntity, Long> 
     @Query("SELECT pc FROM ProcessCertEntity pc WHERE pc.process.processId = :processId AND pc.deleted = false")
     List<ProcessCertEntity> findProCert(@Param("processId") String processId);
     List<ProcessCertEntity> findAllByProcess(ProcessEntity process);
+    boolean existsByProcess_ProcessId(String processId);
 
-//    @Query("SELECT e.equipmentId FROM EquipmentEntity e WHERE e.deleted = false")
-//    List<String> findAllEquipmentIds();
 }
