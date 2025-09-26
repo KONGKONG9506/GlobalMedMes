@@ -58,7 +58,7 @@ export default function LeftSidebar({ isOpen, onClose }: LeftSidebarProps) {
   if (!isOpen) return null;
 
   return (
-    <aside className="absolute top-0 left-0 w-64 h-full bg-white border-r shadow z-30 flex flex-col transition-transform duration-300">
+    <aside className="absolute top-0 left-0 w-54 h-full bg-white border-r shadow z-30 flex flex-col transition-transform duration-300">
       {/* 상단 제목 + 닫기 버튼 */}
       <div className="p-4 border-b flex justify-between items-center">
         <span className="font-bold text-lg">GlobalMed MES</span>
