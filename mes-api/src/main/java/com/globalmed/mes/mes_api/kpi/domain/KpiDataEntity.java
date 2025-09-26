@@ -65,6 +65,16 @@ public class KpiDataEntity {
     @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "modified_by", length = 50, nullable = false)
+    private String modifiedBy;
+
+    @Column(name = "modified_at")
+    private LocalDateTime modifiedAt;
+
+
     // 새로운 컬럼
     @Column(name = "aggregation_type_id", nullable = false)
     private Long aggregationTypeId;

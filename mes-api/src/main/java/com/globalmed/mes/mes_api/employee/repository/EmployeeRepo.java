@@ -1,7 +1,6 @@
 package com.globalmed.mes.mes_api.employee.repository;
 
 import com.globalmed.mes.mes_api.employee.domain.EmployeeEntity;
-import com.globalmed.mes.mes_api.employee.dto.EmployeeAssignmentDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +13,9 @@ public interface EmployeeRepo extends JpaRepository<EmployeeEntity, String> {
 
     @Query("SELECT e FROM EmployeeEntity e WHERE LOWER(e.employeeName) LIKE LOWER(CONCAT('%', :name, '%')) AND e.deleted = false")
     Page<EmployeeEntity> findEmployeeName(@Param("name") String name, Pageable pageable);
+
+    @Query("SELECT e FROM EmployeeEntity e WHERE e.deleted = false")
+    Page<EmployeeEntity> findNotDeletedAll(Pageable pageable);
 
     @Query("""
     SELECT e.employeeId, e.employeeName, eq.equipmentId, p.processId

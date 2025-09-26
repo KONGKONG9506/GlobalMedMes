@@ -25,7 +25,7 @@ public class EmployeeService {
         if (name != null && !name.isEmpty()) {
             employees = employeeRepo.findEmployeeName(name, pageable);
         } else {
-            employees = employeeRepo.findAll(pageable);
+            employees = employeeRepo.findNotDeletedAll(pageable);
         }
 
         // 2. 직원별 설비/공정 조회

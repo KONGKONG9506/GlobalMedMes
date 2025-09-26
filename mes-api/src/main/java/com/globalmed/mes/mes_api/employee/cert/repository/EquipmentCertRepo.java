@@ -10,4 +10,8 @@ import java.util.List;
 public interface EquipmentCertRepo extends JpaRepository<EquipmentCertEntity, Long> {
     @Query("SELECT ec FROM EquipmentCertEntity ec WHERE ec.equipment.equipmentId = :equipmentId AND ec.deleted = false")
     List<EquipmentCertEntity> findEquiprequier(@Param("equipmentId") String equipmentId);
+
+
+
+//    boolean existsByEquipmentId(String equipmentId);
 }
