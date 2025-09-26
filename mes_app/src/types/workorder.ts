@@ -2,7 +2,7 @@ export type WorkOrderItem = {
   workOrderId: string;
   workOrderNumber: string;
   orderQty: number;
-  produceQty: number;
+  producedQty: number;
   statusCode: string;
   startTs:string | null;
   createdAt:string;

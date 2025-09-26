@@ -82,7 +82,8 @@ export default function WorkOrdersList() {
       {/* 필터 영역 */}
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
         <div className="flex items-center gap-2">
-        <input className="border w-40 px-3 py-2 rounded" placeholder="작업지시넘버"
+          <span className="font-semibold text-gray-700">조회 :</span>
+        <input className="border w-40 px-3 py-2 rounded" placeholder="작업지시번호"
           value={workOrderNumber} onChange={(e) => { setPage(0); setWon(e.target.value); }} />
         <input className="border w-15 px-3 py-2 rounded" placeholder="품명"
           value={itemName} onChange={(e) => { setPage(0); setIn(e.target.value); }} />
@@ -148,7 +149,11 @@ export default function WorkOrdersList() {
                   <tr>
                     <th className="p-3 text-left">번호</th>
                     <th className="p-3 text-left">품목</th>
+                    <th className="p-3 text-left">구분</th>
+                    <th className="p-3 text-left">단위</th>
+                    <th className="p-3 text-left">품목설명</th>
                     <th className="p-3 text-left">공정</th>
+                    <th className="p-3 text-left">공정설명</th>
                     <th className="p-3 text-left">설비</th>
                     <th className="p-3 text-right">지시</th>
                     <th className="p-3 text-right">누적</th>
@@ -164,10 +169,14 @@ export default function WorkOrdersList() {
                       <tr key={it.workOrderId} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}>
                         <td className="p-3">{it.workOrderNumber}</td>
                         <td className="p-3">{it.itemName}</td>
+                        <td className="p-3">{it.itemType}</td>
+                        <td className="p-3">{it.unit}</td>
+                        <td className="p-3">{it.itemDescription}</td>
                         <td className="p-3">{it.processName}</td>
+                        <td className="p-3">{it.processDescription}</td>
                         <td className="p-3">{it.equipmentName}</td>
                         <td className="p-3 text-right">{it.orderQty}</td>
-                        <td className="p-3 text-right">{it.produceQty}</td>
+                        <td className="p-3 text-right">{it.producedQty}</td>
                         <td className="p-3">
                           <span className={`px-2 py-1 rounded text-sm font-medium ${statusColor[it.statusCode] ?? "bg-gray-100 text-gray-600"}`}>
                             {it.statusCode ?? "-"}
