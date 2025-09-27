@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
@@ -38,6 +39,7 @@ public class ProcessController {
         return ResponseEntity.ok(processes);
     }
 
+    @PreAuthorize("@permChecker.has(authentication, '/process','write') or hasAnyRole('ADMIN','OP')")
     @PostMapping
     public ResponseEntity<ProcessDetailDto> createProcess(@Valid @RequestBody ProcessCreationDto creationDto) {
         ProcessDetailDto newProcess = processService.createProcess(creationDto);
@@ -68,6 +70,7 @@ public class ProcessController {
         }
     }
 
+    @PreAuthorize("@permChecker.has(authentication, '/process','write') or hasAnyRole('ADMIN','OP')")
     @PutMapping("/{id}")
     public ResponseEntity<ProcessDetailDto> updateProcess(
             @PathVariable("id") String processId,

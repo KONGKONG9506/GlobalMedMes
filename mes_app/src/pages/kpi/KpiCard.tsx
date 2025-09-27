@@ -1,4 +1,4 @@
-import { statusColor, StatusColor } from "../../lib/kpi";
+import { StatusColor } from "../../lib/kpi";
 
 type Props = {
   title: string;
@@ -6,14 +6,11 @@ type Props = {
   target?: number | string; 
   actualLabel?: string;
   actual?: number | string;
-  status?: StatusColor;
+  status: StatusColor;
 };
 
-export default function KpiCard({ title, targetLabel, target, actualLabel, actual }: Props) {
+export default function KpiCard({ title, targetLabel, target, actualLabel, actual, status }: Props) {
   // 숫자로 변환 (문자열로 들어올 수도 있으므로)
-  const actualNum = typeof actual === "string" ? parseFloat(actual) : actual ?? 0;
-  const targetNum = target != null ? (typeof target === "string" ? parseFloat(target) : target) : 100;
-  const status: StatusColor = statusColor(targetNum, actualNum);
 
   const color =
     status === "ok" ? "border-green-600 text-green-700 bg-green-50"

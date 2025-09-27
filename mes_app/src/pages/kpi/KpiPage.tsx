@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api } from "../../lib/api";
 import { getErrorMessage } from "../../lib/error";
-import { statusColor, fmtPercent, fmtNumber } from "../../lib/kpi";
+import { statusColor, statusDefectColor, fmtPercent, fmtNumber } from "../../lib/kpi";
 import KpiCard from "../kpi/KpiCard";
 import type { KpiRes, KpiApiResponse } from "../../types/kpi";
 import KpisSelect,{KpiOptions} from "./Kpiequipment";
@@ -67,22 +67,22 @@ export default function KpiPage() {
               <KpiCard
                 title={`OEE (${item.equipmentId})`}
                 actual={fmtPercent(item.actualOee)}
-                status={statusColor(undefined, item.actualOee)}
+                status={statusColor(100, item.actualOee)}
               />
               <KpiCard
                 title={`수율 (${item.equipmentId})`}
                 actual={fmtPercent(item.actualYield)}
-                status={statusColor(undefined, item.actualYield)}
+                status={statusColor(100, item.actualYield)}
               />
               <KpiCard
                 title={`불량률 (${item.equipmentId})`}
                 actual={fmtPercent(item.actualDefectRate)}
-                status={statusColor(undefined, item.actualDefectRate)}
+                status={statusDefectColor(0, item.actualDefectRate)}
               />
               <KpiCard
                 title={`생산성 (${item.equipmentId})`}
                 actual={fmtNumber(item.actualProductivity, 2)}
-                status={statusColor(undefined, item.actualProductivity)}
+                status={statusColor(100, item.actualProductivity)}
               />
             </div>
           ))}
