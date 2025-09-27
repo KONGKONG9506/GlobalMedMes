@@ -9,8 +9,12 @@ import { useState } from "react";
 type PerfItem = {
   performanceId: number;
   workOrderId: string; workOrderNumber: string; itemId: string; processId: string; equipmentId: string;
-  producedQty: number; defectQty: number; startTime: string; endTime: string;
+  producedQty: number; defectQty: number; startTime: string; endTime: string; processName: string; processDescription: string;
+  equipmentName: string; itemName: string; itemType: string; itemUnit: string; itemDescription: string;
+  workOrderorderQty: number; workOrderproducedQty: number; workOrderCode: string; perfDefectQty: number; perfProducedQty: number;
+  perfstartTime: string; perfendTime: string;
 };
+
 
 const sortOptions = [
   { label: "시작시각↓", value: "startTime,desc" },
@@ -84,9 +88,18 @@ export default function PerformancesList() {
                 {/* ✅ 헤더 강조 적용 */}
                 <thead className="bg-blue-100 text-black-800">
                   <tr className="font-semibold">
-                    <th className="p-3 text-left">작업지시</th>
-                    <th className="p-3 text-left">품목</th>
+                    <th className="p-3 text-left">실적ID</th>
+                    <th className="p-3 text-left">공정</th>
+                    <th className="p-3 text-left">공정설명</th>                    
                     <th className="p-3 text-left">설비</th>
+                    <th className="p-3 text-left">품목</th>
+                    <th className="p-3 text-left">구분</th>
+                    <th className="p-3 text-left">단위</th>
+                    <th className="p-3 text-left">품목설명</th>
+                    <th className="p-3 text-left">작업지시</th>
+                    <th className="p-3 text-right">지시</th>
+                    <th className="p-3 text-right">누적</th>
+                    <th className="p-3 text-left">상태</th>
                     <th className="p-3 text-right">생산량</th>
                     <th className="p-3 text-right">불량</th>
                     <th className="p-3 text-left">시작시각</th>
@@ -96,19 +109,30 @@ export default function PerformancesList() {
                 <tbody>
                   {data.items.map((it, idx) => (
                     <tr key={it.performanceId} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-100`}>
-                      <td className="p-3">{it.workOrderId}</td>
-                      <td className="p-3">{it.itemId}</td>
-                      <td className="p-3">{it.equipmentId}</td>
-                      <td className="p-3 text-right text-blue-900 font-semibold">{it.producedQty}</td>
-                      <td className="p-3 text-right text-red-700 font-semibold">{it.defectQty}</td>
+
+                      <td className="p-3">{it.performanceId}</td>
+                      <td className="p-3">{it.processName}</td>
+                      <td className="p-3">{it.processDescription}</td>
+                      <td className="p-3">{it.equipmentName}</td>
+                      <td className="p-3">{it.itemName}</td>
+                      <td className="p-3">{it.itemType}</td>
+                      <td className="p-3">{it.itemUnit}</td>
+                      <td className="p-3">{it.itemDescription}</td>
+                      <td className="p-3">{it.workOrderNumber}</td>
+                      <td className="p-3">{it.workOrderorderQty}</td>
+                      <td className="p-3">{it.workOrderproducedQty}</td>
+                      <td className="p-3">{it.workOrderCode}</td>
+                      
+                      <td className="p-3 text-right text-blue-900 font-semibold">{it.perfProducedQty}</td>
+                      <td className="p-3 text-right text-red-700 font-semibold">{it.perfDefectQty}</td>
                       <td className="p-3">
-                        {new Date(it.startTime).toLocaleString("ko-KR", {
+                        {new Date(it.perfstartTime).toLocaleString("ko-KR", {
                           year: "numeric", month: "2-digit", day: "2-digit",
                           hour: "2-digit", minute: "2-digit"
                         })}
                       </td>
                                             <td className="p-3">
-                        {new Date(it.endTime).toLocaleString("ko-KR", {
+                        {new Date(it.perfendTime).toLocaleString("ko-KR", {
                           year: "numeric", month: "2-digit", day: "2-digit",
                           hour: "2-digit", minute: "2-digit"
                         })}
