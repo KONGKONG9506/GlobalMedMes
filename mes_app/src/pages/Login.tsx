@@ -28,7 +28,6 @@ export default function Login() {
       alert(msg);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       {/* 로그인 카드 */}

@@ -7,7 +7,7 @@ import WorkOrderCreate from "../workorders/WorkOrderCreate";
 type RightSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
-  onCreated?: () => void; // 생성 후 호출
+  onCreated?: () => void; // 생성 후 호출 
 };
 
 export default function RightSidebar({ isOpen, onClose, onCreated }: RightSidebarProps) {
@@ -69,7 +69,7 @@ export default function RightSidebar({ isOpen, onClose, onCreated }: RightSideba
   if (!isOpen) return null;
 
   return (
-    <aside className="w-96 bg-white border-l shadow fixed top-0 bottom-0 right-0 z-50 flex flex-col transform transition-transform duration-300"
+    <aside className="w-72 bg-white border-l shadow fixed top-0 bottom-0 right-0 z-50 flex flex-col transform transition-transform duration-300"
     style={{transform: isOpen ? "translateX(0)" : "translateX(100%)",}}>
       <div className="p-4 border-b flex items-center justify-between">
         <span className="text-lg font-semibold"></span>

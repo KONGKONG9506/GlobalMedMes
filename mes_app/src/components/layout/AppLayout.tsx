@@ -23,15 +23,15 @@ export default function AppLayout() {
         }}
       >
         {/* 헤더 */}
-        <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-300 text-white shadow-md">
+        <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-300">
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+              className="p-2 rounded-lg" //hover:bg-white/20
             >
               <Menu size={24} />
             </button>
-            <span className="text-xl font-bold tracking-wide">
+            <span className="text-xl font-bold tracking-wide text-white">
               GlobalMed MES
             </span>
           </div>
