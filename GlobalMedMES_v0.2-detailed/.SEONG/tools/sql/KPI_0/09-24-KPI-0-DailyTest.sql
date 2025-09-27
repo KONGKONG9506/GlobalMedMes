@@ -1,3 +1,7 @@
+
+SET @EVT_DAILY_BATCH  := (SELECT code_id FROM tb_code WHERE group_code='KPI_DATA_TYPE' AND code='DAILY_BATCH');
+
+
 -- CNC-001, P-100, FG-FIX-4010S-001 → 과거 100일치
 INSERT INTO tb_kpi_data (
     kpi_date, equipment_id, process_id, item_id, 

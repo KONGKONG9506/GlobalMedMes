@@ -336,3 +336,5 @@ INSERT INTO `tb_item` (`item_id`, `item_code`, `item_name`, `item_type`, `unit`,
 ('SM-FIX-4010-001', 'SM-FIX-4010-001', 'Fixture Semi 4.0x10', 'P', 'EA', 'CNC 가공 완료, 표면처리 전', 'system'),
 ('FG-FIX-4010S-001', 'FG-FIX-4010S-001', '임플란트 Fixture S-Type 4.0x10', 'F', 'EA', 'Ø4.0mm, L10mm, SLA Surface', 'system'),
 ('FG-FIX-4512S-001', 'FG-FIX-4512S-001', '임플란트 Fixture S-Type 4.5x12', 'F', 'EA', 'Ø4.5mm, L12mm, SLA Surface', 'system');
+
+
