@@ -6,6 +6,7 @@ import type { EquipStatusItem } from "../../types/equip";
 import { fetchEquipStatus } from "../../lib/equip";
 import EquipStatusSelect, { StatusOptions } from "./Equipstatussearch";
 import Rightbarequ from "./Rightbarequ"; 
+import CanWrite from "../../components/common/perm/CanWrite";
 
 const statusColors = {
   RUN: "bg-green-100 text-green-800",
@@ -50,12 +51,14 @@ export default function EquipStatusPage() {
 
          {/* 👉 사이드바 열기 버튼 */}
       <div className="mb-4">
+        <CanWrite>
         <button
           onClick={() => setSidebarOpen(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
         >
           새 상태 등록
         </button>
+        </CanWrite>
       </div>
 
       {/* 👉 사이드바 */}
