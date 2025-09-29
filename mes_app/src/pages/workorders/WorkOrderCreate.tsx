@@ -27,6 +27,9 @@ export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
   const [isSubmitting, setSubmitting] = useState(false);
   const canSave = canWrite && !isSubmitting;
    const qc = useQueryClient();
+ const [isSidebarOpen] = useState(false);
+
+  
 
   function validate() {
     const e: {[k:string]: string} = {};
@@ -62,10 +65,11 @@ export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
       setSubmitting(false);
     }
   }
-
+ 
   return (
-    <div>
-      <h1 className="text-lg font-semibold mb-3">Create Details</h1>
+     <div className={`flex-1 transition-all duration-300 ${
+          isSidebarOpen ? "mr-96" : "mr-0"}`}>
+      <h1 className="text-lg font-semibold mb-3">Create Details</h1>     
       <form onSubmit={submit} className="grid gap-3 w-full px-4">
         {err && <div className="text-red-600">{err}</div>}
         <input className="border px-3 py-2 rounded-md w-full" placeholder="지시번호" value={workOrderNumber} onChange={(e)=>setNo(e.target.value)} required />
@@ -83,6 +87,8 @@ export default function WorkOrderCreate({onClose}: WorkOrderCreateProps) {
           <button className="border px-3 py-1 rounded" type="button" onClick={onClose}>취소</button>
         </div>
       </form>
+      {/* <RightSidebar isOpen={!isSidebarOpen} onClose={() => setSidebarOpen(false)} onCreated={() => setSidebarOpen(false)} />
+      <RightSidebar isOpen={!isRightOpen} onClose={() => setRightOpen(false)} onCreated={() => setRightOpen(false)} /> */}
     </div>
   );
 }

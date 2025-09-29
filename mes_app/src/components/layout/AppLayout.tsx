@@ -16,35 +16,33 @@ export default function AppLayout() {
 
       {/* 메인 콘텐츠 영역 */}
       <div
-        className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
-          isSidebarOpen ? "ml-64" : "ml-0"
-        }`}
+          className={`flex-1 flex flex-col transition-all duration-300`}
+        style={{
+          marginLeft: isSidebarOpen ? 170 : 0,   // 왼쪽 사이드바 width 64 * 4 = 256px
+          // marginRight: isRightOpen ? 384 : 0, // 오른쪽 사이드바 width 96 * 4 = 384px
+        }}
       >
         {/* 헤더 */}
-        <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-300 text-white shadow-md">
+        <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-300">
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+              className="p-2 rounded-lg" //hover:bg-white/20
             >
               <Menu size={24} />
             </button>
-            <span className="text-xl font-bold tracking-wide">
+            <span className="text-xl font-bold tracking-wide text-white">
               GlobalMed MES
             </span>
           </div>
-          <div className="flex items-center space-x-4">
-            {/* 나중에 유저 프로필, 알림 아이콘 자리 */}
-            <div className="w-8 h-8 rounded-full bg-white/30 flex items-center justify-center text-sm font-bold">
-              
-            </div>
+         <div className="flex items-center gap-4">
           </div>
         </header>
 
         {/* 메인 */}
         <main className="flex-1 p-6 bg-gray-50 overflow-auto">
           <div className="bg-white rounded-2xl shadow-lg p-6 h-full">
-            <Outlet />
+            <Outlet/>
           </div>
         </main>
       </div>

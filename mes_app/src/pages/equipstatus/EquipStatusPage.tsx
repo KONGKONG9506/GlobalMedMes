@@ -22,6 +22,7 @@ export default function EquipStatusPage() {
   const [toDate, setToDate] = useState<string>(today);
 
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isRightOpen, setRightOpen] = useState(false);
 
   // 목록 로드
   const { data, isLoading, error } = useQuery<PageResult<EquipStatusItem>>({
@@ -46,7 +47,10 @@ export default function EquipStatusPage() {
   });
 
   return (
-    <div className="w-full p-4">
+    <div className="transition-all duration-300 p-4" 
+    style={{
+    marginRight: isSidebarOpen ? 384 : 0 // 오른쪽 사이드바 열림
+    }}>
       <h1 className="text-2xl font-bold mb-5 text-black-700">설비 상태</h1>
 
          {/* 👉 사이드바 열기 버튼 */}
@@ -69,6 +73,12 @@ export default function EquipStatusPage() {
           setSidebarOpen(false);
         }}
       />
+
+      <Rightbarequ
+       isOpen={isRightOpen}
+      onClose={() => setRightOpen(false)}
+      onCreated={() => setRightOpen(false)}
+     />
 
       {/* 👉 사이드바와 연동될 검색조건 */}
       <form className="flex flex-wrap items-end gap-4 mb-6">

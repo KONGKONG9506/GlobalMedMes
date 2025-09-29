@@ -13,6 +13,7 @@ export function toMenuItems(serverMenus: ServerMenu[]): MenuItem[] {
     title: m.name,
     path: m.path,
     perms: m.perms,
+    // 재귀적으로 children 처리
     children: m.children?.length ? toMenuItems(m.children) : [],
   }));
 }
