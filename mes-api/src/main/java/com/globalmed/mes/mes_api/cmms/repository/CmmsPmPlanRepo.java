@@ -12,13 +12,13 @@ import java.util.Optional;
 public interface CmmsPmPlanRepo extends JpaRepository<CmmsPmPlan, Long> {
     @Query("""
         select p from CmmsPmPlan p
-        where p.deleted=false and p.nextDueAt <= :to
+        where p.deleted=false 
+        and (:to is null or p.nextDueAt <= :to)
         and (:equipmentId is null or p.equipmentId = :equipmentId)
     """)
     Page<CmmsPmPlan> findDue(@Param("to")OffsetDateTime to,
                              @Param("equipmentId") String equipmentId,
-                             Pageable pageable
-                             );
+                             Pageable pageable);
 
     Optional<CmmsPmPlan> findByIdAndDeletedFalse(Long id);
 

@@ -225,7 +225,7 @@ SET @LOSS_QLT := (SELECT code_id FROM tb_code WHERE group_code='LOSS_CATEGORY' A
 SET @LOSS_PLN := (SELECT code_id FROM tb_code WHERE group_code='LOSS_CATEGORY' AND code='PLANNED_STOP' LIMIT 1);
 
 -- 5) 고정 참조
-SET @EQP := 'E-0001';
+SET @EQP := 'BLS-001';
 SET @OP  := '00000000-0000-0000-0000-0000000000OP';
 
 -- 6) PM 계획 데모 (equipment_id+task_name 멱등)
