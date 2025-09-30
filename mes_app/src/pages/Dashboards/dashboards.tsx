@@ -26,6 +26,14 @@ type PerfItem = {
   endTime: string;
 };
 
+type WorkOrderCardItem = {
+  workOrderId: string;
+  itemName: string;
+  processName: string;
+  equipmentName: string;
+  orderQty: number;
+  statusCode: string;
+};
 
 export default function Dashboards() {
   // 오늘 날짜 (KPI 조회용) → 9시간 보정 필요 없다면 그대로 사용
@@ -39,6 +47,9 @@ export default function Dashboards() {
 
   const [perfList, setPerfList] = useState<PerfItem[]>([]);
   const [perfErr, setPerfErr] = useState<string>("");
+
+  const [workOrders, setWorkOrders] = useState<WorkOrderCardItem[]>([]);
+  const [woErr, setWoErr] = useState<string>("");
  
   // **KPI 데이터 로드**
   const load = async () => {
@@ -107,10 +118,28 @@ console.log(fromIso+"////////////////"+toIso);
     }
   };
 
+  // 작업지시 데이터 로드
+  const loadWorkOrders = async () => {
+    try {
+      setWoErr("");
+      const fromIso = new Date(today).toISOString().replace(/\.\d{3}Z$/, "Z");
+      const toIso = new Date(`${today}T23:59:59Z`).toISOString().replace(/\.\d{3}Z$/, "Z");
+
+      const res = await api.get<{ content: WorkOrderCardItem[] }>("/work-orders", {
+        params: { from: fromIso, to: toIso, page: 0, size: 50, sort: "createdAt,desc" },
+      });
+      setWorkOrders(res.data.content ?? []);
+    } catch (err: unknown) {
+      setWorkOrders([]);
+      setWoErr(getErrorMessage(err, "작업지시 조회 실패"));
+    }
+  };
+
   useEffect(() => {
     load();
     loadEquip();
     loadPerformance();
+    loadWorkOrders();
   }, []);
 
   return (
@@ -146,7 +175,7 @@ console.log(fromIso+"////////////////"+toIso);
         </div>
       )}
 
-      <h2 className="text-xl font-semibold mb-4">오늘의 설비 상태</h2>
+      <h2 className="text-xl font-semibold mb-4 mt-6">오늘의 설비 상태</h2>
       {equipErr && <div className="text-red-600 mb-4">{equipErr}</div>}
       {equipstatus.length === 0 && <div>오늘 등록된 설비 상태가 없습니다.</div>}
       {equipstatus.length > 0 && (
@@ -194,6 +223,30 @@ console.log(fromIso+"////////////////"+toIso);
               <div className="text-lg font-bold text-gray-800 mb-2">{p.equipmentId}</div>
               <div className="text-sm text-gray-600 mb-1">생산량: <b className="text-blue-600">{p.producedQty}</b></div>
               <div className="text-sm text-gray-600">불량: <b className="text-red-600">{p.defectQty}</b></div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <h2 className="text-xl font-semibold mb-4 mt-6">오늘의 작업지시</h2>
+      {woErr && <div className="text-red-600 mb-4">{woErr}</div>}
+      {workOrders.length === 0 && <div>오늘 등록된 작업지시가 없습니다.</div>}
+      {workOrders.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {workOrders.map((wo) => (
+            <div key={wo.workOrderId} className="p-6 rounded-xl shadow-md bg-white flex flex-col gap-2 border-2 border-gray-300">
+              <div className="text-sm text-gray-600"><b>품목:</b> {wo.itemName}</div>
+              <div className="text-sm text-gray-600"><b>공정:</b> {wo.processName}</div>
+              <div className="text-sm text-gray-600"><b>설비:</b> {wo.equipmentName}</div>
+              <div className="text-sm text-gray-600"><b>지시:</b> {wo.orderQty}</div>
+              <div className="text-sm text-gray-600">
+                <b>상태:</b> <span className={`px-2 py-1 rounded text-sm font-medium ${
+                  wo.statusCode === "P" ? "bg-yellow-100 text-yellow-800" :
+                  wo.statusCode === "R" ? "bg-blue-100 text-blue-800" :
+                  wo.statusCode === "C" ? "bg-green-100 text-green-800" :
+                  "bg-gray-100 text-gray-600"
+                }`}>{wo.statusCode}</span>
+              </div>
             </div>
           ))}
         </div>
