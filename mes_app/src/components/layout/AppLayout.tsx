@@ -46,7 +46,11 @@ export default function AppLayout() {
            {/* 오른쪽 상단 영역 */}
          <div className="flex items-center gap-4">
           <button
-          onClick={handleLogout}
+          onClick={()=>{
+            if (window.confirm("로그아웃을 하시겠습니까?")){
+              handleLogout();
+            }
+          }}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white text-blue-600 hover:bg-gray-100 font-medium shadow transitio"
           >
             <LogOut size={18} className="text-blue-600"/>
