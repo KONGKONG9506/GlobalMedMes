@@ -13,6 +13,20 @@ const equipStatusColors: Record<string, string> = {
   DOWN: "bg-red-100 text-red-800",
 };
 
+type PerfItem = {
+  performanceId: number;
+  workOrderId: string;
+  workOrderNumber: string;
+  itemId: string;
+  processId: string;
+  equipmentId: string;
+  producedQty: number;
+  defectQty: number;
+  startTime: string;
+  endTime: string;
+};
+
+
 export default function Dashboards() {
   // 오늘 날짜 (KPI 조회용) → 9시간 보정 필요 없다면 그대로 사용
   const today = new Date().toISOString().slice(0, 10);
@@ -23,6 +37,10 @@ export default function Dashboards() {
   const [equipstatus, setEquipstatus] = useState<EquipStatusItem[]>([]);
   const [equipErr, setEquipErr] = useState<string>("");
 
+  const [perfList, setPerfList] = useState<PerfItem[]>([]);
+  const [perfErr, setPerfErr] = useState<string>("");
+ 
+  // **KPI 데이터 로드**
   const load = async () => {
     try {
       setErr("");
@@ -37,7 +55,7 @@ export default function Dashboards() {
       setErr(getErrorMessage(err, "조회 실패"));
     }
   };
-
+ // **설비상태 데이터 로드**
  const loadEquip = async () => {
     try {
       setEquipErr("");
@@ -61,20 +79,45 @@ console.log(fromIso+"////////////////"+toIso);
     } catch (err: unknown) {
       console.error("대시보드 설비상태 API 오류:", err);
       setEquipstatus([]);
-      setEquipErr(getErrorMessage(err, "설비 상태 조회 실패"));
+      setEquipErr(getErrorMessage(err, "설비 상태 조회 실패")); 
+    }
+  };
+
+ // **실적 데이터 로드** 
+ const loadPerformance = async () => {
+    try {
+      setPerfErr("");
+      const fromIso = new Date(today).toISOString().replace(/\.\d{3}Z$/, "Z");
+      const toIso = new Date(`${today}T23:59:59Z`).toISOString().replace(/\.\d{3}Z$/, "Z");
+
+      const res = await api.get<{ content: PerfItem[] }>("/performances", {
+        params: {
+          from: fromIso,
+          to: toIso,
+          page: 0,
+          size: 50,
+          sort: "startTime,desc",
+        },
+      });
+      setPerfList(res.data.content ?? []);
+    } catch (err: unknown) {
+      console.error("대시보드 실적 API 오류:", err);
+      setPerfList([]);
+      setPerfErr(getErrorMessage(err, "실적 조회 실패"));
     }
   };
 
   useEffect(() => {
     load();
     loadEquip();
+    loadPerformance();
   }, []);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">대시보드</h1>
-      <h2 className="text-xl font-semibold mb-4">오늘의 KPI</h2>
 
+      <h2 className="text-xl font-semibold mb-4">오늘의 KPI</h2>
       {err && <div className="text-red-600 mb-4">{err}</div>}
 
       {dataList.length === 0 && <div>오늘 등록된 KPI 데이터가 없습니다.</div>}
@@ -102,27 +145,57 @@ console.log(fromIso+"////////////////"+toIso);
           ))}
         </div>
       )}
-      <h2 className="text-xl font-semibold mb-4">설비 상태</h2>
+
+      <h2 className="text-xl font-semibold mb-4">오늘의 설비 상태</h2>
       {equipErr && <div className="text-red-600 mb-4">{equipErr}</div>}
       {equipstatus.length === 0 && <div>오늘 등록된 설비 상태가 없습니다.</div>}
       {equipstatus.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {equipstatus.map((it) => {
-            const statusClass =
-              equipStatusColors[it.statusCode as keyof typeof equipStatusColors] ||
-              "bg-gray-100 text-gray-800";
-            return (
-              <div
-                key={it.logId}
-                className="p-4 rounded-lg shadow border flex flex-col items-center"
-              >
-                <div className="text-lg font-bold mb-2">{it.equipmentId}</div>
-                <span className={`px-3 py-1 rounded-full font-semibold text-sm ${statusClass}`}>
-                  {it.statusCode}
-                </span>
-              </div>
-            );
-          })}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {equipstatus.map((it) => {
+       const statusClass =
+       equipStatusColors[it.statusCode as keyof typeof equipStatusColors] ||
+      "bg-gray-100 text-gray-800";
+
+       const borderColors: Record<string, string> = {
+       RUN: "border-green-400",
+       IDLE: "border-yellow-400",
+       DOWN: "border-red-400",
+      };
+      const borderClass =
+      borderColors[it.statusCode as keyof typeof borderColors] || "border-gray-300";
+
+      return (
+      <div
+        key={it.logId}
+        className={`p-6 rounded-xl shadow-md bg-white flex flex-col items-center transition-all duration-300 border-2 ${borderClass}`}>
+        {/* 설비명 */}
+        <div className="text-lg font-bold text-gray-800 mb-2">
+          {it.equipmentId}
+        </div>
+
+        {/* 상태 뱃지 */}
+        <span
+          className={`px-4 py-1.5 rounded-full font-semibold text-sm ${statusClass}`}>
+          {it.statusCode}
+        </span>
+       </div>
+        );
+       })}
+       </div>
+      )}
+
+      <h2 className="text-xl font-semibold mb-4 mt-6">오늘의 실적</h2>
+      {perfErr && <div className="text-red-600 mb-4">{perfErr}</div>}
+      {perfList.length === 0 && <div>오늘 등록된 실적 데이터가 없습니다.</div>}
+      {perfList.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {perfList.map((p) => (
+            <div key={p.performanceId} className="p-6 rounded-xl shadow-md bg-white flex flex-col items-center border-2 border-gray-300">
+              <div className="text-lg font-bold text-gray-800 mb-2">{p.equipmentId}</div>
+              <div className="text-sm text-gray-600 mb-1">생산량: <b className="text-blue-600">{p.producedQty}</b></div>
+              <div className="text-sm text-gray-600">불량: <b className="text-red-600">{p.defectQty}</b></div>
+            </div>
+          ))}
         </div>
       )}
     </div>
