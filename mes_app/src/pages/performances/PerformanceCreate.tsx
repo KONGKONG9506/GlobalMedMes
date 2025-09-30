@@ -74,22 +74,17 @@ export default function PerformanceCreate() {
     defectQty >= 0 &&
     defectQty <= producedQty;
 
-    // 아래가 기존 코드 - 태영 임시
   // 기준 날짜(UTC): baseline 있으면 그 날짜(UTC), 없으면 오늘(UTC)
-  // const baseDateStr = useMemo(
-  //   () => toBaseDateStrFromIso(woBaselineIso ?? null),
-  //   [woBaselineIso]
-  // );
+  const baseDateStr = useMemo(
+    () => toBaseDateStrFromIso(woBaselineIso ?? null),
+    [woBaselineIso]
+  );
+
   // HH:mm → UTC ISO(Z) 변환(유효할 때만)
-  // const stIso = useMemo(() => toUtcIsoFromTime(startTime, baseDateStr), [startTime, baseDateStr]);
-  // const etIso = useMemo(() => toUtcIsoFromTime(endTime, baseDateStr),   [endTime, baseDateStr]);
-  
-  // 아래가 변경코드 - 태영 임시
-  const stIso = new Date(`${date}T${startTime}:00Z`).toISOString();
-  const etIso = new Date(`${date}T${endTime}:00Z`).toISOString();
+  const stIso = useMemo(() => toUtcIsoFromTime(startTime, baseDateStr), [startTime, baseDateStr]);
+  const etIso = useMemo(() => toUtcIsoFromTime(endTime, baseDateStr),   [endTime, baseDateStr]);
   const stMs = stIso ? new Date(stIso).getTime() : NaN;
   const etMs = etIso ? new Date(etIso).getTime() : NaN;
-
   // 유효성
   const timeOk  = isValidTimeStr(startTime) && isValidTimeStr(endTime) && !!stIso && !!etIso;
   const orderOk = timeOk ? new Date(stIso!).getTime() <= new Date(etIso!).getTime() : false;
@@ -97,7 +92,7 @@ export default function PerformanceCreate() {
   const baselineOk = !woBaselineIso
     ? true
     : stMs >= new Date(woBaselineIso).getTime() && etMs >= new Date(woBaselineIso).getTime();
-
+  
   const statusOk = (woStatus ?? "").toUpperCase() === "R";
   const canSave = canWrite && fieldsOk && qtyOk && timeOk && baselineOk && statusOk && !isSubmitting;
 
