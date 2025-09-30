@@ -31,7 +31,7 @@ public class ProcessCertCheckService {
                     .map(ec -> ec.getCert().getCertCode())
                     .collect(Collectors.toSet());
 
-            Set<String> requiredCertCodes = processCertRepo.findByProcess_ProcessIdAndDeletedFalse(processId)
+            Set<String> requiredCertCodes = processCertRepo.findProCert(processId)
                     .stream()
                     .map(pc -> pc.getCert().getCertCode())
                     .collect(Collectors.toSet());

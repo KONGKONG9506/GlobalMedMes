@@ -1,7 +1,7 @@
 package com.globalmed.mes.mes_api.equipstatus.domain;
 
 import com.globalmed.mes.mes_api.code.CodeEntity;
-import com.globalmed.mes.mes_api.process.ProcessEntity;
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
 import com.globalmed.mes.mes_api.workorder.domain.WorkcenterEntity;
 import jakarta.persistence.*;
 import lombok.*;

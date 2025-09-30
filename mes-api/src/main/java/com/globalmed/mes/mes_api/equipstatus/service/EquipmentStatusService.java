@@ -28,10 +28,28 @@ public class EquipmentStatusService {
         LocalDateTime end = req.endTimeUtc() == null || req.endTimeUtc().isBlank() ? null : parseUtc(req.endTimeUtc());
         if (end != null && end.isBefore(start)) throw new IllegalArgumentException("TIME_ORDER_INVALID");
 
-
         // downtime용 직전 상태 조회
         EquipmentStatusLogEntity lastLog = repo.findTopByEquipmentIdOrderByStartTimeDesc(req.equipmentId())
                 .orElse(null);
+
+        if (lastLog != null) {
+            String lastCode = lastLog.getStatusCode().getCode();
+            String newCode = status.getCode();
+
+            // 1) RUN -> RUN: 에러
+            if ("RUN".equals(newCode) && newCode.equals(lastCode)) {
+                throw new IllegalArgumentException("이미 가동되고 있습니다.");
+            }
+
+            // 2) IDLE -> IDLE 또는 DOWN -> DOWN: 기존 로그 갱신
+            if (("IDLE".equals(newCode) && newCode.equals(lastCode)) ||
+                    ("DOWN".equals(newCode) && newCode.equals(lastCode))) {
+
+                lastLog.setEndTime(end); // 끝 시간 갱신
+                return repo.save(lastLog); // 갱신된 로그 반환
+            }
+        }
+
 
         // 다운타임 로직은 분리된 서비스에서 처리
         downtimeLogService.handleStatusChange(lastLog, status, req);

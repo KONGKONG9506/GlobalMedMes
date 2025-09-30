@@ -1,7 +1,7 @@
 package com.globalmed.mes.mes_api.performance.specs;
 
 import com.globalmed.mes.mes_api.item.ItemEntity;
-import com.globalmed.mes.mes_api.process.ProcessEntity;
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;

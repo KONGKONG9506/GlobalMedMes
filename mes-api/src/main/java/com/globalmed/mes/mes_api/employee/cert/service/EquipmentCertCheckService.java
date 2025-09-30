@@ -18,7 +18,7 @@ public class EquipmentCertCheckService {
     public void check(String employeeId, String equipmentId) {
         // 설비가 요구하는 자격증
         var requiredCerts = equipmentCertRepo
-                .findByEquipment_EquipmentIdAndDeletedFalse(equipmentId).stream()
+                .findEquiprequier(equipmentId).stream()
                 .map(ec -> ec.getCert().getCertCode())
                 .toList();
 

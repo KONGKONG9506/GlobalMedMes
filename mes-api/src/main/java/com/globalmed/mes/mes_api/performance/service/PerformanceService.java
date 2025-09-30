@@ -8,7 +8,7 @@ import com.globalmed.mes.mes_api.item.ItemEntity;
 import com.globalmed.mes.mes_api.kpi.service.RealTimeKpiService;
 import com.globalmed.mes.mes_api.performance.domain.ProductionPerformanceEntity;
 import com.globalmed.mes.mes_api.performance.repository.PerformanceRepo;
-import com.globalmed.mes.mes_api.process.ProcessEntity;
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
 import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;

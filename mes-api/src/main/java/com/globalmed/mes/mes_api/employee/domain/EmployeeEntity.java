@@ -24,6 +24,14 @@ public class EmployeeEntity {
     @Column(name = "employee_name", nullable = false, length = 100)
     private String employeeName;
 
+    // 추가된 컬럼: 소속 부서
+    @Column(name = "department_name", length = 100)
+    private String departmentName;
+
+    // 추가된 컬럼: 직원 상태. tb_code 테이블의 ID를 참조합니다.
+    @Column(name = "status_code_id")
+    private Long statusCodeId;
+
     @Column(name = "created_by", nullable = false, length = 50)
     private String createdBy;
 

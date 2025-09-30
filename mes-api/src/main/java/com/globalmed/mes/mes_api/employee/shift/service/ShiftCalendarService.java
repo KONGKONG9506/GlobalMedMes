@@ -11,9 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,12 +48,24 @@ public class ShiftCalendarService {
             }
 
             ShiftCalendarEntity calendar = new ShiftCalendarEntity();
+
+            OffsetDateTime startTz = start
+                    .atZone(ZoneId.systemDefault())
+                    .toOffsetDateTime()
+                    .withOffsetSameInstant(ZoneOffset.UTC);
+
+            OffsetDateTime endTz = end
+                    .atZone(ZoneId.systemDefault())
+                    .toOffsetDateTime()
+                    .withOffsetSameInstant(ZoneOffset.UTC);
+
+
             calendar.setShiftDate(shiftDate);
             calendar.setShift(shift);
             calendar.setEquipmentId(equipmentId);
             calendar.setWorkcenterId(workcenterId);
-            calendar.setStartTs(start.atOffset(ZoneOffset.ofHours(9))); // KST 예시
-            calendar.setEndTs(end.atOffset(ZoneOffset.ofHours(9)));
+            calendar.setStartTs(startTz); // KST 예시
+            calendar.setEndTs(endTz);
             calendar.setCreatedBy("system");
 
             results.add(calendarRepo.save(calendar));
