@@ -3,9 +3,6 @@ package com.globalmed.mes.mes_api.employee.shift.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.time.LocalTime;
 
 @Entity

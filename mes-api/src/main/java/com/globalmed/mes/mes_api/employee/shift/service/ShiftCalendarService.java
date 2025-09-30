@@ -3,11 +3,16 @@ package com.globalmed.mes.mes_api.employee.shift.service;
 
 import com.globalmed.mes.mes_api.employee.shift.domain.ShiftCalendarEntity;
 import com.globalmed.mes.mes_api.employee.shift.domain.ShiftEntity;
+import com.globalmed.mes.mes_api.employee.shift.dto.ShiftCalendarDto;
+import com.globalmed.mes.mes_api.employee.shift.dto.ShiftDto;
 import com.globalmed.mes.mes_api.employee.shift.repository.ShiftCalendarRepo;
 import com.globalmed.mes.mes_api.employee.shift.repository.ShiftRepo;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,5 +77,53 @@ public class ShiftCalendarService {
         }
 
         return results;
+    }
+    @Transactional
+    public Page<ShiftCalendarDto> getCalendarByDate(LocalDate start, LocalDate end, String equipmentName, Pageable pageable) {
+
+        List<String> equipmentIds = null;
+        if (equipmentName != null && !equipmentName.trim().isEmpty()) {
+            equipmentIds = equipmentRepo.findByEquipmentNametoEntity(equipmentName.trim());
+            // 만약 검색된 설비 ID가 없다면, 결과를 비워서 반환
+            if (equipmentIds.isEmpty()) {
+                return new PageImpl<>(new ArrayList<>(), pageable, 0);
+            }
+        }
+
+
+        // 1. 날짜 범위로 엔티티 조회
+        List<ShiftCalendarEntity> allCalendar = calendarRepo.findByDateRange(start, end, equipmentIds);
+
+        // 2. DTO 변환
+        List<ShiftCalendarDto> dtoList = allCalendar.stream()
+                .map(a -> {
+                    EquipmentEntity eq = equipmentRepo.findById(a.getEquipmentId())
+                            .orElseThrow(() -> new IllegalStateException("Equipment not found: " + a.getEquipmentId()));
+                    LocalDateTime startLocal = a.getStartTs()
+                            .atZoneSameInstant(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    LocalDateTime endLocal = a.getEndTs()
+                            .atZoneSameInstant(ZoneId.systemDefault())
+                            .toLocalDateTime();
+                    return new ShiftCalendarDto(
+                            a.getCalendarId(),
+                            a.getShiftDate(),
+                            a.getShift().getShiftName(),
+                            a.getEquipmentId(),
+                            eq.getEquipmentName(),
+                            a.getWorkcenterId(),
+                            eq.getWorkcenter().getWorkcenterName(),
+                            startLocal,
+                            endLocal
+                    );
+                })
+                .toList();
+
+        // 3. 페이지네이션 적용 (리스트에서 서브리스트 추출)
+        int startIdx = (int) pageable.getOffset();
+        int endIdx = Math.min(startIdx + pageable.getPageSize(), dtoList.size());
+        List<ShiftCalendarDto> pageContent = startIdx > endIdx ? new ArrayList<>() : dtoList.subList(startIdx, endIdx);
+
+        return new PageImpl<>(pageContent, pageable, dtoList.size());
     }
 }

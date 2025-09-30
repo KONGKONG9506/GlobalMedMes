@@ -21,5 +21,6 @@ public class MenuEntity {
 
     @Column(name = "sort_order") private Integer sortOrder;
 
+    @Column(name = "is_deleted") private boolean isDeleted = false;
     // parent_id 등 다른 컬럼은 필요 시 추가
 }

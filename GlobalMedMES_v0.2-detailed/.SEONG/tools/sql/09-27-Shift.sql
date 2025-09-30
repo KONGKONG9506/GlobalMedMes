@@ -1,3 +1,4 @@
+-- 25-09-30
 INSERT INTO tb_menu (menu_code, menu_name, path, sort_order, created_by) VALUES
 ('SHIFT','시프트 관리','/shift',6,'seed')
 ON DUPLICATE KEY UPDATE menu_name=VALUES(menu_name), path=VALUES(path), sort_order=VALUES(sort_order);
@@ -41,3 +42,11 @@ SELECT r.role_id, m.menu_id, 1, 1, 1, 'seed'
 FROM tb_role r JOIN tb_menu m ON m.menu_code IN ('SHIFT','SHIFT_CALENDAR', 'SHIFT_ASSIGNMENT')
 WHERE r.role_code='ROLE_ADMIN'
   AND NOT EXISTS (SELECT 1 FROM tb_role_menu x WHERE x.role_id=r.role_id AND x.menu_id=m.menu_id);
+
+-- 09-30
+-- 시프트 제약 조건 변경
+ALTER TABLE tb_shift_calendar 
+    DROP INDEX uk_shiftcal_eqp,
+    DROP INDEX uk_shiftcal_wc,
+    ADD UNIQUE KEY uk_shiftcal_all (shift_date, shift_id, equipment_id, workcenter_id);
+

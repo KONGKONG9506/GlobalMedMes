@@ -21,4 +21,12 @@ public interface EquipmentRepo extends JpaRepository<EquipmentEntity, String> {
 
     @Query("SELECT e.equipmentId FROM EquipmentEntity e WHERE e.isDeleted = false")
     List<String> findAllEquipmentIds();
+
+
+    @Query("SELECT e FROM EquipmentEntity e WHERE e.isDeleted = false")
+    List<EquipmentEntity> findAllEquipments();
+
+    @Query("SELECT e.equipmentId FROM EquipmentEntity e WHERE e.equipmentName = :equipmentName AND e.isDeleted = false")
+    List<String> findByEquipmentNametoEntity(@Param("equipmentId")String equipmentName);
+
 }

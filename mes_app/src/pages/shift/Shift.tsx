@@ -13,7 +13,7 @@ export default function Shift(){
                 activeTab === "Calendar" ? "bg-blue-500 text-white" : "bg-gray-200"
               }`}
             >
-              PM 계획
+              캘린더 생성
             </button>
           </div>
     
