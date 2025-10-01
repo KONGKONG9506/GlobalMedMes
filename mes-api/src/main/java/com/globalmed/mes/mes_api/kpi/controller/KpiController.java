@@ -29,8 +29,8 @@ public class KpiController {
     @GetMapping("/actuals")
     public ResponseEntity<?> actuals(@RequestParam String kpiDate,
                                      @RequestParam String equipmentId) {
-        var date = LocalDate.parse(kpiDate); // ISO yyyy-MM-dd
-        var res  = kpiService.getActuals(date, equipmentId);
+        LocalDate date = LocalDate.parse(kpiDate); // ISO yyyy-MM-dd
+        KpiService.Res res  = kpiService.getActuals(date, equipmentId);
         return ResponseEntity.ok(Map.of(
                 "kpiDate", res.kpiDate(),
                 "equipmentId", res.equipmentId(),
@@ -70,7 +70,8 @@ public class KpiController {
             result = kpiDataRepo.findByFilters(equipmentId, processId, itemId, aggregationTypeId, pageable);
         }
 
-        var dtoPage = result.map(KpiDataListDto::fromEntity);
+        Page<KpiDataListDto> dtoPage = result.map(KpiDataListDto::fromEntity);
+
         return ResponseEntity.ok(PageResponse.of(dtoPage, sort));
     }
 

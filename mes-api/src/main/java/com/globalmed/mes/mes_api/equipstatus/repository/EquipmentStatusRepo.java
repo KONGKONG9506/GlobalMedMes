@@ -16,5 +16,4 @@ public interface EquipmentStatusRepo extends JpaRepository<EquipmentStatusLogEnt
             String equipmentId, LocalDateTime from, LocalDateTime to, Pageable pageable);
 
     Optional<EquipmentStatusLogEntity> findTopByEquipmentIdOrderByStartTimeDesc(String equipmentId);
-
 }

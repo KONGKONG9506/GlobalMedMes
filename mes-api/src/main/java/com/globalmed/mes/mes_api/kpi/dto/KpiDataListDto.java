@@ -5,6 +5,7 @@ import com.globalmed.mes.mes_api.kpi.domain.KpiDataEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record KpiDataListDto(
         Long kpiId,
@@ -18,7 +19,17 @@ public record KpiDataListDto(
         BigDecimal actualDefectRate,
         Long aggregationType,
         LocalDateTime startTime,
-        LocalDateTime endTime
+        LocalDateTime endTime,
+        String workOrderId,
+        String createdBy,
+        LocalDateTime createdAt,
+        String modifiedBy,
+        LocalDateTime modifiedAt,
+        String batchGroupKey,
+        Long calcStatusCodeId,
+        LocalDateTime calcAt,
+        boolean deleted,
+        OffsetDateTime deletedAt
 ) {
     public static KpiDataListDto fromEntity(KpiDataEntity entity) {
         return new KpiDataListDto(
@@ -33,7 +44,17 @@ public record KpiDataListDto(
                 entity.getActualDefectRate(),
                 entity.getAggregationTypeId(),
                 entity.getStartTime(),
-                entity.getEndTime()
+                entity.getEndTime(),
+                entity.getWorkOrderId(),
+                entity.getCreatedBy(),
+                entity.getCreatedAt(),
+                entity.getModifiedBy(),
+                entity.getModifiedAt(),
+                entity.getBatchGroupKey(),
+                entity.getCalcStatusCodeId(),
+                entity.getCalcAt(),
+                entity.isDeleted(),
+                entity.getDeletedAt()
         );
     }
 }

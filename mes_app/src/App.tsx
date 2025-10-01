@@ -13,6 +13,7 @@ import Forbidden from "./pages/Forbidden";
 import Management from "./pages/Management/Managementcreate";
 import CmmsTotal from "./pages/CMMS/cmms total";
 import Dashboards from "./pages/Dashboards/dashboards";
+import Shift from "./pages/shift/Shift";
 
 export default function App() {
   return (
@@ -72,6 +73,17 @@ export default function App() {
               element={
                 <PermRoute require="write">
                   <CmmsTotal />
+                </PermRoute>
+              }
+            />
+          </Route>
+
+          <Route path="shift">
+            <Route
+              index
+              element={
+                <PermRoute require="write">
+                  <Shift />
                 </PermRoute>
               }
             />

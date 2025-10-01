@@ -36,11 +36,11 @@ public class PmPlanController {
     }
 
     @GetMapping("/due")
-    public PageResponse<PmPlanDto.Res> due(@RequestParam OffsetDateTime to,
-                                           @RequestParam String equipmentId,
+    public PageResponse<PmPlanDto.Res> due(@RequestParam(required = false) OffsetDateTime to,
+                                           @RequestParam(required = false) String equipmentId,
                                            @RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "10") int size,
-                                           @RequestParam String sort) {
+                                           @RequestParam(defaultValue = "nextDueAt,asc") String sort) {
         String[] s = sort.split(",", 2);
         String prop = s[0].trim();
         Sort.Direction dir = (s.length > 1 && "desc".equalsIgnoreCase(s[1].trim()))

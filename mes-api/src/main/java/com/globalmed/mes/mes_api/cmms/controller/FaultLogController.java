@@ -6,6 +6,7 @@ import com.globalmed.mes.mes_api.common.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -29,12 +30,12 @@ public class FaultLogController {
     }
 
     @GetMapping
-    public PageResponse<FaultLogDto.Res> search(@RequestParam String equipmentId,
-                                                @RequestParam OffsetDateTime from,
-                                                @RequestParam OffsetDateTime to,
+    public PageResponse<FaultLogDto.Res> search(@RequestParam(required = false) String equipmentId,
+                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime from,
+                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime to,
                                                 @RequestParam(defaultValue ="0") int page,
                                                 @RequestParam(defaultValue ="10") int size,
-                                                @RequestParam String sort){
+                                                @RequestParam(defaultValue = "occurredAt,desc") String sort){
         String[] p = sort.split(",", 2);
         Sort.Direction dir = (p.length>1 && p[1].equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort s = Sort.by(new Sort.Order(dir, p[0]));
