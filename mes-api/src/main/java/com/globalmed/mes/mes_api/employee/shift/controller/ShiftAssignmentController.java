@@ -2,6 +2,7 @@ package com.globalmed.mes.mes_api.employee.shift.controller;
 
 import com.globalmed.mes.mes_api.employee.shift.domain.ShiftAssignmentEntity;
 import com.globalmed.mes.mes_api.employee.shift.dto.ShiftAssignmentDto;
+import com.globalmed.mes.mes_api.employee.shift.dto.ShiftAssignmentViewDto;
 import com.globalmed.mes.mes_api.employee.shift.service.ShiftAssignmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,14 @@ public class ShiftAssignmentController {
     public ResponseEntity<?> getAssignmentsByPeriod(
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String equipmentId,
+            @RequestParam(required = false) String workcenterId,
             HttpServletRequest req
     ) {
-        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
+
+        if (startDate.isAfter(endDate)) {
             return ResponseEntity.badRequest().body(Map.of(
                     "code", "INVALID_DATE_RANGE",
                     "message", "startDate는 endDate 이전이어야 합니다.",
@@ -43,7 +49,7 @@ public class ShiftAssignmentController {
             ));
         }
 
-        List<ShiftAssignmentDto> assignments = assignmentService.getAssignmentsByDate(startDate, endDate);
+        List<ShiftAssignmentDto> assignments = assignmentService.getAssignmentsByDate(startDate, endDate, equipmentId, workcenterId);
 
         if (assignments == null || assignments.isEmpty()) {
             // 데이터가 없으면 404와 에러 메시지 반환
@@ -56,4 +62,50 @@ public class ShiftAssignmentController {
         }
         return ResponseEntity.ok(assignments);
     }
+
+    @GetMapping("/assignments/views")
+    public ResponseEntity<?> getAssignmentViews(
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String equipmentId,
+            @RequestParam(required = false) String workcenterId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            HttpServletRequest req
+
+    ) {
+        if (startDate == null) startDate = LocalDate.now();
+        if (endDate == null) endDate = LocalDate.now();
+
+        if (startDate.isAfter(endDate)) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "code", "INVALID_DATE_RANGE",
+                    "message", "startDate는 endDate 이전이어야 합니다.",
+                    "path", req.getRequestURI(),
+                    "method", req.getMethod()
+            ));
+        }
+
+        List<ShiftAssignmentViewDto> assignments =
+                assignmentService.getAssignmentViews(startDate, endDate, equipmentId, workcenterId);
+
+        if (assignments == null || assignments.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of(
+                    "code", "DATA_NOT_FOUND",
+                    "message", "해당 기간의 근무 배정 데이터가 존재하지 않습니다",
+                    "path", req.getRequestURI(),
+                    "method", req.getMethod()
+            ));
+        }
+        int total = assignments.size();
+        int fromIndex = Math.min(page * size, total);
+        int toIndex = Math.min(fromIndex + size, total);
+        List<ShiftAssignmentViewDto> pageItems = assignments.subList(fromIndex, toIndex);
+
+        return ResponseEntity.ok(Map.of(
+                "items", pageItems,
+                "total", total
+        ));
+    }
+
 }

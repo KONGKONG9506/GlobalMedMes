@@ -49,4 +49,6 @@ public interface ShiftAssignmentRepo extends JpaRepository<ShiftAssignmentEntity
     Optional<ShiftAssignmentEntity> findEquipShiftNow(@Param("equipmentId") String equipmentId,
                                                       @Param("now") OffsetDateTime now);
 
+
+
 }

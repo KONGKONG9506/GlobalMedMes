@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useState } from "react";
-import { useToast } from "../../store/toast";
 import type {  PageResult } from "../../types/api";
 import Pagination from "../../components/common/Pagination";
 import SortSelect from "../../components/common/SortSelect";
 import { ShiftCalander } from "../../types/shift";
 import { toPage } from "../../adapters/page";
 import ShiftSidebar from "./ShiftSidebar";
+import ShiftAssignSidebar from "./ShiftAssignSiderBar";
 
 const sortOptions = [
   { label: "최근 교대순", value: "shiftDate,desc" },
@@ -21,9 +21,9 @@ export default function ShiftCalendarList() {
   const [equipmentName, setEquipmentName] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const toast = useToast();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const queryClient = useQueryClient();
+  const [sidebarCalendarId, setSidebarCalendarId] = useState<number | null>(null);
 
   const { data, isLoading, error } = useQuery<PageResult<ShiftCalander>>({
     queryKey: ["shifts/calendars", page, size, equipmentName, sort, from, to],
@@ -65,12 +65,12 @@ export default function ShiftCalendarList() {
 
       {/* 헤더 + 정렬 */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-gray-800">교대 캘린더</h1>
+        <h1 className="text-xl font-semibold text-gray-800">교대 목록</h1>
         <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
             <button
               onClick={toggleRightSidebar}
               className="p-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white py-1">
-              작업지시 생성
+              일일 교대 생성
             </button>
       </div>
 
@@ -93,6 +93,7 @@ export default function ShiftCalendarList() {
                     <th className="p-3 text-left">워크센터 </th>
                     <th className="p-3 text-left">시작 시간</th>
                     <th className="p-3 text-left">종료 시간</th>
+                    <th className="p-3 text-left">직원 배치</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -104,6 +105,14 @@ export default function ShiftCalendarList() {
                       <td className="p-3">{item.workcenterName}</td>
                       <td className="p-3">{new Date(item.startTs).toLocaleString()}</td>
                       <td className="p-3">{new Date(item.endTs).toLocaleString()}</td>
+                      <td className="p-3">
+                        <button
+                          className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                          onClick={() => setSidebarCalendarId(item.calendarId)} 
+                        >
+                          직원 배치
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -130,6 +139,11 @@ export default function ShiftCalendarList() {
         queryKey: ["shifts/calendars"],
         });
     }}
+    />
+    <ShiftAssignSidebar
+      isOpen={sidebarCalendarId} // calendarId
+      onClose={() => setSidebarCalendarId(null)}
+      onAssigned={() => queryClient.invalidateQueries({ queryKey: ["shifts/calendars"] })}
     />
     </div>
   );
