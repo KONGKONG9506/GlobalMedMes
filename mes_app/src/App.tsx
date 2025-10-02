@@ -14,6 +14,8 @@ import Management from "./pages/Management/Managementcreate";
 import CmmsTotal from "./pages/CMMS/cmms total";
 import Dashboards from "./pages/Dashboards/dashboards";
 import Shift from "./pages/shift/Shift";
+import ProcessList from "./pages/process/ProcessListPage";
+import ProcessDetail from "./pages/process/ProcessDetailSideBar";
 
 export default function App() {
   return (
@@ -78,12 +80,32 @@ export default function App() {
             />
           </Route>
 
-          <Route path="shift">
+          <Route path="process">
             <Route
               index
               element={
                 <PermRoute require="write">
+                  <ProcessList />
+                </PermRoute>
+              }
+            />
+            <Route
+              path="detail/:id"
+              element={
+                <PermRoute require="read">
+                  <ProcessDetail />
+                </PermRoute>
+              }
+            />
+          </Route>
+
+          <Route path="shift">
+            <Route
+              index
+              element={
+                <PermRoute require="read">
                   <Shift />
+                  
                 </PermRoute>
               }
             />

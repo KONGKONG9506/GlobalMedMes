@@ -46,7 +46,7 @@ public class ProcessController {
         return new ResponseEntity<>(newProcess, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/detail/{id}")
     public ResponseEntity<?> getProcessDetail(@PathVariable("id") String processId, HttpServletRequest req) {
         try {
             ProcessDetailDto detail = processService.getProcessDetail(processId);

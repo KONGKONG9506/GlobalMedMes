@@ -7,7 +7,7 @@ import SortSelect from "../../components/common/SortSelect";
 import { ShiftCalander } from "../../types/shift";
 import { toPage } from "../../adapters/page";
 import ShiftSidebar from "./ShiftSidebar";
-import ShiftAssignSidebar from "./ShiftAssignSiderBar";
+import ShiftAssignSidebar from "./ShiftAssignSideBar";
 import { ShiftEquipLists, WorkcenterMap } from "./ShiftList";
 
 const sortOptions = [
@@ -159,21 +159,21 @@ export default function ShiftCalendarList() {
         </>
       )}
 
-    <ShiftSidebar
-    isOpen={isSidebarOpen}
-    onClose={() => setSidebarOpen(false)}
-    onCreated={() => {
-        // 쿼리 무효화해서 새로 불러오기
-        queryClient.invalidateQueries({
-        queryKey: ["shifts/calendars"],
-        });
-    }}
-    />
-    <ShiftAssignSidebar
-      isOpen={sidebarCalendarId} // calendarId
-      onClose={() => setSidebarCalendarId(null)}
-      onAssigned={() => queryClient.invalidateQueries({ queryKey: ["shifts/calendars"] })}
-    />
+      <ShiftSidebar
+      isOpen={isSidebarOpen}
+      onClose={() => setSidebarOpen(false)}
+      onCreated={() => {
+          // 쿼리 무효화해서 새로 불러오기
+          queryClient.invalidateQueries({
+          queryKey: ["shifts/calendars"],
+          });
+      }}
+      />
+      <ShiftAssignSidebar
+        isOpen={sidebarCalendarId} // calendarId
+        onClose={() => setSidebarCalendarId(null)}
+        onAssigned={() => queryClient.invalidateQueries({ queryKey: ["shifts/calendars"] })}
+      />
     </div>
   );
 }
