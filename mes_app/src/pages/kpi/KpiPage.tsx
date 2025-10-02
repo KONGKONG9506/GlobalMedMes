@@ -38,8 +38,9 @@ export default function KpiPage() {
     const loadAugustData = async () => {
       try {
         const res = await api.get<KpiApiResponse>("/kpi/datalist", {
-          params: { startDate: "2025-08-01", endDate: "2025-08-31" },
+          params: { sort: "kpiDate,asc", size: 62 },
         });
+        console.log("chart:",res.data.content);
         setChartDataList(res.data.content);
       } catch (err: unknown) {
         console.error(err);
@@ -47,6 +48,13 @@ export default function KpiPage() {
     };
     loadAugustData();
   }, []);
+
+  // **설비별로 차트 데이터 그룹화**
+  const groupedChartData = chartDataList.reduce<Record<string, KpiRes[]>>((acc, item) => {
+    if (!acc[item.equipmentId]) acc[item.equipmentId] = [];
+    acc[item.equipmentId].push(item);
+    return acc;
+  }, {});
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -107,12 +115,13 @@ export default function KpiPage() {
           ))}
         </>
       )}
-       {/* 조회와 무관하게 항상 표시되는 8월 차트 */}
-      {chartDataList.length > 0 && (
-        <div className="mt-8">
-          <KpiChart dataList={chartDataList} />
+      {/* 설비별로 개별 차트 렌더링 */}
+      {Object.entries(groupedChartData).map(([eqpId, eqpData]) => (
+        <div key={eqpId} className="mt-8">
+          <h2 className="text-xl font-semibold mb-2">{eqpId} KPI 차트 (8월)</h2>
+          <KpiChart dataList={eqpData} />
         </div>
-      )}
+      ))}
     </div>
   );
 }
