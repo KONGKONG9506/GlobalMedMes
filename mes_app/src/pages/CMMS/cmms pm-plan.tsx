@@ -18,7 +18,7 @@ type CmmsPmPlan = {
 
 type CmmsApiResponse = {
   content: CmmsPmPlan[];
-  page: number;
+  page: number;  
   size: number;
   totalElements: number;   // ✅ 백엔드 응답 키랑 동일하게
   totalPages: number;      // ✅ 이것도 추가

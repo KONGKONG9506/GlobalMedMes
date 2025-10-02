@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "../../lib/api";
 import { getErrorMessage } from "../../lib/error";
 import { statusColor, statusDefectColor, fmtPercent, fmtNumber } from "../../lib/kpi";
 import KpiCard from "../kpi/KpiCard";
 import type { KpiRes, KpiApiResponse } from "../../types/kpi";
 import KpisSelect,{KpiOptions} from "./Kpiequipment";
+import KpiChart from "./Kpichart";
 
 export default function KpiPage() {
   //fixedDate.setHours(fixedDate.getHours() + 9)
@@ -12,6 +13,9 @@ export default function KpiPage() {
   const [eqp, setEqp] = useState<string>("");
   const [dataList, setDataList] = useState<KpiRes[]>([]);
   const [err, setErr] = useState<string>("");
+
+   // **차트 전용 데이터**
+  const [chartDataList, setChartDataList] = useState<KpiRes[]>([]);
 
 
   const load = async () => {
@@ -28,6 +32,21 @@ export default function KpiPage() {
       setErr(getErrorMessage(err, "조회 실패"));
     }
   };
+
+  // **페이지 마운트 시 8월 데이터 자동 로드**
+  useEffect(() => {
+    const loadAugustData = async () => {
+      try {
+        const res = await api.get<KpiApiResponse>("/kpi/datalist", {
+          params: { startDate: "2025-08-01", endDate: "2025-08-31" },
+        });
+        setChartDataList(res.data.content);
+      } catch (err: unknown) {
+        console.error(err);
+      }
+    };
+    loadAugustData();
+  }, []);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -87,6 +106,12 @@ export default function KpiPage() {
             </div>
           ))}
         </>
+      )}
+       {/* 조회와 무관하게 항상 표시되는 8월 차트 */}
+      {chartDataList.length > 0 && (
+        <div className="mt-8">
+          <KpiChart dataList={chartDataList} />
+        </div>
       )}
     </div>
   );

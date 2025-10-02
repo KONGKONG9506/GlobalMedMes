@@ -20,8 +20,9 @@ type PerfItem = {
   itemId: string;
   processId: string;
   equipmentId: string;
-  producedQty: number;
-  defectQty: number;
+  equipmentName:string;
+  perfProducedQty: number;
+  perfDefectQty: number;
   startTime: string;
   endTime: string;
 };
@@ -75,7 +76,7 @@ export default function Dashboards() {
       const toIso = new Date(`${today}T23:59:59Z`).toISOString().replace(/\.\d{3}Z$/, "Z");
 console.log(fromIso+"////////////////"+toIso);
       const res = await fetchEquipStatus({
-        equipmentId: "INS-001", // 전체 설비 조회
+        equipmentId: "ETC-001", // 전체 설비 조회
         from: fromIso,
         to: toIso,
         page: 0,
@@ -111,6 +112,7 @@ console.log(fromIso+"////////////////"+toIso);
         },
       });
       setPerfList(res.data.content ?? []);
+      console.log("점검",res.data.content);
     } catch (err: unknown) {
       console.error("대시보드 실적 API 오류:", err);
       setPerfList([]);
@@ -129,6 +131,7 @@ console.log(fromIso+"////////////////"+toIso);
         params: { from: fromIso, to: toIso, page: 0, size: 50, sort: "createdAt,desc" },
       });
       setWorkOrders(res.data.content ?? []);
+      console.log("잗업",res);
     } catch (err: unknown) {
       setWorkOrders([]);
       setWoErr(getErrorMessage(err, "작업지시 조회 실패"));
@@ -150,7 +153,6 @@ console.log(fromIso+"////////////////"+toIso);
       {err && <div className="text-red-600 mb-4">{err}</div>}
 
       {dataList.length === 0 && <div>오늘 등록된 KPI 데이터가 없습니다.</div>}
-
       {dataList.length > 0 && (
         <div className="flex flex-col gap-6">
           {dataList.map((item) => (
@@ -158,17 +160,17 @@ console.log(fromIso+"////////////////"+toIso);
               <KpiCard
                 title={`OEE (${item.equipmentId})`}
                 actual={fmtPercent(item.actualOee)}
-                status={statusColor(undefined, item.actualOee)}
+                status={statusColor(100, item.actualOee)}
               />
               <KpiCard
                 title={`수율 (${item.equipmentId})`}
                 actual={fmtPercent(item.actualYield)}
-                status={statusColor(undefined, item.actualYield)}
+                status={statusColor(100, item.actualYield)}
               />
               <KpiCard
                 title={`생산성 (${item.equipmentId})`}
                 actual={fmtNumber(item.actualProductivity, 2)}
-                status={statusColor(undefined, item.actualProductivity)}
+                status={statusColor(100, item.actualProductivity)}
               />
             </div>
           ))}
@@ -184,7 +186,7 @@ console.log(fromIso+"////////////////"+toIso);
        const statusClass =
        equipStatusColors[it.statusCode as keyof typeof equipStatusColors] ||
       "bg-gray-100 text-gray-800";
-
+      
        const borderColors: Record<string, string> = {
        RUN: "border-green-400",
        IDLE: "border-yellow-400",
@@ -197,14 +199,10 @@ console.log(fromIso+"////////////////"+toIso);
       <div
         key={it.logId}
         className={`p-6 rounded-xl shadow-md bg-white flex flex-col items-center transition-all duration-300 border-2 ${borderClass}`}>
-        {/* 설비명 */}
         <div className="text-lg font-bold text-gray-800 mb-2">
           {it.equipmentId}
         </div>
-
-        {/* 상태 뱃지 */}
-        <span
-          className={`px-4 py-1.5 rounded-full font-semibold text-sm ${statusClass}`}>
+        <span className={`px-4 py-1.5 rounded-full font-semibold text-sm ${statusClass}`}>
           {it.statusCode}
         </span>
        </div>
@@ -220,9 +218,9 @@ console.log(fromIso+"////////////////"+toIso);
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {perfList.map((p) => (
             <div key={p.performanceId} className="p-6 rounded-xl shadow-md bg-white flex flex-col items-center border-2 border-gray-300">
-              <div className="text-lg font-bold text-gray-800 mb-2">{p.equipmentId}</div>
-              <div className="text-sm text-gray-600 mb-1">생산량: <b className="text-blue-600">{p.producedQty}</b></div>
-              <div className="text-sm text-gray-600">불량: <b className="text-red-600">{p.defectQty}</b></div>
+              <div className="text-lg font-bold text-gray-800 mb-2">{p.equipmentName}</div>
+              <div className="text-sm text-gray-600 mb-1">생산량: <b className="text-blue-600">{p.perfProducedQty}</b></div>
+              <div className="text-sm text-gray-600">불량: <b className="text-red-600">{p.perfDefectQty}</b></div>
             </div>
           ))}
         </div>
