@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../../lib/api";
 import { isAxiosError } from "axios";
 import { useToast } from "../../store/toast";
+import { ShiftEquipLists, WorkcenterMap } from "./ShiftEquipList";
 
 type ShiftSidebarProps = {
   isOpen: boolean;
@@ -13,10 +14,13 @@ export default function ShiftSidebar({ isOpen, onClose, onCreated }: ShiftSideba
   const toast = useToast();
 
   const [date, setDate] = useState("");
-  const [equipmentId, setEquipmentId] = useState("");
-  const [workcenterId, setWorkcenterId] = useState("");
+  const [selectedEqu, setSelectedEqu] = useState(ShiftEquipLists[0]);
   const [isSubmitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const equipmentId = selectedEqu.equId;
+  const workcenterId = selectedEqu.workcenterId;
+  const workcenterName = WorkcenterMap[workcenterId];
 
   const canSave = date.trim() && equipmentId.trim() && workcenterId.trim();
 
@@ -40,8 +44,7 @@ export default function ShiftSidebar({ isOpen, onClose, onCreated }: ShiftSideba
 
       // 폼 초기화
       setDate("");
-      setEquipmentId("");
-      setWorkcenterId("");
+      setSelectedEqu(ShiftEquipLists[0]);
 
       onClose();
       if (onCreated) onCreated();
@@ -78,22 +81,34 @@ export default function ShiftSidebar({ isOpen, onClose, onCreated }: ShiftSideba
             className="border rounded px-2 py-1"
           />
         </label>
+
+        {/* 설비 선택 */}
         <label className="flex flex-col text-sm">
-          설비 ID
-          <input
-            type="text"
-            value={equipmentId}
-            onChange={(e) => setEquipmentId(e.target.value)}
-            className="border rounded px-2 py-1"
-          />
+          설비
+          <select
+            className="border px-2 py-1 rounded"
+            value={selectedEqu.equId}
+            onChange={(e) => {
+              const next = ShiftEquipLists.find((opt) => opt.equId === e.target.value);
+              if (next) setSelectedEqu(next);
+            }}
+          >
+            {ShiftEquipLists.map((opt) => (
+              <option key={opt.equId} value={opt.equId}>
+                {opt.name}
+              </option>
+            ))}
+          </select>
         </label>
+
+        {/* 워크센터 자동 표시 */}
         <label className="flex flex-col text-sm">
-          워크센터 ID
+          워크센터
           <input
             type="text"
-            value={workcenterId}
-            onChange={(e) => setWorkcenterId(e.target.value)}
-            className="border rounded px-2 py-1"
+            value={workcenterName}
+            className="border rounded px-2 py-1 bg-gray-100"
+            readOnly
           />
         </label>
 

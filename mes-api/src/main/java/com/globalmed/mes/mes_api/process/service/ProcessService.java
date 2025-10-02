@@ -107,7 +107,7 @@ public class ProcessService {
         newProcess.setProcessName(creationDto.processName());
         newProcess.setDescription(creationDto.description());
         newProcess.setCreatedAt(LocalDateTime.now());
-        newProcess.setCreatedBy("system");
+//        newProcess.setCreatedBy("system");
 
         ProcessEntity savedProcess = processRepo.save(newProcess);
 
