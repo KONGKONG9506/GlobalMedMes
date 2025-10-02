@@ -42,7 +42,8 @@ public class ShiftCalendarController {
     public ResponseEntity<?> getShiftCalendar(
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String equipmentName,
+            @RequestParam(required = false) String equipmentId,   // ID로 변경
+            @RequestParam(required = false) String workcenterId,  // ID로 변경
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "startTs,desc") String sort,
@@ -70,7 +71,7 @@ public class ShiftCalendarController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         // 서비스에서 DTO Page 반환
-        Page<ShiftCalendarDto> calendarPage = calendarService.getCalendarByDate(startDate, endDate, equipmentName, pageable);
+        Page<ShiftCalendarDto> calendarPage = calendarService.getCalendarByDate(startDate, endDate, equipmentId, workcenterId, pageable);
 
         if (calendarPage == null || calendarPage.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of(

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api } from "../../lib/api";
 import { isAxiosError } from "axios";
 import { useToast } from "../../store/toast";
-import { ShiftEquipLists, WorkcenterMap } from "./ShiftEquipList";
+import { ShiftEquipLists, WorkcenterMap } from "./ShiftList";
 
 type ShiftSidebarProps = {
   isOpen: boolean;

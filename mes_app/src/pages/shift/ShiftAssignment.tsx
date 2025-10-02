@@ -5,6 +5,8 @@ import type { PageResult } from "../../types/api";
 import Pagination from "../../components/common/Pagination";
 import SortSelect from "../../components/common/SortSelect";
 import { ShiftAssignmentView } from "../../types/shift"; // DTO 타입
+import { ShiftEquipLists, WorkcenterMap } from "./ShiftList";
+import { useEffect } from "react";
 
 const sortOptions = [
   { label: "최근 배정순", value: "shiftDate,desc" },
@@ -15,22 +17,27 @@ export default function ShiftAssignmentList() {
   const [page, setPage] = useState(0);
   const [size] = useState(20);
   const [sort, setSort] = useState("shiftDate,desc");
-  const [equipmentName, setEquipmentName] = useState("");
-  const [workcenterName, setWorkcenterName] = useState("");
+const [selectedEquip, setSelectedEquip] = useState("");
+const [selectedWorkcenter, setSelectedWorkcenter] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
-
   const { data, isLoading, error } = useQuery<PageResult<ShiftAssignmentView>>({
-    queryKey: ["shift/assignments/views", page, size, equipmentName, workcenterName, sort, from, to],
+    queryKey: ["shift/assignments/views", page, size, selectedEquip, selectedWorkcenter, sort, from, to],
     queryFn: async () => {
       const params: Record<string, string | number> = { page, size, sort };
-      if (equipmentName) params.equipmentName = equipmentName;
-      if (workcenterName) params.workcenterName = workcenterName;
+      if (selectedEquip){ const eq = ShiftEquipLists.find(e => e.name === selectedEquip);
+      if (eq) params.equipmentId = eq.equId;}
+
+      if (selectedWorkcenter) {
+        const wc = Object.entries(WorkcenterMap).find(([_, name]) => name === selectedWorkcenter);
+        if (wc) params.workcenterId = wc[0];
+      }
+
       if (from) params.startDate = from;
       if (to) params.endDate = to;
 
-      const res = await api.get("/shifts/assignments/views", { params });
+    const res = await api.get("/shifts/assignments/views", { params });
       return res.data; // 서버에서 PageResult 형태로 반환
     }
   });
@@ -39,18 +46,26 @@ export default function ShiftAssignmentList() {
     <div>
       {/* 필터 영역 */}
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
-        <input
-          className="border w-40 px-3 py-2 rounded"
-          placeholder="설비 이름"
-          value={equipmentName}
-          onChange={(e) => { setPage(0); setEquipmentName(e.target.value); }}
-        />
-        <input
-          className="border w-40 px-3 py-2 rounded"
-          placeholder="워크센터 이름"
-          value={workcenterName}
-          onChange={(e) => { setPage(0); setWorkcenterName(e.target.value); }}
-        />
+      <select
+      className="border w-40 px-3 py-2 rounded"
+      value={selectedEquip}
+      onChange={(e) => { setPage(0); setSelectedEquip(e.target.value); }}
+      >
+      <option value="">모든 설비</option>
+      {ShiftEquipLists.map(eq => (
+      <option key={eq.equId} value={eq.name}>{eq.name}</option>
+      ))}
+      </select>
+      <select
+      className="border w-40 px-3 py-2 rounded"
+      value={selectedWorkcenter}
+      onChange={(e) => { setPage(0); setSelectedWorkcenter(e.target.value); }}
+      >
+      <option value="">모든 작업장</option>
+      {Object.entries(WorkcenterMap).map(([id, name]) => (
+      <option key={id} value={name}>{name}</option>
+      ))}
+      </select>
         <input
           className="border px-3 py-2 rounded"
           type="date"
@@ -73,7 +88,15 @@ export default function ShiftAssignmentList() {
 
       {/* 로딩 / 에러 / 데이터 */}
       {isLoading && <div className="text-center text-gray-600 py-10">로딩 중...</div>}
-      {error && <div className="text-center text-red-500 py-10">데이터 불러오기 오류</div>}
+
+      {error && (
+        <div className="text-center text-gray-500 py-10">
+          {/* axios 기준 error.response?.status */}
+          {error instanceof Error && (error as any).response?.status === 404
+            ? "표시할 교대 데이터가 없습니다."
+            : "데이터 불러오기 오류"}
+        </div>
+      )}
 
       {data && (
         <>
@@ -87,7 +110,7 @@ export default function ShiftAssignmentList() {
                     <th className="p-3 text-left">교대일</th>
                     <th className="p-3 text-left">교대조</th>
                     <th className="p-3 text-left">설비</th>
-                    <th className="p-3 text-left">워크센터</th>
+                    <th className="p-3 text-left">작업장</th>
                     <th className="p-3 text-left">작업자</th>
                     <th className="p-3 text-left">작업자 수</th>
                     <th className="p-3 text-left">시작 시간</th>

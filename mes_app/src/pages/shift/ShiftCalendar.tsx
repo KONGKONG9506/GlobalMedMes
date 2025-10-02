@@ -8,6 +8,7 @@ import { ShiftCalander } from "../../types/shift";
 import { toPage } from "../../adapters/page";
 import ShiftSidebar from "./ShiftSidebar";
 import ShiftAssignSidebar from "./ShiftAssignSiderBar";
+import { ShiftEquipLists, WorkcenterMap } from "./ShiftList";
 
 const sortOptions = [
   { label: "최근 교대순", value: "shiftDate,desc" },
@@ -18,7 +19,8 @@ export default function ShiftCalendarList() {
   const [page, setPage] = useState(0);
   const [size] = useState(20);
   const [sort, setSort] = useState("shiftDate,desc");
-  const [equipmentName, setEquipmentName] = useState("");
+  const [equipmentId, setEquipmentId] = useState("");
+  const [workcenterId, setworkcenterId] = useState(""); // 워크센터 필터
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -26,15 +28,27 @@ export default function ShiftCalendarList() {
   const [sidebarCalendarId, setSidebarCalendarId] = useState<number | null>(null);
 
   const { data, isLoading, error } = useQuery<PageResult<ShiftCalander>>({
-    queryKey: ["shifts/calendars", page, size, equipmentName, sort, from, to],
+    queryKey: ["shifts/calendars", page, size, equipmentId, workcenterId, sort, from, to],
     queryFn: async () => {
       const params: Record<string, string | number> = { page, size, sort };
-      if (equipmentName) params.equipmentName = equipmentName;
+      if (equipmentId) params.equipmentId = equipmentId;
+      if (workcenterId) params.workcenterId = workcenterId;
       if (from) params.startDate = from;
       if (to) params.endDate = to;
-      const res = await api.get("/shifts/calendars", { params });
-      console.log(res);
-      return toPage(res.data);
+      try {
+        const res = await api.get("/shifts/calendars", { params });
+        return toPage(res.data);
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          return { items: [], 
+            page: page,    
+            size: size,    
+            total: 0      
+          }; 
+        }
+        throw err;
+      }
+
     }
   });
   const toggleRightSidebar = () => setSidebarOpen(!isSidebarOpen);
@@ -43,12 +57,27 @@ export default function ShiftCalendarList() {
     <div>
       {/* 필터 영역 */}
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
-        <input
+        <select
           className="border w-40 px-3 py-2 rounded"
-          placeholder="설비 이름"
-          value={equipmentName}
-          onChange={(e) => { setPage(0); setEquipmentName(e.target.value); }}
-        />
+          value={equipmentId}
+          onChange={(e) => { setPage(0); setEquipmentId(e.target.value); }}
+        >
+          <option value="">모든 설비</option>
+          {ShiftEquipLists.map(eq => (
+            <option key={eq.equId} value={eq.equId}>{eq.equId}</option>
+          ))}
+        </select>
+
+        <select
+          className="border w-40 px-3 py-2 rounded"
+          value={workcenterId}
+          onChange={(e) => { setPage(0); setworkcenterId(e.target.value); }}
+        >
+          <option value="">모든 작업장</option>
+          {Object.entries(WorkcenterMap).map(([id, name]) => (
+            <option key={id} value={id}>{name}</option>
+          ))}
+        </select>
         <input
           className="border px-3 py-2 rounded"
           type="date"
@@ -90,7 +119,7 @@ export default function ShiftCalendarList() {
                     <th className="p-3 text-left">교대일</th>
                     <th className="p-3 text-left">교대조</th>
                     <th className="p-3 text-left">설비</th>
-                    <th className="p-3 text-left">워크센터 </th>
+                    <th className="p-3 text-left">작업장</th>
                     <th className="p-3 text-left">시작 시간</th>
                     <th className="p-3 text-left">종료 시간</th>
                     <th className="p-3 text-left">직원 배치</th>

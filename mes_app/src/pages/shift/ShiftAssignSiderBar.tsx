@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../../lib/api";
 import { isAxiosError } from "axios";
 import { useToast } from "../../store/toast";
+import { ShiftEmployeeLists, ShiftEmployee } from "./ShiftList"; // 하드코딩 직원 리스트
 
 type ShiftAssignSidebarProps = {
   isOpen: number | null; // calendarId
@@ -11,11 +12,11 @@ type ShiftAssignSidebarProps = {
 
 export default function ShiftAssignSidebar({ isOpen, onClose, onAssigned }: ShiftAssignSidebarProps) {
   const toast = useToast();
-  const [workerId, setWorkerId] = useState("");
+  const [selectedEmp, setSelectedEmp] = useState<ShiftEmployee>(ShiftEmployeeLists[0]);
   const [isSubmitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const canSave = workerId.trim() && !!isOpen;
+  const canSave = selectedEmp.employeeId && !!isOpen;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,11 +27,13 @@ export default function ShiftAssignSidebar({ isOpen, onClose, onAssigned }: Shif
 
     try {
       await api.post(`/shifts/${isOpen}/assign`, null, {
-        params: { workerId },
+        params: { workerId: selectedEmp.employeeId },
       });
 
       toast.push("직원이 배치되었습니다.", "success");
-      setWorkerId("");
+
+      // 초기화
+      setSelectedEmp(ShiftEmployeeLists[0]);
       onClose();
       if (onAssigned) onAssigned();
     } catch (error: unknown) {
@@ -58,15 +61,27 @@ export default function ShiftAssignSidebar({ isOpen, onClose, onAssigned }: Shif
 
       <form onSubmit={submit} className="p-4 flex flex-col gap-3">
         <label className="flex flex-col text-sm">
-          직원 ID
-          <input
-            type="text"
-            value={workerId}
-            onChange={(e) => setWorkerId(e.target.value)}
+          직원 선택
+          <select
+            value={selectedEmp.employeeId}
+            onChange={(e) => {
+              const emp = ShiftEmployeeLists.find(emp => emp.employeeId === e.target.value);
+              if (emp) setSelectedEmp(emp);
+            }}
             className="border rounded px-2 py-1"
-            placeholder="배치할 직원 ID 입력"
-          />
+          >
+            {ShiftEmployeeLists.map(emp => (
+              <option key={emp.employeeId} value={emp.employeeId}>
+                {emp.name} ({emp.department})
+              </option>
+            ))}
+          </select>
         </label>
+
+        {/* 부서 표시 */}
+        <div className="text-sm text-gray-700">
+          부서: {selectedEmp.department}
+        </div>
 
         {err && <div className="text-sm text-red-600">{err}</div>}
 

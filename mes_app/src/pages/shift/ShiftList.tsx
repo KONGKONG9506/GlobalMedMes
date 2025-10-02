@@ -21,3 +21,15 @@ export const WorkcenterMap: Record<string, string> = {
   "WCR-003": "클린룸 및 포장실",
   "QZR-001": "품질보증실"
 };
+
+export type ShiftEmployee = {
+  employeeId: string;   // 실제 DB에 들어갈 ID
+  name: string;         // 화면에 보여줄 이름
+  department: string;   // 부서
+};
+
+export const ShiftEmployeeLists: ShiftEmployee[] = [
+  { employeeId: "00000000-0000-0000-0000-0000000000OP", name: "운영자", department: "운영팀" },
+  { employeeId: "00000000-0000-0000-0000-0000000000QA", name: "품질관리자", department: "품질관리팀" },
+  { employeeId: "00000000-0000-0000-0000-0000000000AD", name: "관리자", department: "경영지원팀" },
+];
