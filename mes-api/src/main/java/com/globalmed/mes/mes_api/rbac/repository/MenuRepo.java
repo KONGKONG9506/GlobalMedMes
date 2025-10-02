@@ -37,9 +37,8 @@ public interface MenuRepo extends JpaRepository<MenuEntity, Long> {
            join tb_menu m on m.menu_id = rm.menu_id 
            where ur.user_id = :uid 
            and m.is_deleted = false
-           group by m.menu_id, m.parent_id, m.menu_code, m.menu_name, 
-           m.path, m.sort_order 
-           order by m.parent_id, m.sort_order, m.menu_name 
+           group by m.menu_id, m.parent_id, m.menu_code, m.menu_name, m.path, 
+           m.sort_order order by m.parent_id, m.sort_order, m.menu_name 
            """, nativeQuery = true)
     List<MenuFlatRow> findMenusByUser(@Param("uid") String userId);
 

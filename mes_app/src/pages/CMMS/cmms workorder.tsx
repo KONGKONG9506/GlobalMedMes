@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import Pagination from "../../components/common/Pagination";
+import SortSelect from "../../components/common/SortSelect";
+
 
 type Cmmsworkorder = {
   id: number;
@@ -20,63 +24,108 @@ type CmmsworkorderResponse = {
   content: Cmmsworkorder[];
   page:number;
   size:number;
-  totalElement:number;
+  totalElements:number;
+  totalPages: number;
+  sort: string;
 };
 
-export default function CmmsPage() {
-  const [workorder, setPmPlans] = useState<Cmmsworkorder[]>([]);
-  const [err, setErr] = useState("");
-  const [loading, setLoading] = useState(true);
+// 정렬 옵션
+const sortOptions = [
+  { label: "최신 생성순", value: "createdAt,desc" },
+  { label: "오래된 생성순", value: "createdAt,asc" },
+  { label: "중요도↑", value: "priorityCodeId,asc" },
+  { label: "중요도↓", value: "priorityCodeId,desc" },
+];
 
-  const load = async () => {
-    try {
-      setErr("");
-      setLoading(true);
+export default function CmmsPage() {
+  const [page, setPage] = useState(0);
+  const [size] = useState(10);
+  const [sort, setSort] = useState("createdAt,desc");
+  const [status, setStatus] = useState("");
+  const [equipmentId, setEquipmentId] = useState("");
+
+  // react-query 사용
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["cmms-work-orders", page, size, sort, status, equipmentId],
+    queryFn: async () => {
+      const params: Record<string, string | number> = { page, size, sort };
+
+      if (status) params.status = status;
+      if (equipmentId) params.equipmentId = equipmentId;
 
       const res = await api.get<CmmsworkorderResponse>("/cmms/work-orders", {
-        params: {id:4, assigneeUserId: "00000000-0000-0000-0000-0000000000OP" },
+        params,
       });
-      console.log("작업지시 사항:", res.data.content);
+      return res.data;
+    },
+    placeholderData: keepPreviousData, 
+  });
 
-      setPmPlans(res.data.content);
-    } catch (err: unknown) {
-      console.error("API 오류:", err);
-      setPmPlans([]);
-      setErr("작업지시 조회 실패");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  if (loading) return <div>불러오는 중...</div>;
-  if (err) return <div className="text-red-500">{err}</div>;
+  if (isLoading) return <div>불러오는 중...</div>;
+  if (error) return <div className="text-red-500">작업지시 조회 실패</div>;
+  if (!data) return <div>데이터 없음</div>;
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">작업지시</h2>
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100">
+     <div className="p-4">
+      {/* 헤더 */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">설비 작업지시 목록</h2>
+      </div>
+      {/* 필터 */}
+      <div className="flex gap-2 mb-4">
+        <input
+          className="border px-2 py-1 rounded"
+          placeholder="설비ID"
+          value={equipmentId}
+          onChange={(e) => {
+            setPage(0);
+            setEquipmentId(e.target.value);
+          }}
+        />
+        <select
+          className="border px-2 py-1 rounded"
+          value={status}
+          onChange={(e) => {
+            setPage(0);
+            setStatus(e.target.value);
+          }}
+        >
+          <option value="">상태 전체</option>
+          <option value="OPEN">Open</option>
+          <option value="ASSIGNED">Assigned</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="DONE">Done</option>
+        </select>
+        
+        <SortSelect
+          value={sort}
+          options={sortOptions}
+          onChange={(v) => {
+            setPage(0);
+            setSort(v);
+          }}
+        />
+      </div>
+    <div className="overflow-x-auto border rounded shadow-sm">
+      <table className="min-w-full table-fixed text-sm">
+        <thead className="sticky top-0 bg-blue-100 z-10 shadow-sm text-gray-700">
+          <tr>
             <th className="border px-2 py-1">ID</th>
-            <th className="border px-2 py-1">equipmentId</th>
-            <th className="border px-7 py-1">title</th>
-            <th className="border px-0.5 py-1">statusCodeId</th>
-            <th className="border px-0.5 py-1">priorityCodeId</th>
-            <th className="border px-2 py-1">assigneeUserId</th>
+            <th className="border px-2 py-1">설비ID</th>
+            <th className="border px-7 py-1">내용</th>
+            <th className="border px-0.5 py-1">상태</th>
+            <th className="border px-0.5 py-1">중요도</th>
+            <th className="border px-2 py-1">담당자</th>
             <th className="border px-2 py-1">requestId</th>
-            <th className="border px-2 py-1">createdAt</th>
-            <th className="border px-2 py-1">startedAt</th>
-            <th className="border px-2 py-1">finishedAt</th>
-            <th className="border px-0.5 py-1">actualMinutes</th>
-            <th className="border px-2 py-1">partsCost</th>
+            <th className="border px-2 py-1">생성시간</th>
+            <th className="border px-2 py-1">시작시간</th>
+            <th className="border px-2 py-1">종료시간</th>
+            <th className="border px-0.5 py-1">작업시간</th>
+            <th className="border px-2 py-1">비용</th>
           </tr>
         </thead>
         <tbody>
-          {workorder.map((w) => (
+          {data.content.map((w) => (
             <tr key={w.id}>
               <td className="border px-2 py-1">{w.id}</td>
               <td className="border px-2 py-1">{w.equipmentId}</td>
@@ -94,6 +143,16 @@ export default function CmmsPage() {
           ))}
         </tbody>
       </table>
+    </div>
+      {/* 페이지네이션 */}
+      <div className="mt-4">
+        <Pagination
+          page={page}
+          size={size}
+          total={data.totalElements}
+          onPageChange={(p) => setPage(p)}
+        />
+      </div>
     </div>
   );
 }

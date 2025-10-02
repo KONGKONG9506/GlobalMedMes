@@ -1,13 +1,21 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import LeftSidebar from "./leftsidebar";
 import ToastHost from "../common/ToastHost";
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { Menu, LogOut} from "lucide-react";
+import { useAuthStore } from "../../store/auth";
 
 export default function AppLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const logout = useAuthStore((s) => s.logout);
+  const nav = useNavigate();
+
+  const handleLogout = () =>{
+    logout();
+    nav("/login",{replace:true});
+  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -23,19 +31,31 @@ export default function AppLayout() {
         }}
       >
         {/* 헤더 */}
-        <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-300 text-white shadow-md">
+        <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-300">
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-lg hover:bg-white/20 transition-colors"
+              className="p-2 rounded-lg" //hover:bg-white/20
             >
               <Menu size={24} />
             </button>
-            <span className="text-xl font-bold tracking-wide">
+            <span className="text-xl font-bold tracking-wide text-white">
               GlobalMed MES
             </span>
           </div>
+           {/* 오른쪽 상단 영역 */}
          <div className="flex items-center gap-4">
+          <button
+          onClick={()=>{
+            if (window.confirm("로그아웃을 하시겠습니까?")){
+              handleLogout();
+            }
+          }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white text-blue-600 hover:bg-gray-100 font-medium shadow transitio"
+          >
+            <LogOut size={18} className="text-blue-600"/>
+            로그아웃
+           </button>
           </div>
         </header>
 

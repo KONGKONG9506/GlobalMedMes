@@ -39,6 +39,7 @@ export default function WorkOrdersList() {
   const [itemName, setIn] = useState<string>("");
   const [processName, setPn] = useState<string>("");
   const [equipmentName, setEn] = useState<string>("");
+  const toggleRightSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
@@ -73,12 +74,13 @@ export default function WorkOrdersList() {
       toast.push(msg, "error");
     }
   }
-
-  // 사이드바 열기/닫기
-  const toggleRightSidebar = () => setSidebarOpen(!isSidebarOpen);
-
   return (
-    <div>
+    <div className="flex transition-all duration-300">
+    {/* 메인 화면 */}
+    <div
+      className={`flex-1 transition-all duration-300 ${
+        isSidebarOpen ? "mr-72" : "mr-0"
+      }`}>
       {/* 필터 영역 */}
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
         <div className="flex items-center gap-2">
@@ -87,13 +89,13 @@ export default function WorkOrdersList() {
           value={workOrderNumber} onChange={(e) => { setPage(0); setWon(e.target.value); }} />
         <input className="border w-15 px-3 py-2 rounded" placeholder="품명"
           value={itemName} onChange={(e) => { setPage(0); setIn(e.target.value); }} />
-        <input className="border w-32 px-3 py-2 rounded" placeholder="공정명"
+        <input className="border w-28 px-3 py-2 rounded" placeholder="공정명"
           value={processName} onChange={(e) => { setPage(0); setPn(e.target.value); }} />
-        <input className="border w-36 px-3 py-2 rounded" placeholder="설비명"
+        <input className="border w-32 px-3 py-2 rounded" placeholder="설비명"
           value={equipmentName} onChange={(e) => { setPage(0); setEn(e.target.value); }} />
         </div>
         <select
-          className="border px-3 py-2 rounded"
+          className="border w-32 px-3 py-2 rounded"
           value={status}
           onChange={(e) => { setPage(0); setStatus(e.target.value); }}
         >
@@ -103,13 +105,13 @@ export default function WorkOrdersList() {
           <option value="C">C</option>
         </select>
         <input
-          className="border px-3 py-2 rounded"
+          className="border w-32 px-3 py-2 rounded"
           type="date"
           value={from}
           onChange={(e) => { setPage(0); setFrom(e.target.value); }}
         />
         <input
-          className="border px-3 py-2 rounded"
+          className="border w-32 px-3 py-2 rounded"
           type="date"
           value={to}
           onChange={(e) => { setPage(0); setTo(e.target.value); }}
@@ -235,5 +237,6 @@ export default function WorkOrdersList() {
       {/* 오른쪽 사이드바 */}
       <RightSidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
     </div>
+  </div>
   );
 }

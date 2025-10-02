@@ -67,7 +67,7 @@ export default function ShiftAssignmentList() {
 
       {/* 헤더 + 정렬 */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-gray-800">교대 목룍</h1>
+        <h1 className="text-xl font-semibold text-gray-800">교대 목록</h1>
         <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
       </div>
 
