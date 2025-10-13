@@ -38,7 +38,7 @@ public class ProcessEntity {
     @Column(name = "modified_by", length = 50)
     private String modifiedBy;
 
-    @Column(name = "modified_at", insertable = false, updatable = false)
+    @Column(name = "modified_at")
 
     private LocalDateTime modifiedAt;
     @PrePersist

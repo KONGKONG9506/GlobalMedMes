@@ -19,6 +19,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -133,7 +135,6 @@ public class ProcessService {
         // 값 업데이트
         process.setProcessName(creationDto.processName());
         process.setDescription(creationDto.description());
-        process.setModifiedAt(LocalDateTime.now());
 
         // 자격증 갱신
         updateProcessCerts(process, creationDto.requiredCertCodes());
@@ -166,6 +167,8 @@ public class ProcessService {
         Set<String> newCertCodes = certCodes.stream().collect(Collectors.toSet());
         List<ProcessCertEntity> entitiesToSave = new java.util.ArrayList<>();
 
+        boolean certsModified = false;
+
         // 2. 새로운 자격증 목록을 순회하며 추가 및 업데이트할 엔티티를 결정합니다.
         for (String certCode : newCertCodes)
         {
@@ -180,6 +183,7 @@ public class ProcessService {
                     existingEntity.setDeleted(false);
                     existingEntity.setDeletedAt(null);
                     entitiesToSave.add(existingEntity);
+                    certsModified = true;
                 }
                 certCodeMap.remove(certCode);
             } else {
@@ -189,6 +193,7 @@ public class ProcessService {
                 newProcessCert.setProcess(process);
                 newProcessCert.setCert(cert);
                 entitiesToSave.add(newProcessCert);
+                certsModified = true;
             }
         }
 
@@ -198,14 +203,27 @@ public class ProcessService {
                 existingEntity.setDeleted(true);
                 existingEntity.setDeletedAt(OffsetDateTime.now(ZoneOffset.UTC));
                 entitiesToSave.add(existingEntity);
+                certsModified = true;
             }
         }
+        if (!entitiesToSave.isEmpty()) {
+            proCertRepo.saveAll(entitiesToSave);
+        }
+        // ✅ 자격증 변경이 있으면 ProcessEntity.modifiedAt 갱신
+        if (certsModified) {
+            OffsetDateTime now = OffsetDateTime.now();
+            process.setModifiedAt(now.toLocalDateTime());
+            processRepo.saveAndFlush(process);
+        }
 
-        proCertRepo.saveAll(entitiesToSave);
 
     }
 
-
+    private String getCurrentUserId() {
+        // SecurityContextHolder에서 직접 가져오는 로직을 유틸리티 클래스나 여기에 구현해야 합니다.
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return (auth != null && auth.isAuthenticated()) ? String.valueOf(auth.getPrincipal()) : "system";
+    }
     private List<CertDto> getCertDtosForProcess(ProcessEntity process) {
         List<ProcessCertEntity> processCerts = proCertRepo.findProCert(process.getProcessId());
         return processCerts.stream()
