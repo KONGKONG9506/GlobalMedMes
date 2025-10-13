@@ -3,7 +3,6 @@ package com.globalmed.mes.mes_api.workorder.service;
 
 
 import com.globalmed.mes.mes_api.code.CodeRepo;
-import com.globalmed.mes.mes_api.integration.erp.ErpApiClient;
 import com.globalmed.mes.mes_api.process.repository.ProcessRepo;
 import com.globalmed.mes.mes_api.item.ItemRepo;
 import com.globalmed.mes.mes_api.employee.cert.service.ProcessCertCheckService;
@@ -13,10 +12,11 @@ import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.dto.WorkOrderDetailDto;
 import com.globalmed.mes.mes_api.workorder.dto.WorkOrderListDto;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -34,13 +34,13 @@ public class WorkOrderService {
     private final EquipmentRepo equipmentRepo;
     private final ProductionLogService productionLogService;
     private final ProcessCertCheckService processCertCheckService;
-    private final ErpApiClient erpApiClient;
+    private final ToErpStatusService toErpStatusService;
 
-    private static final String ERP_IN_PRODUCTION = "IN_PRODUCTION";
-    private static final String ERP_COMPLETED = "COMPLETED";
+//    private static final String ERP_IN_PRODUCTION = "IN_PRODUCTION";
+//    private static final String ERP_COMPLETED = "COMPLETED";
 
     @Transactional
-    public WorkOrderEntity create(String workOrderNumber, String itemId, String processId,
+    public WorkOrderEntity create(String planId, String workOrderNumber, String itemId, String processId,
                                   String equipmentId, BigDecimal orderQty, String createdByOpt) {
 
         woRepo.findByWorkOrderNumber(workOrderNumber).ifPresent(x -> {
@@ -62,6 +62,12 @@ public class WorkOrderService {
         var wo = new WorkOrderEntity();
         wo.setWorkOrderId(UUID.randomUUID().toString());
         wo.setWorkOrderNumber(workOrderNumber);
+
+        // planId가 null 또는 비어 있지 않을 때만 설정
+        if (planId != null && !planId.isBlank()) {
+            wo.setPlanId(planId);
+        }
+
         wo.setItemId(item);
         wo.setProcessId(process);
         wo.setEquipmentId(equipment);
@@ -82,6 +88,7 @@ public class WorkOrderService {
 
         var cur = wo.getStatusCode().getCode();         // 현재 P/R/C
         var to  = toStatus != null ? toStatus.trim() : "";
+        if(now == null) now = OffsetDateTime.now();
 
         // 허용 전이만 통과
         boolean allowed = (cur.equals("P") && to.equals("R"))
@@ -90,26 +97,13 @@ public class WorkOrderService {
             throw new IllegalStateException("WO_STATUS_INVALID");
         }
         if(now == null) now = OffsetDateTime.now();
-//        P -> R 전이 공정 자격 체크 (개발용으로 임시 비활성화)
         if(cur.equals("P")&&to.equals("R")){
-            // TODO: 실제 운영 환경에서는 아래 주석을 해제하고 위의 주석을 제거하세요
-            // processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
-        }
-
-        // 1. 상태 전이 확인 및 ERP 통보 상태 결정
-        String erpNewStatus = null;
-        if (cur.equals("P") && to.equals("R")) {
-            // Released → START
-            erpNewStatus = ERP_IN_PRODUCTION;
-        } else if (cur.equals("R") && to.equals("C")) {
-            // Completed → END
-            erpNewStatus = ERP_COMPLETED;
+             processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
         }
 
         // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
         var next = codeRepo.findByGroupCodeAndCodeAndUseYn("wo_status", to, 'Y')
                 .orElseThrow(() -> new IllegalStateException("WO_STATUS_"+to+"_NOT_FOUND"));
-
         wo.setStatusCode(next);           // status_code_id 매핑
 
         // ✅ 상태 전이에 따른 로그 기록
@@ -133,23 +127,10 @@ public class WorkOrderService {
             );
         }
 
-        // 2. 상태 전이에 따른 로그 기록 및 startTs/endTs 설정 (기존 로직)
-        if (cur.equals("P") && to.equals("R")) {
-            wo.setStartTs(now.toLocalDateTime());
-            // productionLogService.logStart(...) 호출 (기존 로직 유지)
-        } else if (cur.equals("R") && to.equals("C")) {
-            wo.setEndTs(now.toLocalDateTime());
-            // productionLogService.logEnd(...) 호출 (기존 로직 유지)
-        }
-
         // 3. 🚨 ERP 통보 (PlanId가 있을 경우에만 실행)
-        if (erpNewStatus != null && wo.getPlanId() != null && !wo.getPlanId().isBlank()) {
-            // 수정자 정보: Work Order가 DB에 반영된 후의 createdBy 또는 system 사용
-            String modifier = wo.getCreatedBy() != null ? wo.getCreatedBy() : "sync_mes";
-
-            // WebClient를 블로킹하여 동기적으로 ERP API 호출
-            // PlanId는 WorkOrderEntity에 매핑된 필드를 사용합니다.
-            erpApiClient.updateErpPlanStatus(wo.getPlanId(), erpNewStatus, modifier).block();
+        if (wo.getPlanId() != null && !wo.getPlanId().isBlank()) {
+            // ToErpStatusService는 Work Order 엔티티를 받아 ERP 상태로 변환 및 PUSH 처리를 수행합니다.
+            toErpStatusService.pushStatusToErp(wo);
         }
 
         return wo;
@@ -174,18 +155,11 @@ public class WorkOrderService {
                 .collect(Collectors.toList());
     }
     
-    // ERP연동로직
+
     @Transactional
-    public WorkOrderEntity createFromPlan(String planId, String workOrderNumber, String itemId, String processId,
-                                          String equipmentId, BigDecimal orderQty, String createdByOpt) {
-
-        // 1. 기존 Work Order 생성 로직 재사용
-        WorkOrderEntity wo = create(workOrderNumber, itemId, processId, equipmentId, orderQty, createdByOpt);
-
-        // 2. Plan ID 연결
-        wo.setPlanId(planId); // WorkOrderEntity에 planId 필드가 있으므로 연결
-
-        return wo;
-        // woRepo.save(wo)는 create() 내부에서 호출됨.
+    public WorkOrderEntity create(String workOrderNumber, String itemId, String processId,
+                                  String equipmentId, BigDecimal orderQty, String createdByOpt) {
+        // planId에 null을 전달하여 기존 메소드를 호출
+        return create(null, workOrderNumber, itemId, processId, equipmentId, orderQty, createdByOpt);
     }
 }
