@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = "tb_cert")
 @Getter
@@ -32,4 +34,10 @@ public class CertEntity {
 
     @Column(name = "modified_by", length = 50)
     private String modifiedBy;
+
+    @Column(name="is_deleted", nullable = false)
+    private boolean deleted = false;
+
+    @Column(name="deleted_at")
+    private OffsetDateTime deletedAt;
 }

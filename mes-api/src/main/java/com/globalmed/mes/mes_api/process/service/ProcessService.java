@@ -6,6 +6,8 @@ import com.globalmed.mes.mes_api.employee.cert.domain.CertEntity;
 import com.globalmed.mes.mes_api.employee.cert.domain.ProcessCertEntity;
 import com.globalmed.mes.mes_api.employee.cert.repository.CertRepo;
 import com.globalmed.mes.mes_api.employee.cert.repository.ProcessCertRepo;
+import com.globalmed.mes.mes_api.employee.domain.EmployeeEntity;
+import com.globalmed.mes.mes_api.employee.repository.EmployeeRepo;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentRepo;
 import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
@@ -33,6 +35,7 @@ public class ProcessService {
     private final EquipmentRepo equipmentRepo;
     private final ProcessCertRepo proCertRepo;
     private final CertRepo certRepo;
+    private final EmployeeRepo employeeRepo;
 
     @Transactional
     public Page<ProcessListDto> getProcessList(Pageable pageable) {
@@ -64,10 +67,10 @@ public class ProcessService {
 
         if (process.getModifiedAt() != null && process.getModifiedBy() != null) {
             lastModAt = process.getModifiedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getModifiedBy();
+            lastModBy = resolveEmployeeName(process.getModifiedBy());
         } else if (process.getCreatedAt() != null && process.getCreatedBy() != null) {
             lastModAt = process.getCreatedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getCreatedBy();
+            lastModBy = resolveEmployeeName(process.getCreatedBy());
         }
 
         return new ProcessDetailDto(
@@ -216,10 +219,10 @@ public class ProcessService {
 
         if (process.getModifiedAt() != null && process.getModifiedBy() != null) {
             lastModAt = process.getModifiedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getModifiedBy();
+            lastModBy = resolveEmployeeName(process.getModifiedBy());
         } else if (process.getCreatedAt() != null && process.getCreatedBy() != null) {
             lastModAt = process.getCreatedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getCreatedBy();
+            lastModBy = resolveEmployeeName(process.getCreatedBy());
         }
 
         return new ProcessDetailDto(
@@ -232,4 +235,24 @@ public class ProcessService {
                 lastModBy
         );
     }
+    private String resolveEmployeeName(String employeeId) {
+        return employeeRepo.findActiveById(employeeId)
+                .map(EmployeeEntity::getEmployeeName)
+                .orElse(employeeId);
+    }
+
+    public boolean softDeleteProcess(String processId) {
+        ProcessEntity entity = processRepo.findById(processId)
+                .orElse(null);
+
+        if (entity == null || entity.isDeleted()) {
+            return false;
+        }
+
+        entity.setDeleted(true);
+
+        processRepo.save(entity);
+        return true;
+    }
+
 }

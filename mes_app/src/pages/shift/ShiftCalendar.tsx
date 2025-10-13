@@ -16,13 +16,14 @@ const sortOptions = [
 ];
 
 export default function ShiftCalendarList() {
+  const today = new Date().toISOString().slice(0, 10);
   const [page, setPage] = useState(0);
   const [size] = useState(20);
   const [sort, setSort] = useState("shiftDate,desc");
   const [equipmentId, setEquipmentId] = useState("");
   const [workcenterId, setworkcenterId] = useState(""); // 워크센터 필터
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [from, setFrom] = useState(today);
+  const [to, setTo] = useState(today);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const queryClient = useQueryClient();
   const [sidebarCalendarId, setSidebarCalendarId] = useState<number | null>(null);
@@ -51,11 +52,19 @@ export default function ShiftCalendarList() {
 
     }
   });
-  const toggleRightSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const toggleRightSidebar = () => {
+    setSidebarCalendarId(null)
+    setSidebarOpen(!isSidebarOpen)
+  };
+  const toggleCalendarSidebar = (item: any) => {
+    setSidebarOpen(false)
+    setSidebarCalendarId(item.calendarId)
+  }
 
   return (
-    <div>
+    <div className="flex relative">
       {/* 필터 영역 */}
+      <div className={`flex-1 transition-all duration-300 ${isSidebarOpen || sidebarCalendarId ? "mr-96" : "mr-0"}`}>
       <div className="flex flex-wrap gap-3 mb-4 p-4 border rounded bg-gray-100 shadow-sm">
         <select
           className="border w-40 px-3 py-2 rounded"
@@ -94,13 +103,15 @@ export default function ShiftCalendarList() {
 
       {/* 헤더 + 정렬 */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-gray-800">교대 목록</h1>
+        <h1 className="text-xl font-semibold text-gray-800">작업 일정</h1>
+        <div className="flex items-center gap-3">
         <SortSelect value={sort} options={sortOptions} onChange={(v) => { setPage(0); setSort(v); }} />
             <button
               onClick={toggleRightSidebar}
-              className="p-2 rounded bg-indigo-600 hover:bg-indigo-700 text-white py-1">
-              일일 교대 생성
+              className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              일정 생성
             </button>
+        </div>
       </div>
 
       {/* 로딩 / 에러 / 데이터 */}
@@ -137,7 +148,7 @@ export default function ShiftCalendarList() {
                       <td className="p-3">
                         <button
                           className="px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                          onClick={() => setSidebarCalendarId(item.calendarId)} 
+                          onClick={() => toggleCalendarSidebar(item)}
                         >
                           직원 배치
                         </button>
@@ -158,6 +169,7 @@ export default function ShiftCalendarList() {
           />
         </>
       )}
+      </div>
 
       <ShiftSidebar
       isOpen={isSidebarOpen}

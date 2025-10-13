@@ -13,7 +13,8 @@ type ShiftSidebarProps = {
 export default function ShiftSidebar({ isOpen, onClose, onCreated }: ShiftSidebarProps) {
   const toast = useToast();
 
-  const [date, setDate] = useState("");
+  const today = new Date().toISOString().slice(0, 10);
+  const [date, setDate] = useState(today); // <-- 이 부분을 수정
   const [selectedEqu, setSelectedEqu] = useState(ShiftEquipLists[0]);
   const [isSubmitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);

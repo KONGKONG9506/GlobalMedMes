@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EmployeeRepo extends JpaRepository<EmployeeEntity, String> {
 
@@ -36,6 +37,9 @@ public interface EmployeeRepo extends JpaRepository<EmployeeEntity, String> {
     WHERE e.employeeId = :employeeId
 """)
     List<String> findAllowedProcessIds(@Param("employeeId") String employeeId);
+
+    @Query("SELECT e FROM EmployeeEntity e WHERE e.employeeId = :id AND e.deleted = false")
+    Optional<EmployeeEntity> findActiveById(@Param("id") String id);
 
 //    @Query("SELECT e FROM EmployeeEntity e WHERE e.employeeId IN :employeeIds AND e.deleted = false")
 //    List<EmployeeEntity> findShiftWorkers(@Param("employeeIds") List<String> employeeIds);

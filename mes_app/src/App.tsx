@@ -89,14 +89,6 @@ export default function App() {
                 </PermRoute>
               }
             />
-            <Route
-              path="detail/:id"
-              element={
-                <PermRoute require="read">
-                  <ProcessDetail />
-                </PermRoute>
-              }
-            />
           </Route>
 
           <Route path="shift">

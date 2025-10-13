@@ -41,7 +41,7 @@ export default function ProcessDetailSideBar({ id, onClose }: Props) {
             <p><strong>공정명:</strong> {data.name}</p>
             <p><strong>설명:</strong> {data.description}</p>
             <p><strong>마지막 수정자:</strong> {data.LastmodBy}</p>
-            <p><strong>마지막 수정일:</strong> {data.LastmodAt ? new Date(data.LastmodAt).toLocaleString() : "-"}</p>
+            <p><strong>마지막 수정일:</strong> {data.LastmodAt ? new Date(data.LastmodAt.slice(0, -1)).toLocaleString() : "-"}</p>
           </div>
 
           <div className="border rounded p-4 shadow-sm">

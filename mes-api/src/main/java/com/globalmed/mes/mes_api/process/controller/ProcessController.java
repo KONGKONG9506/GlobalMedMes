@@ -82,4 +82,28 @@ public class ProcessController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+
+    @PreAuthorize("@permChecker.has(authentication, '/process','write') or hasAnyRole('ADMIN','OP')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> softDeleteProcess(@PathVariable("id") String processId, HttpServletRequest req) {
+        try {
+            boolean deleted = processService.softDeleteProcess(processId);
+            if (!deleted) {
+                return ResponseEntity.status(404).body(Map.of(
+                        "code", "ID_NOT_FOUND",
+                        "message", "해당 공정 ID를 찾을 수 없습니다",
+                        "path", req.getRequestURI(),
+                        "method", req.getMethod()
+                ));
+            }
+            return ResponseEntity.ok(Map.of("message", "공정이 삭제되었습니다."));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of(
+                    "code", "INTERNAL_ERROR",
+                    "message", e.getMessage(),
+                    "path", req.getRequestURI(),
+                    "method", req.getMethod()
+            ));
+        }
+    }
 }
