@@ -36,9 +36,6 @@ public class WorkOrderService {
     private final ProcessCertCheckService processCertCheckService;
     private final ToErpStatusService toErpStatusService;
 
-//    private static final String ERP_IN_PRODUCTION = "IN_PRODUCTION";
-//    private static final String ERP_COMPLETED = "COMPLETED";
-
     @Transactional
     public WorkOrderEntity create(String planId, String workOrderNumber, String itemId, String processId,
                                   String equipmentId, BigDecimal orderQty, String createdByOpt) {
@@ -98,7 +95,7 @@ public class WorkOrderService {
         }
         if(now == null) now = OffsetDateTime.now();
         if(cur.equals("P")&&to.equals("R")){
-             processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
+//             processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
         }
 
         // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
@@ -154,8 +151,10 @@ public class WorkOrderService {
                 .map(WorkOrderListDto::fromEntity)
                 .collect(Collectors.toList());
     }
-    
 
+    /**
+     * PlanId 없이 Work Order를 수동으로 생성할 때 사용되는 오버로딩 메소드
+     */
     @Transactional
     public WorkOrderEntity create(String workOrderNumber, String itemId, String processId,
                                   String equipmentId, BigDecimal orderQty, String createdByOpt) {

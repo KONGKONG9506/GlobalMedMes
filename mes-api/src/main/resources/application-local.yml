@@ -31,4 +31,4 @@ app:
 
 erp:
   api:
-    base-url: http://erp-service-host:8080 # ERP 백엔드 서버 주소
+    base-url: http://localhost:8081 # ERP 백엔드 서버 주소

@@ -12,6 +12,7 @@ import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
 import com.globalmed.mes.mes_api.production.service.ProductionLogService;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;
 import com.globalmed.mes.mes_api.workorder.repository.WorkOrderRepo;
+import com.globalmed.mes.mes_api.workorder.service.ToErpStatusService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class PerformanceService {
     private final ProductionLogService productionLogService;
     private final RealTimeKpiService realTimeKpiService;
     private final CodeService codeService;
+    private final ToErpStatusService toErpStatusService;
 
     public record Req(
             String workOrderId, String itemId, String processId, String equipmentId,
@@ -124,11 +126,28 @@ public class PerformanceService {
             wo.setStatusCode(completed);
         }
 
-// Good/Defect 이벤트 로그 남기기
+        boolean isCompleted = false;
+        if (wo.getProducedQty().compareTo(wo.getOrderQty()) >= 0) {
+            CodeEntity completed = codeService.getCode("WO_STATUS", "C");
+            wo.setStatusCode(completed);
+            isCompleted = true; // 완료 플래그 설정
+        }
+
+        // Good/Defect 이벤트 로그 남기기
         if (good.compareTo(BigDecimal.ZERO) > 0) {
-            productionLogService.logGood(woId, eqp, proc, good.intValue()); } if (req.defectQty().compareTo(BigDecimal.ZERO) > 0)
-        {productionLogService.logDefect(woId, eqp, proc, req.defectQty().intValue()); }
-        return new Res(p.getPerformanceId(), good);}
+            productionLogService.logGood(woId, eqp, proc, good.intValue());
+        }
+        if (req.defectQty().compareTo(BigDecimal.ZERO) > 0){
+            productionLogService.logDefect(woId, eqp, proc, req.defectQty().intValue());
+        }
+
+        if (isCompleted && wo.getPlanId() != null && !wo.getPlanId().isBlank()) {
+            // PlanId가 null이 아닌 경우, toErpStatusService를 통해 상태를 PUSH (C -> COMPLETED)
+            toErpStatusService.pushStatusToErp(wo);
+        }
+
+        return new Res(p.getPerformanceId(), good);
+    }
 
     private static String t(String s){ return s==null ? null : s.trim(); }
     private LocalDateTime toUtcLdt(String isoZ){
