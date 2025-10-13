@@ -14,6 +14,8 @@ import Management from "./pages/Management/Managementcreate";
 import CmmsTotal from "./pages/CMMS/cmms total";
 import Dashboards from "./pages/Dashboards/dashboards";
 import Shift from "./pages/shift/Shift";
+import PlanList from "./pages/plan/PlanList";
+import PlanDetail from "./pages/plan/PlanDetail";
 
 export default function App() {
   return (
@@ -33,6 +35,10 @@ export default function App() {
         >
           {/* Dashboard */}
           <Route path="dashboard" element={<Dashboards />} />
+
+          {/* planList */}
+          <Route path="plan" element={<PlanList />} />
+          <Route path="plans/:planId" element={<PlanDetail />} />
 
           {/* Work Orders */}
           <Route path="work-orders" element={<WorkOrdersList />} />
