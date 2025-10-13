@@ -1,9 +1,13 @@
 package com.globalmed.mes.mes_api.plan.service;
 
 import com.globalmed.mes.mes_api.code.CodeRepo;
+import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.item.ItemEntity;
 import com.globalmed.mes.mes_api.item.ItemRepo;
+import com.globalmed.mes.mes_api.process.repository.ProcessRepo;
+import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentRepo;
 import com.globalmed.mes.mes_api.plan.domain.TbProductionPlan; // MES의 Plan Entity
+import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
 import com.globalmed.mes.mes_api.workorder.domain.WorkOrderEntity;      // MES의 WorkOrder Entity
 import com.globalmed.mes.mes_api.integration.erp.dto.ProductionPlanDto;
 import com.globalmed.mes.mes_api.plan.repository.ProductionPlanRepository;
@@ -14,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,12 +28,16 @@ public class MesPlanIntegrationService {
     private final WorkOrderRepo workOrderRepository;
     private final CodeRepo codeRepo;
     private final ItemRepo itemRepo;
+    private final ProcessRepo processRepo;
+    private final EquipmentRepo equipmentRepo;
+
     // 필요한 경우 Item/Product 정보 조회를 위한 ItemService 등 추가 가능
 
     // MES 상태 코드 상수
     private static final String PLANNED = "P";
     private static final String RELEASED = "R";
-    private static final String ITEM_DEFAULT_LINE = "L01"; // 기본 생산 라인 ID 가정
+    private static final String ITEM_DEFAULT_LINE = "P-100"; // 기본 생산 라인 ID 가정
+    private static final String ITEM_DEFAULT_EQUIPMENT = "BLS-001"; // 기본 생산 라인 ID 가정
 
     /**
      * ERP에서 수신된 생산 계획 데이터를 MES DB에 반영하고 워크 오더를 생성합니다.
@@ -77,14 +86,21 @@ public class MesPlanIntegrationService {
         WorkOrderEntity wo = new WorkOrderEntity();
         ItemEntity itemEntity = itemRepo.findById(mesPlan.getItemId())
                 .orElseThrow(() -> new IllegalStateException("MES Item을 찾을 수 없습니다: " + mesPlan.getItemId()));
-        var status = codeRepo.findByGroupCodeAndCodeAndUseYn("WO_STATUS", "R", 'Y')
+        var status = codeRepo.findByGroupCodeAndCodeAndUseYn("WO_STATUS", "P", 'Y')
                 .orElseThrow(() -> new IllegalStateException("WO_STATUS_P_NOT_FOUND"));
+        ProcessEntity processEntity = processRepo.findById(ITEM_DEFAULT_LINE)
+                .orElseThrow(() -> new IllegalStateException("MES Process(공정/라인)을 찾을 수 없습니다: " + ITEM_DEFAULT_LINE));
+        EquipmentEntity equipmentEntity = equipmentRepo.findById(ITEM_DEFAULT_EQUIPMENT)
+                .orElseThrow(() -> new IllegalStateException("MES Equipment을 찾을 수 없습니다: " + ITEM_DEFAULT_EQUIPMENT));
+
+
         // Work Order 필드 설정 (단순 예시)
-        wo.setWorkOrderId(mesPlan.getPlanId() + "-WO-01"); // Unique WO ID 생성
+        wo.setWorkOrderId(UUID.randomUUID().toString());
         wo.setPlanId(mesPlan.getPlanId());
+        wo.setWorkOrderNumber(mesPlan.getPlanNumber() + "-WO-001");
         wo.setItemId(itemEntity);
-        wo.setProcessId(ITEM_DEFAULT_LINE); // 아이템별 기본 라인 조회 로직 필요
-        wo.setEquipmentId();
+        wo.setProcessId(processEntity); // 아이템별 기본 라인 조회 로직 필요
+        wo.setEquipmentId(equipmentEntity);
         wo.setOrderQty(mesPlan.getTargetQty());
         wo.setStartTs(LocalDateTime.now());
         LocalDateTime endDateTime = mesPlan.getEndDate().atTime(LocalTime.MAX);
