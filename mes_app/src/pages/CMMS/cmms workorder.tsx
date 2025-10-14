@@ -110,14 +110,14 @@ export default function CmmsPage() {
       <table className="min-w-full table-fixed text-sm">
         <thead className="sticky top-0 bg-blue-100 z-10 shadow-sm text-gray-700">
           <tr>
-            <th className="border px-2 py-1">ID</th>
-            <th className="border px-2 py-1">설비ID</th>
+            <th className="border px-2 py-1 hidden">ID</th>
+            <th className="border px-2 py-1 ">설비명</th>
             <th className="border px-7 py-1">내용</th>
-            <th className="border px-0.5 py-1">상태</th>
-            <th className="border px-0.5 py-1">중요도</th>
+            <th className="border px-0.5 py-1 hidden">상태</th>
+            <th className="border px-0.5 py-1 hidden">중요도</th>
             <th className="border px-2 py-1">담당자</th>
-            <th className="border px-2 py-1">requestId</th>
-            <th className="border px-2 py-1">생성시간</th>
+            <th className="border px-2 py-1 hidden">requestId</th>
+            <th className="border px-2 py-1 hidden">생성시간</th>
             <th className="border px-2 py-1">시작시간</th>
             <th className="border px-2 py-1">종료시간</th>
             <th className="border px-0.5 py-1">작업시간</th>
@@ -127,14 +127,14 @@ export default function CmmsPage() {
         <tbody>
           {data.content.map((w) => (
             <tr key={w.id}>
-              <td className="border px-2 py-1">{w.id}</td>
+              <td className="border px-2 py-1 hidden">{w.id}</td>
               <td className="border px-2 py-1">{w.equipmentId}</td>
               <td className="border px-2 py-1">{w.title}</td>
-              <td className="border px-2 py-1">{w.statusCodeId}</td>
-              <td className="border px-2 py-1">{w.priorityCodeId}</td>
+              <td className="border px-2 py-1 hidden">{w.statusCodeId}</td>
+              <td className="border px-2 py-1 hidden">{w.priorityCodeId}</td>
               <td className="border px-2 py-1">{w.assigneeUserId}</td>
-              <td className="border px-2 py-1">{w.requestId}</td>
-              <td className="border px-2 py-1">{w.createdAt}</td>
+              <td className="border px-2 py-1 hidden">{w.requestId}</td>
+              <td className="border px-2 py-1 hidden">{w.createdAt}</td>
               <td className="border px-2 py-1">{w.startedAt}</td>
               <td className="border px-2 py-1">{w.finishedAt}</td>
               <td className="border px-2 py-1">{w.actualMinutes}</td>

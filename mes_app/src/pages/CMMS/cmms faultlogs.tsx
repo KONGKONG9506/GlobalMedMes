@@ -64,7 +64,7 @@ export default function CmmsFault() {
     <div className="p-4">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">고장 목록</h2>
+        <h2 className="text-xl font-semibold">고장&수리 목록</h2>
       </div>
       {/* 필터 영역 */}
       <div className="flex gap-2 mb-4">
@@ -110,27 +110,27 @@ export default function CmmsFault() {
         <table className="min-w-full table-fixed text-sm">
           <thead className="sticky top-0 bg-blue-100 z-10 shadow-sm text-gray-700">
             <tr>
-              <th className="border px-2 py-1">ID</th>
-              <th className="border px-2 py-1">설비ID</th>
-              <th className="border px-2 py-1">고장 분류</th>
+              <th className="border px-2 py-1 hidden">ID</th>
+              <th className="border px-2 py-1">설비명</th>
+              <th className="border px-2 py-1 hidden">고장 분류</th>
               <th className="border px-2 py-1">증상</th>
               <th className="border px-2 py-1">조치</th>
               <th className="border px-2 py-1">발생시간</th>
               <th className="border px-2 py-1">해결시간</th>
-              <th className="border px-2 py-1">작업지시ID</th>
+              <th className="border px-2 py-1 hidden">작업지시ID</th>
             </tr>
           </thead>
           <tbody>
             {data.content.map((f) => (
               <tr key={f.id}>
-                <td className="border px-2 py-1">{f.id}</td>
+                <td className="border px-2 py-1 hidden">{f.id}</td>
                 <td className="border px-2 py-1">{f.equipmentId}</td>
-                <td className="border px-2 py-1">{f.lossCategoryCodeId}</td>
+                <td className="border px-2 py-1 hidden">{f.lossCategoryCodeId}</td>
                 <td className="border px-2 py-1">{f.symptom}</td>
                 <td className="border px-2 py-1">{f.action}</td>
                 <td className="border px-2 py-1">{f.occurredAt}</td>
                 <td className="border px-2 py-1">{f.resolveAt}</td>
-                <td className="border px-2 py-1">{f.workOrderId}</td>
+                <td className="border px-2 py-1 hidden">{f.workOrderId}</td>
               </tr>
             ))}
           </tbody>

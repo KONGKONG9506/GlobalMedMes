@@ -96,11 +96,11 @@ export default function CmmsPage() {
       <table className="min-w-full table-fixed text-sm">
         <thead className="sticky top-0 bg-blue-100 z-10 shadow-sm text-gray-700">
           <tr>
-            <th className="border px-2 py-1">ID</th>
-            <th className="border px-2 py-1">설비ID</th>
+            <th className="border px-2 py-1 hidden">ID</th>
+            <th className="border px-2 py-1">설비명</th>
             <th className="border px-2 py-1">작업명</th>
-            <th className="border px-2 py-1">Cycle Type Code</th>
-            <th className="border px-2 py-1">Cycle Value</th>
+            <th className="border px-2 py-1 hidden">Cycle Type Code</th>
+            <th className="border px-2 py-1 hidden">Cycle Value</th>
             <th className="border px-2 py-1">완료시간</th>
             <th className="border px-2 py-1">다음 점검일</th>
             <th className="border px-2 py-1">상태</th>
@@ -112,11 +112,11 @@ export default function CmmsPage() {
               key={plan.id}
               className="hover:bg-gray-50 transition-colors"
             >
-              <td className="border px-2 py-1">{plan.id}</td>
+              <td className="border px-2 py-1 hidden">{plan.id}</td>
               <td className="border px-2 py-1">{plan.equipmentId}</td>
               <td className="border px-2 py-1">{plan.taskName}</td>
-              <td className="border px-2 py-1">{plan.cycleTypeCodeId}</td>
-              <td className="border px-2 py-1">{plan.cycleValue}</td>
+              <td className="border px-2 py-1 hidden">{plan.cycleTypeCodeId}</td>
+              <td className="border px-2 py-1 hidden">{plan.cycleValue}</td>
               <td className="border px-2 py-1">{plan.lastDoneAt}</td>
               <td className="border px-2 py-1">{plan.nextDueAt}</td>
               <td className="border px-2 py-1">
