@@ -1,3 +1,4 @@
+-- 25-10-14
  CREATE TABLE `tb_code_group` (
    `group_code` varchar(50) NOT NULL COMMENT '코드 그룹 ID (PK)',
    `group_name` varchar(100) NOT NULL COMMENT '코드 그룹명 (유일)',
@@ -134,8 +135,7 @@ CREATE TABLE `tb_shift_calendar` (
    `modified_by` varchar(50) DEFAULT NULL,
    `modified_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT 'UTC',
    PRIMARY KEY (`calendar_id`),
-   UNIQUE KEY `uk_shiftcal_eqp` (`shift_date`,`shift_id`,`equipment_id`),
-   UNIQUE KEY `uk_shiftcal_wc` (`shift_date`,`shift_id`,`workcenter_id`),
+   UNIQUE KEY `uk_shiftcal_all` (`shift_date`,`shift_id`,`equipment_id`, `workcenter_id`),
    KEY `idx_shiftcal_date_shift_eqp` (`shift_date`,`shift_id`,`equipment_id`),
    KEY `idx_shiftcal_date_shift_wc` (`shift_date`,`shift_id`,`workcenter_id`),
    KEY `fk_shiftcal_shift` (`shift_id`),

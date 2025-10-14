@@ -41,7 +41,7 @@ export default function ShiftSidebar({ isOpen, onClose, onCreated }: ShiftSideba
         },
       });
 
-      toast.push("교대 캘린더가 생성되었습니다.", "success");
+      toast.push("교대 일정이 생성되었습니다.", "success");
 
       // 폼 초기화
       setDate("");
@@ -68,7 +68,7 @@ export default function ShiftSidebar({ isOpen, onClose, onCreated }: ShiftSideba
       style={{ transform: isOpen ? "translateX(0)" : "translateX(100%)" }}
     >
       <div className="p-4 border-b flex items-center justify-between">
-        <span className="text-lg font-semibold">교대 캘린더 생성</span>
+        <span className="text-lg font-semibold">교대 일정 생성</span>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
       </div>
 

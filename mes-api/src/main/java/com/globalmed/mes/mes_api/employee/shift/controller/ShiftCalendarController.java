@@ -76,7 +76,7 @@ public class ShiftCalendarController {
         if (calendarPage == null || calendarPage.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of(
                     "code", "DATA_NOT_FOUND",
-                    "message", "해당 기간의 시프트 캘린더 데이터가 존재하지 않습니다",
+                    "message", "해당 기간의 교대 일정 데이터가 존재하지 않습니다",
                     "path", req.getRequestURI(),
                     "method", req.getMethod()
             ));

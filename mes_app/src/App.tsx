@@ -16,6 +16,7 @@ import Dashboards from "./pages/Dashboards/dashboards";
 import Shift from "./pages/shift/Shift";
 import PlanList from "./pages/plan/PlanList";
 import PlanDetail from "./pages/plan/PlanDetail";
+import ProcessList from "./pages/process/ProcessListPage";
 
 export default function App() {
   return (
