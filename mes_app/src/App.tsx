@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/Login";
@@ -16,6 +16,8 @@ import Dashboards from "./pages/Dashboards/dashboards";
 import Shift from "./pages/shift/Shift";
 import PlanList from "./pages/plan/PlanList";
 import PlanDetail from "./pages/plan/PlanDetail";
+import ProcessList from "./pages/process/ProcessListPage";
+
 
 export default function App() {
   return (
@@ -33,6 +35,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
+          <Route index element={<Navigate to="dashboard" replace />} />
           {/* Dashboard */}
           <Route path="dashboard" element={<Dashboards />} />
 
