@@ -2,7 +2,7 @@ spring:
   application:
     name: erp-mvp
   datasource:
-    url: jdbc:mysql://localhost:3308/erp_mvp?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=UTC
+    url: jdbc:mysql://16.171.148.27:3306/erp_mvp?useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=UTC
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
