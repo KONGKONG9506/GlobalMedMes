@@ -6,6 +6,8 @@ import com.globalmed.mes.mes_api.employee.cert.domain.CertEntity;
 import com.globalmed.mes.mes_api.employee.cert.domain.ProcessCertEntity;
 import com.globalmed.mes.mes_api.employee.cert.repository.CertRepo;
 import com.globalmed.mes.mes_api.employee.cert.repository.ProcessCertRepo;
+import com.globalmed.mes.mes_api.employee.domain.EmployeeEntity;
+import com.globalmed.mes.mes_api.employee.repository.EmployeeRepo;
 import com.globalmed.mes.mes_api.equipstatus.domain.EquipmentEntity;
 import com.globalmed.mes.mes_api.equipstatus.repository.EquipmentRepo;
 import com.globalmed.mes.mes_api.process.domain.ProcessEntity;
@@ -17,6 +19,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,6 +37,7 @@ public class ProcessService {
     private final EquipmentRepo equipmentRepo;
     private final ProcessCertRepo proCertRepo;
     private final CertRepo certRepo;
+    private final EmployeeRepo employeeRepo;
 
     @Transactional
     public Page<ProcessListDto> getProcessList(Pageable pageable) {
@@ -64,10 +69,10 @@ public class ProcessService {
 
         if (process.getModifiedAt() != null && process.getModifiedBy() != null) {
             lastModAt = process.getModifiedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getModifiedBy();
+            lastModBy = resolveEmployeeName(process.getModifiedBy());
         } else if (process.getCreatedAt() != null && process.getCreatedBy() != null) {
             lastModAt = process.getCreatedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getCreatedBy();
+            lastModBy = resolveEmployeeName(process.getCreatedBy());
         }
 
         return new ProcessDetailDto(
@@ -107,7 +112,7 @@ public class ProcessService {
         newProcess.setProcessName(creationDto.processName());
         newProcess.setDescription(creationDto.description());
         newProcess.setCreatedAt(LocalDateTime.now());
-        newProcess.setCreatedBy("system");
+//        newProcess.setCreatedBy("system");
 
         ProcessEntity savedProcess = processRepo.save(newProcess);
 
@@ -130,7 +135,6 @@ public class ProcessService {
         // 값 업데이트
         process.setProcessName(creationDto.processName());
         process.setDescription(creationDto.description());
-        process.setModifiedAt(LocalDateTime.now());
 
         // 자격증 갱신
         updateProcessCerts(process, creationDto.requiredCertCodes());
@@ -163,6 +167,8 @@ public class ProcessService {
         Set<String> newCertCodes = certCodes.stream().collect(Collectors.toSet());
         List<ProcessCertEntity> entitiesToSave = new java.util.ArrayList<>();
 
+        boolean certsModified = false;
+
         // 2. 새로운 자격증 목록을 순회하며 추가 및 업데이트할 엔티티를 결정합니다.
         for (String certCode : newCertCodes)
         {
@@ -177,6 +183,7 @@ public class ProcessService {
                     existingEntity.setDeleted(false);
                     existingEntity.setDeletedAt(null);
                     entitiesToSave.add(existingEntity);
+                    certsModified = true;
                 }
                 certCodeMap.remove(certCode);
             } else {
@@ -186,6 +193,7 @@ public class ProcessService {
                 newProcessCert.setProcess(process);
                 newProcessCert.setCert(cert);
                 entitiesToSave.add(newProcessCert);
+                certsModified = true;
             }
         }
 
@@ -195,14 +203,27 @@ public class ProcessService {
                 existingEntity.setDeleted(true);
                 existingEntity.setDeletedAt(OffsetDateTime.now(ZoneOffset.UTC));
                 entitiesToSave.add(existingEntity);
+                certsModified = true;
             }
         }
+        if (!entitiesToSave.isEmpty()) {
+            proCertRepo.saveAll(entitiesToSave);
+        }
+        // ✅ 자격증 변경이 있으면 ProcessEntity.modifiedAt 갱신
+        if (certsModified) {
+            OffsetDateTime now = OffsetDateTime.now();
+            process.setModifiedAt(now.toLocalDateTime());
+            processRepo.saveAndFlush(process);
+        }
 
-        proCertRepo.saveAll(entitiesToSave);
 
     }
 
-
+    private String getCurrentUserId() {
+        // SecurityContextHolder에서 직접 가져오는 로직을 유틸리티 클래스나 여기에 구현해야 합니다.
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return (auth != null && auth.isAuthenticated()) ? String.valueOf(auth.getPrincipal()) : "system";
+    }
     private List<CertDto> getCertDtosForProcess(ProcessEntity process) {
         List<ProcessCertEntity> processCerts = proCertRepo.findProCert(process.getProcessId());
         return processCerts.stream()
@@ -216,10 +237,10 @@ public class ProcessService {
 
         if (process.getModifiedAt() != null && process.getModifiedBy() != null) {
             lastModAt = process.getModifiedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getModifiedBy();
+            lastModBy = resolveEmployeeName(process.getModifiedBy());
         } else if (process.getCreatedAt() != null && process.getCreatedBy() != null) {
             lastModAt = process.getCreatedAt().atOffset(ZoneOffset.UTC);
-            lastModBy = process.getCreatedBy();
+            lastModBy = resolveEmployeeName(process.getCreatedBy());
         }
 
         return new ProcessDetailDto(
@@ -232,4 +253,24 @@ public class ProcessService {
                 lastModBy
         );
     }
+    private String resolveEmployeeName(String employeeId) {
+        return employeeRepo.findActiveById(employeeId)
+                .map(EmployeeEntity::getEmployeeName)
+                .orElse(employeeId);
+    }
+
+    public boolean softDeleteProcess(String processId) {
+        ProcessEntity entity = processRepo.findById(processId)
+                .orElse(null);
+
+        if (entity == null || entity.isDeleted()) {
+            return false;
+        }
+
+        entity.setDeleted(true);
+
+        processRepo.save(entity);
+        return true;
+    }
+
 }

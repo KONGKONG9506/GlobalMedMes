@@ -65,13 +65,17 @@ public class KpiDataEntity {
     @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
+<<<<<<< HEAD
     @Column(name = "created_at", nullable = false)
+=======
+    @Column(name = "created_at", insertable = false, updatable = false)
+>>>>>>> origin/Seong
     private LocalDateTime createdAt;
 
     @Column(name = "modified_by", length = 50, nullable = false)
     private String modifiedBy;
 
-    @Column(name = "modified_at")
+    @Column(name = "modified_at", insertable = false, updatable = false)
     private LocalDateTime modifiedAt;
 
 

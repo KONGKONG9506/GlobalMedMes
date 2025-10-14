@@ -9,6 +9,9 @@ type Props = { require: PermKind | PermKind[]; children: JSX.Element };
 export default function PermRoute({ require, children }: Props) {
   const loc = useLocation();
   const perms = useMenusStore((s) => s.getPerms(loc.pathname));
+  console.log("[PermRoute] 현재 경로:", loc.pathname);
+  console.log("[PermRoute] 매칭된 권한:", perms);
+  console.log("[PermRoute] 필요 권한:", require);
   const needs: PermKind[] = Array.isArray(require) ? require : [require];
   const ok = Boolean(perms && needs.every((k) => perms[k] === true));
   if (!ok) return <Navigate to="/403" replace state={{ from: loc.pathname }} />;
