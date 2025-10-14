@@ -11,7 +11,6 @@ import {
   TrendingUp,
   LineChart,
   Warehouse,
-  CheckCircle,
   Settings,
 } from 'lucide-react';
 
@@ -21,15 +20,15 @@ type LeftSidebarProps = {
 };
 
 // 메뉴의 'key'에 해당하는 아이콘을 매핑하는 객체
-const menuIcons = {
+const menuIcons: Record<string, JSX.Element> = {
   'DASH': <LayoutDashboard size={20} />,
   'WO': <ClipboardList size={20} />,
   'EQPSTAT': <Wrench size={20} />,
   'PERF': <TrendingUp size={20} />,
   'KPI': <LineChart size={20} />,
   'CMMS': <Warehouse size={20} />,
-  'QUALITY': <CheckCircle size={20} />,
   'ADMIN': <Settings size={20} />,
+  'PLAN': <ClipboardList size={20} />, // Replace with a suitable icon for PLAN
 };
 
 // ... (기존 코드 생략)
@@ -83,7 +82,7 @@ export default function LeftSidebar({ isOpen, onClose }: LeftSidebarProps) {
             }`}
             to={m.path}
           >
-            {menuIcons[m.key]} {/* DB 정보의 'code' 값으로 아이콘을 매핑 */}
+            {menuIcons[m.key] ?? <LayoutDashboard size={20} />} {/* DB 정보의 'code' 값으로 아이콘을 매핑 */}
             <span>{m.title}</span>
           </Link>
         ))}
