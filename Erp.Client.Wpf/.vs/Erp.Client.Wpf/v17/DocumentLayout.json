@@ -1,0 +1,149 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\viewmodels\\productionplanviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:viewmodels\\productionplanviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\views\\productionplanview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:views\\productionplanview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\views\\productionplanview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:views\\productionplanview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\services\\apiclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:services\\apiclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\models\\productionplanmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:models\\productionplanmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\views\\costview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:views\\costview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|c:\\devprogram\\test\\studysmartfactory2025_finalpjtteststructure\\frontend\\erp.client.wpf\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{7FFEAE4D-512D-4280-ACDB-052531D8C425}|Erp.Client.Wpf.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 321,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProductionPlanModels.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Models\\ProductionPlanModels.cs",
+              "RelativeDocumentMoniker": "Models\\ProductionPlanModels.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Models\\ProductionPlanModels.cs",
+              "RelativeToolTip": "Models\\ProductionPlanModels.cs",
+              "ViewState": "AgIAADMAAAAAAAAAAAAzwD4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T06:19:58.033Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ProductionPlanViewModel.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\ViewModels\\ProductionPlanViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\ProductionPlanViewModel.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\ViewModels\\ProductionPlanViewModel.cs",
+              "RelativeToolTip": "ViewModels\\ProductionPlanViewModel.cs",
+              "ViewState": "AgIAABgBAAAAAAAAAAAIwCwBAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T06:18:21.741Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProductionPlanView.xaml.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Views\\ProductionPlanView.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\ProductionPlanView.xaml.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Views\\ProductionPlanView.xaml.cs",
+              "RelativeToolTip": "Views\\ProductionPlanView.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwsAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T06:18:14.703Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ProductionPlanView.xaml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Views\\ProductionPlanView.xaml",
+              "RelativeDocumentMoniker": "Views\\ProductionPlanView.xaml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Views\\ProductionPlanView.xaml",
+              "RelativeToolTip": "Views\\ProductionPlanView.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-10-02T06:17:02.867Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "ApiClient.cs",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Services\\ApiClient.cs",
+              "RelativeDocumentMoniker": "Services\\ApiClient.cs",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Services\\ApiClient.cs",
+              "RelativeToolTip": "Services\\ApiClient.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAADwv2AAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T06:16:47.027Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CostView.xaml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Views\\CostView.xaml",
+              "RelativeDocumentMoniker": "Views\\CostView.xaml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\Views\\CostView.xaml",
+              "RelativeToolTip": "Views\\CostView.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-27T04:47:00.656Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-27T04:45:17.945Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\DevProgram\\test\\StudySmartFactory2025_FinalPjtTestStructure\\frontend\\Erp.Client.Wpf\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-27T04:45:12.433Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -27,3 +27,14 @@ api.interceptors.response.use(
     return Promise.reject(err);
   }
 );
+
+export interface ApiErrorResponse {
+    // 백엔드에서 내려주는 오류 메시지 필드
+    message?: string; 
+    
+    // Spring Boot의 기본 에러 구조를 따른다면 아래 필드도 추가할 수 있습니다.
+    timestamp?: string;
+    status?: number;
+    error?: string; // HTTP 상태 코드에 해당하는 이름 (Bad Request 등)
+    path?: string;
+}

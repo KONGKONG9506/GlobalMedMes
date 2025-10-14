@@ -45,6 +45,8 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
 	// captcha (캡챠 사용)
 	implementation("com.github.whvcse:easy-captcha:1.6.2")
+	// WebClient, Mono, Flux 등을 사용(ERP연동)
+	implementation("org.springframework.boot:spring-boot-starter-webflux")
 
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

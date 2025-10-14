@@ -40,6 +40,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // preflight 허용
+                        .requestMatchers(HttpMethod.POST, "/api/mes/production-plans").permitAll() // erp 허용
                         .requestMatchers("/auth/**","/v3/api-docs/**","/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
