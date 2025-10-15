@@ -134,9 +134,9 @@ export default function CmmsPage() {
               <td className="border px-2 py-1 hidden">{w.priorityCodeId}</td>
               <td className="border px-2 py-1">{w.assigneeUserId}</td>
               <td className="border px-2 py-1 hidden">{w.requestId}</td>
-              <td className="border px-2 py-1 hidden">{w.createdAt}</td>
-              <td className="border px-2 py-1">{w.startedAt}</td>
-              <td className="border px-2 py-1">{w.finishedAt}</td>
+              <td className="border px-2 py-1 hidden">{new Date(w.createdAt).toLocaleString()}</td>
+              <td className="border px-2 py-1">{new Date(w.startedAt).toLocaleString()}</td>
+              <td className="border px-2 py-1">{new Date(w.finishedAt).toLocaleString()}</td>
               <td className="border px-2 py-1">{w.actualMinutes}</td>
               <td className="border px-2 py-1">{w.partsCost}</td>
             </tr>

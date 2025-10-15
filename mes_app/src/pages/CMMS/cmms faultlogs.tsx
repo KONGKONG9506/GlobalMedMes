@@ -128,8 +128,10 @@ export default function CmmsFault() {
                 <td className="border px-2 py-1 hidden">{f.lossCategoryCodeId}</td>
                 <td className="border px-2 py-1">{f.symptom}</td>
                 <td className="border px-2 py-1">{f.action}</td>
-                <td className="border px-2 py-1">{f.occurredAt}</td>
-                <td className="border px-2 py-1">{f.resolveAt}</td>
+                <td className="border px-2 py-1">{new Date(f.occurredAt).toLocaleString()}</td>
+                <td className="border px-2 py-1">
+                  {f.resolveAt ? new Date(f.resolveAt).toLocaleString() : ""}
+                  </td>
                 <td className="border px-2 py-1 hidden">{f.workOrderId}</td>
               </tr>
             ))}

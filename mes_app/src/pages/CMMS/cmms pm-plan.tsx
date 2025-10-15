@@ -117,8 +117,8 @@ export default function CmmsPage() {
               <td className="border px-2 py-1">{plan.taskName}</td>
               <td className="border px-2 py-1 hidden">{plan.cycleTypeCodeId}</td>
               <td className="border px-2 py-1 hidden">{plan.cycleValue}</td>
-              <td className="border px-2 py-1">{plan.lastDoneAt}</td>
-              <td className="border px-2 py-1">{plan.nextDueAt}</td>
+              <td className="border px-2 py-1">{new Date(plan.lastDoneAt).toLocaleString()}</td>
+              <td className="border px-2 py-1">{new Date(plan.nextDueAt).toLocaleString()}</td>
               <td className="border px-2 py-1">
                 <span
                   className={`px-2 py-1 rounded text-white text-sm font-medium ${
