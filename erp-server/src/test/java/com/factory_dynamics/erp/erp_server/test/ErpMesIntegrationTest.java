@@ -24,6 +24,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import reactor.core.publisher.Mono;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration; // 🚨 신규 Import 추가
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration; // 🚨 신규 Import 추가
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration; // 🚨 신규 Import 추가
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -32,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @ActiveProfiles("test") // application-test.yml 로드
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @SpringBootTest(classes = {ErpServerApplication.class, ErpMesIntegrationTest.TestJdbcConfig.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
