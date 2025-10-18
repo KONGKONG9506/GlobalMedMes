@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 // 🚨 DataSource Auto Configuration을 제거하지 않도록 주석 처리합니다.
-// import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration; // 🚨 추가: 모든 DataSource 자동 구성 제외
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -37,8 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @ActiveProfiles("test") // application-test.yml 로드
-// 🚨 하이브리드 접근: Primary DataSource는 Spring 자동 구성에 맡기고, JPA 충돌만 방지합니다.
-@EnableAutoConfiguration(exclude = {HibernateJpaAutoConfiguration.class})
+// 🚨 최종 수정: Primary DB 포함 모든 DataSource 자동 구성을 끕니다. 두 DB 모두 수동 제어 (@Primary 사용).
+@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 @SpringBootTest(classes = {ErpServerApplication.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -70,12 +70,12 @@ public class ErpMesIntegrationTest {
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-        // ERP DataSource (Spring Boot Primary DB) 설정 주입 - Spring이 자동 구성합니다.
+        // ERP DataSource (Primary DB) 설정 주입 - TestJdbcConfig에서 @Value로 받습니다.
         registry.add("spring.datasource.url", erpMysqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", erpMysqlContainer::getUsername);
         registry.add("spring.datasource.password", erpMysqlContainer::getPassword);
 
-        // MES DataSource (Secondary DB) 설정 주입 - TestJdbcConfig에서 사용합니다.
+        // MES DataSource (Secondary DB) 설정 주입 - TestJdbcConfig에서 @Value로 받습니다.
         registry.add("mes.datasource.url", mesMysqlContainer::getJdbcUrl);
         registry.add("mes.datasource.username", mesMysqlContainer::getUsername);
         registry.add("mes.datasource.password", mesMysqlContainer::getPassword);
@@ -88,28 +88,37 @@ public class ErpMesIntegrationTest {
     // 3. 의존성 주입 및 Mocking 설정
     // ----------------------------------------------------------------------
 
+    // 🚨 이제 erpJdbcTemplate은 TestJdbcConfig의 @Primary 빈으로 주입됩니다.
     @Autowired
-    private JdbcTemplate erpJdbcTemplate; // Primary DataSource를 사용하는 JdbcTemplate은 자동 주입
+    private JdbcTemplate erpJdbcTemplate;
 
     @Autowired
     private TestRestTemplate restTemplate;
 
     @Autowired
     @Qualifier("mesJdbcTemplate")
-    private JdbcTemplate mesJdbcTemplate; // MES DB 접근용 (수동 정의 필요)
+    private JdbcTemplate mesJdbcTemplate; // MES DB 접근용
 
     // 🚨 MES API 클라이언트를 Mocking하여 실제 HTTP 통신 실패 방지
     @MockBean
     private MesApiClient mesApiClient;
 
     // ----------------------------------------------------------------------
-    // 4. 테스트 환경 설정 (Secondary DataSource Bean 정의)
+    // 4. 테스트 환경 설정 (모든 DataSource 및 JdbcTemplate Bean 정의)
     // ----------------------------------------------------------------------
 
     @TestConfiguration
     public static class TestJdbcConfig {
 
-        // MES DB 연결 정보 (Secondary DataSource) - @Value를 통해 동적 주입된 속성 사용
+        // ERP DB 연결 정보 (Primary DataSource)
+        @Value("${spring.datasource.url}")
+        private String erpDbUrl;
+        @Value("${spring.datasource.username}")
+        private String erpDbUsername;
+        @Value("${spring.datasource.password}")
+        private String erpDbPassword;
+
+        // MES DB 연결 정보 (Secondary DataSource)
         @Value("${mes.datasource.url}")
         private String mesDbUrl;
         @Value("${mes.datasource.username}")
@@ -117,7 +126,25 @@ public class ErpMesIntegrationTest {
         @Value("${mes.datasource.password}")
         private String mesDbPassword;
 
-        // MES DataSource Bean (Secondary)
+        // 🚨 Primary DataSource (ERP DB) Bean
+        @Bean
+        @Primary
+        public DataSource erpDataSource() {
+            BasicDataSource dataSource = new BasicDataSource();
+            dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+            dataSource.setUrl(erpDbUrl);
+            dataSource.setUsername(erpDbUsername);
+            dataSource.setPassword(erpDbPassword);
+            return dataSource;
+        }
+
+        // 🚨 Primary JdbcTemplate (ERP) Bean
+        @Bean
+        public JdbcTemplate erpJdbcTemplate(DataSource erpDataSource) {
+            return new JdbcTemplate(erpDataSource);
+        }
+
+        // Secondary DataSource (MES DB) Bean
         @Bean
         @Qualifier("mesDataSource")
         public DataSource mesDataSource() {
@@ -129,14 +156,12 @@ public class ErpMesIntegrationTest {
             return dataSource;
         }
 
-        // MES JdbcTemplate Bean
+        // Secondary JdbcTemplate (MES) Bean
         @Bean
         @Qualifier("mesJdbcTemplate")
         public JdbcTemplate mesJdbcTemplate(@Qualifier("mesDataSource") DataSource mesDataSource) {
             return new JdbcTemplate(mesDataSource);
         }
-
-        // 🚨 Primary DB (ERP) 관련 DataSource, JdbcTemplate Bean 정의는 Spring Boot 자동 구성에 맡깁니다.
     }
 
     // ----------------------------------------------------------------------
