@@ -21,6 +21,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager; // 🚨 추가: 트랜잭션 매니저 임포트
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -142,6 +143,14 @@ public class ErpMesIntegrationTest {
         @Bean
         public JdbcTemplate erpJdbcTemplate(DataSource erpDataSource) {
             return new JdbcTemplate(erpDataSource);
+        }
+
+        // 🚨 Primary Transaction Manager (for ERP DB) Bean
+        // DataSourceAutoConfiguration을 제외했으므로, 트랜잭션 매니저를 수동으로 정의하여
+        // 애플리케이션의 트랜잭션 요구 사항을 충족시킵니다.
+        @Bean
+        public DataSourceTransactionManager transactionManager(DataSource erpDataSource) {
+            return new DataSourceTransactionManager(erpDataSource);
         }
 
         // Secondary DataSource (MES DB) Bean
