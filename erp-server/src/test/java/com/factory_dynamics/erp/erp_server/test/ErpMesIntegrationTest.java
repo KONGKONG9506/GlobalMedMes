@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager; // 🚨 추가: 트랜잭션 매니저 임포트
+import org.springframework.orm.jpa.JpaTransactionManager; // 🚨 추가: JpaTransactionManager 임포트
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -105,9 +106,13 @@ public class ErpMesIntegrationTest {
     @MockBean
     private MesApiClient mesApiClient;
 
-    // 🚨 핵심 수정: JPA 자동 구성 제외로 인해 누락된 EntityManagerFactory를 Mocking하여 종속성을 만족시킵니다.
+    // 🚨 핵심 수정 1: JPA 자동 구성 제외로 인해 누락된 EntityManagerFactory를 Mocking하여 종속성을 만족시킵니다.
     @MockBean
     private EntityManagerFactory entityManagerFactory;
+
+    // 🚨 핵심 수정 2: JPA가 활성화된 애플리케이션의 경우, JpaTransactionManager가 누락되어 실패할 수 있습니다. Mocking합니다.
+    @MockBean
+    private JpaTransactionManager jpaTransactionManager;
 
     // ----------------------------------------------------------------------
     // 4. 테스트 환경 설정 (모든 DataSource 및 JdbcTemplate Bean 정의)
