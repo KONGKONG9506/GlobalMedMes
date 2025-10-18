@@ -39,11 +39,10 @@ jobs:
       run: chmod +x ./${{ env.ERP_SERVER_DIR }}/gradlew
 
     # 4. 핵심 통합 테스트 실행 및 리포트 생성
-    - name: Run Integration Tests in ERP Server
-      # 🚨 실행 디렉토리를 erp-server로 변경합니다.
+    - name: Run E2E Integration Tests in ERP Server
       working-directory: ${{ env.ERP_SERVER_DIR }} 
-      # erp-server 폴더 내에서 "./gradlew test"를 실행합니다.
-      run: ./gradlew test
+      run: ./gradlew test --tests 'com.factory_dynamics.erp.erp_server.test.ErpMesIntegrationTest'
+      # 🚨 주의: .test.ErpMesIntegrationTest만 실행하여 ErpServerApplicationTests를 제외합니다.
       
     # 5. 테스트 결과 아티팩트 저장 (JUnit XML)
     - name: Upload Test Results (JUnit XML)
