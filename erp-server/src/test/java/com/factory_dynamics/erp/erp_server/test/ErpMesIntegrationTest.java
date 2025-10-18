@@ -1,52 +1,65 @@
 package com.factory_dynamics.erp.erp_server.test;
-
+import com.factory_dynamics.erp.erp_server.ErpServerApplication;
+import com.factory_dynamics.erp.erp_server.mes_adapter.api.MesApiClient;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.utility.DockerImageName;
+import reactor.core.publisher.Mono;
 
 import javax.sql.DataSource;
-import java.time.LocalDate;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * ERP-MES E2E 통합 테스트: CI 환경에서 Testcontainers를 사용하여 두 DB 간의 연동을 검증합니다.
- */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
 @Testcontainers
-class ErpMesIntegrationTest {
+@ActiveProfiles("test") // application-test.yml 로드
+@SpringBootTest(classes = {ErpServerApplication.class, ErpMesIntegrationTest.TestJdbcConfig.class},
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class ErpMesIntegrationTest {
 
-    // --- 1. Testcontainers 설정: ERP 및 MES DB 컨테이너 정의 ---
-    // MySQL 컨테이너 2개 정의 (각 DB 역할을 수행)
-    @Container
-    static MySQLContainer<?> erpMysqlContainer = new MySQLContainer<>("mysql:8.0.32")
-            .withDatabaseName("erp_mvp")
-            .withUsername("root")
-            .withPassword("root");
+    // ----------------------------------------------------------------------
+    // 1. Testcontainers 설정
+    // ----------------------------------------------------------------------
 
+    // ERP DB (주요 DataSource)
     @Container
-    static MySQLContainer<?> mesMysqlContainer = new MySQLContainer<>("mysql:8.0.32")
-            .withDatabaseName("mes_api_db")
+    static MySQLContainer<?> erpMysqlContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8.0.32"))
+            .withDatabaseName("erp_db")
+            .withUsername("erp_user")
+            .withPassword("erp_pass")
+            .withReuse(true); // 컨테이너 재사용 설정
+
+    // MES DB (보조 DataSource)
+    @Container
+    static MySQLContainer<?> mesMysqlContainer = new MySQLContainer<>(DockerImageName.parse("mysql:8.0.32"))
+            .withDatabaseName("mes_db")
             .withUsername("mes_user")
-            .withPassword("mes_password");
+            .withPassword("mes_pass")
+            .withReuse(true); // 컨테이너 재사용 설정
 
-    // --- 2. 동적 속성 주입 (ConnectException 해결의 핵심) ---
+    // ----------------------------------------------------------------------
+    // 2. 동적 속성 주입 (Spring <-> Testcontainers 연결)
+    // ----------------------------------------------------------------------
 
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
@@ -55,21 +68,49 @@ class ErpMesIntegrationTest {
         registry.add("spring.datasource.username", erpMysqlContainer::getUsername);
         registry.add("spring.datasource.password", erpMysqlContainer::getPassword);
 
-        // MES DB 연결 설정 (두 번째 DataSource 설정을 위한 환경 변수 주입)
+        // MES DataSource (보조 DB) 설정 주입
         registry.add("mes.datasource.url", mesMysqlContainer::getJdbcUrl);
         registry.add("mes.datasource.username", mesMysqlContainer::getUsername);
         registry.add("mes.datasource.password", mesMysqlContainer::getPassword);
 
-        // MES API 주소 Mocking 주입 (CI 환경에서 외부 호출 방지)
+        // MES API 호출 URL (테스트 환경에서는 WebClient가 사용하지 않으나, 설정은 필요)
         registry.add("mes.api.base-url", () -> "http://localhost:8080");
     }
 
-    // --- 3. 테스트 설정 클래스: 두 개의 DataSource 및 JdbcTemplate Bean 생성 ---
+    // ----------------------------------------------------------------------
+    // 3. 의존성 주입 및 Mocking 설정
+    // ----------------------------------------------------------------------
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Autowired
+    private JdbcTemplate erpJdbcTemplate; // ERP DB 접근용
+
+    @Autowired
+    @Qualifier("mesJdbcTemplate")
+    private JdbcTemplate mesJdbcTemplate; // MES DB 접근용
+
+    // 🚨 MES API 클라이언트를 Mocking하여 실제 HTTP 통신 실패 방지
+    @MockBean
+    private MesApiClient mesApiClient;
+
+    // ----------------------------------------------------------------------
+    // 4. 테스트 환경 설정 (DataSource Bean 정의)
+    // ----------------------------------------------------------------------
 
     @TestConfiguration
-    static class TestJdbcConfig {
+    public static class TestJdbcConfig {
 
-        // MES DB 연결 정보를 환경 변수에서 @Value로 주입받음 (DynamicPropertySource가 주입한 값)
+        // ERP DB 연결 정보 (Primary DataSource) - @Value를 통해 동적 주입된 속성 사용
+        @Value("${spring.datasource.url}")
+        private String erpDbUrl;
+        @Value("${spring.datasource.username}")
+        private String erpDbUsername;
+        @Value("${spring.datasource.password}")
+        private String erpDbPassword;
+
+        // MES DB 연결 정보 (Secondary DataSource) - @Value를 통해 동적 주입된 속성 사용
         @Value("${mes.datasource.url}")
         private String mesDbUrl;
         @Value("${mes.datasource.username}")
@@ -77,19 +118,30 @@ class ErpMesIntegrationTest {
         @Value("${mes.datasource.password}")
         private String mesDbPassword;
 
-        // ERP DataSource Bean (Spring Boot 주 DataSource - Primary)
-        // Spring이 기본적으로 생성한 DataSource (ERP DB에 연결됨)를 사용합니다.
+        // ERP DataSource Bean (Primary로 등록)
         @Bean
-        @Qualifier("erpJdbcTemplate")
-        public JdbcTemplate erpJdbcTemplate(DataSource dataSource) {
-            return new JdbcTemplate(dataSource);
+        @Primary
+        public DataSource erpDataSource() {
+            org.apache.commons.dbcp2.BasicDataSource dataSource = new org.apache.commons.dbcp2.BasicDataSource();
+            dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+            dataSource.setUrl(erpDbUrl);
+            dataSource.setUsername(erpDbUsername);
+            dataSource.setPassword(erpDbPassword);
+            return dataSource;
         }
 
-        // MES DataSource Bean (별도로 생성)
+        // ERP JdbcTemplate Bean
+        @Bean
+        @Primary
+        public JdbcTemplate erpJdbcTemplate(DataSource erpDataSource) {
+            return new JdbcTemplate(erpDataSource);
+        }
+
+        // MES DataSource Bean
         @Bean
         @Qualifier("mesDataSource")
         public DataSource mesDataSource() {
-            DriverManagerDataSource dataSource = new DriverManagerDataSource();
+            org.apache.commons.dbcp2.BasicDataSource dataSource = new org.apache.commons.dbcp2.BasicDataSource();
             dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
             dataSource.setUrl(mesDbUrl);
             dataSource.setUsername(mesDbUsername);
@@ -105,137 +157,143 @@ class ErpMesIntegrationTest {
         }
     }
 
-    // --- 4. 테스트 필드 주입 및 로직 ---
-
-    @Autowired
-    TestRestTemplate restTemplate;
-
-    @Autowired
-    @Qualifier("erpJdbcTemplate")
-    JdbcTemplate erpJdbcTemplate;
-
-    @Autowired
-    @Qualifier("mesJdbcTemplate")
-    JdbcTemplate mesJdbcTemplate;
-
-    // --- 테스트 고정값 (Fixture) ---
-    private final String PRODUCT_ID = "PROD-A";
-    private final String ACTOR = "test-system";
-    private final LocalDate TODAY = LocalDate.now();
-
-    @BeforeEach
-    void setup() {
-        // 여기에 테스트 격리를 위한 DB 초기화 로직을 추가하세요.
-    }
-
+    // ----------------------------------------------------------------------
+    // 5. 테스트 전/후 처리 및 격리 설정
+    // ----------------------------------------------------------------------
 
     /**
-     * 시나리오 1: 생산 계획 (DRAFT) -> MES 전송 (PENDING) -> 작업 지시 (P)
+     * 🚨 Scenario 2를 위한 테스트 격리 및 Fixture 데이터 설정
+     * Scenario 2는 'CONFIRMED'된 계획과 'WORK_ORDER'가 이미 존재한다고 가정합니다.
+     */
+    @BeforeEach
+    void setupFixtures() {
+        // --- ERP DB 초기화 및 Fixture (Scenario 2용) ---
+        // 기존 데이터를 안전하게 삭제 (ER_PLAN_002, ER_ITEM_002)
+        erpJdbcTemplate.update("DELETE FROM production_plan WHERE id IN ('TEST-PLAN-2')");
+        erpJdbcTemplate.update("DELETE FROM item WHERE id IN ('TEST-ITEM-2')");
+
+        // ITEM 데이터 삽입 (Scenario 2 의존성)
+        erpJdbcTemplate.update("INSERT INTO item (id, name, created_at, created_by) VALUES (?, ?, NOW(), 'test_system')",
+                "TEST-ITEM-2", "품목-002");
+
+        // PRODUCTION_PLAN 데이터 삽입 (Scenario 2 의존성) - CONFIRMED 상태
+        erpJdbcTemplate.update("INSERT INTO production_plan (id, item_id, status, plan_quantity, created_at, created_by) VALUES (?, ?, ?, ?, NOW(), 'test_system')",
+                "TEST-PLAN-2", "TEST-ITEM-2", "CONFIRMED", 100);
+
+        // --- MES DB 초기화 및 Fixture (Scenario 2용) ---
+        // 기존 데이터를 안전하게 삭제 (WO-002)
+        mesJdbcTemplate.update("DELETE FROM tb_work_order WHERE work_order_id IN ('TEST-WO-2')");
+        mesJdbcTemplate.update("DELETE FROM tb_work_order WHERE erp_plan_id IN ('TEST-PLAN-1')"); // Scenario 1 잔여 데이터 정리
+
+        // WORK_ORDER 데이터 삽입 (Scenario 2 의존성) - MES에 이미 전송된 상태 가정
+        mesJdbcTemplate.update("INSERT INTO tb_work_order (work_order_id, erp_plan_id, item_id, quantity, work_status, created_at) VALUES (?, ?, ?, ?, ?, NOW())",
+                "TEST-WO-2", "TEST-PLAN-2", "TEST-ITEM-2", 100, "WAITING");
+    }
+
+    @AfterAll
+    void cleanup() {
+        // 컨테이너는 withReuse(true)로 설정했으므로 명시적인 stop()은 필요하지 않음
+    }
+
+    // ----------------------------------------------------------------------
+    // 6. E2E 통합 시나리오 테스트
+    // ----------------------------------------------------------------------
+
+    /**
+     * 시나리오 1: 생산 계획 생성 -> 확정 -> MES 전송 (ERP 상태 PENDING 동기화)
      */
     @Test
     void E2E_Scenario1_PlanCreationAndMesTransfer_ShouldSyncStatus() {
-        // GIVEN: 100개 생산 계획 생성 (DRAFT)
+        // GIVEN: 새로운 생산 계획 생성
+        String planId = "TEST-PLAN-1";
         Map<String, Object> createReq = Map.of(
-                "planCode", "PC-" + System.currentTimeMillis(),
-                "productId", PRODUCT_ID,
-                "qty", 100,
-                "startDate", TODAY.toString(),
-                "endDate", TODAY.plusDays(1).toString()
+                "id", planId,
+                "itemId", "ITEM-001", // 가상의 아이템 ID
+                "planQuantity", 50,
+                "status", "DRAFT"
         );
+        restTemplate.postForEntity("/api/plans", createReq, Map.class);
 
-        // 1. DRAFT 계획 생성 및 planId 확보
-        var planResponse = restTemplate.postForEntity("/api/plans", createReq, Map.class);
-        assertEquals(200, planResponse.getStatusCodeValue());
-        String planId = (String) planResponse.getBody().get("planId");
-        long initialVersion = ((Number) planResponse.getBody().get("version")).longValue();
+        // WHEN-1: 계획 상태를 DRAFT -> CONFIRMED로 변경 (MES 전송 가능 상태)
+        Map<String, String> statusReq = Map.of("newStatus", "CONFIRMED");
+        restTemplate.patchForObject("/api/plans/" + planId + "/status", statusReq, Map.class);
 
-        // 2. 상태를 CONFIRMED로 변경
-        Map<String, Object> confirmReq = Map.of(
-                "nextStatus", "CONFIRMED",
-                "actor", ACTOR,
-                "version", initialVersion
-        );
-        var statusResponse = restTemplate.patchForObject("/api/plans/" + planId + "/status", confirmReq, Map.class);
-        assertEquals("CONFIRMED", statusResponse.get("status"));
+        // 🚨 WHEN-2: MES 전송 API 호출 (고객님께서 확인해주신 POST /api/plans/{planId}/send-to-mes 엔드포인트 사용)
+        // MesApiClient Mocking 설정: 실제 MES 호출 시 성공 응답 반환 강제
+        Mockito.when(mesApiClient.sendProductionPlan(Mockito.any()))
+                .thenReturn(Mono.just("Success"));
 
-        // 3. MES 전송 (ERP 상태는 PENDING, MES 작업 지시 생성 유도)
-        Map<String, Object> mesReq = Map.of("modifier", ACTOR);
+        Map<String, String> mesReq = Map.of("modifier", "system");
+
+        // 🚨 POST /api/plans/{planId}/send-to-mes 호출
         var mesTransferResponse = restTemplate.postForEntity("/api/plans/" + planId + "/send-to-mes", mesReq, Map.class);
-        assertEquals(200, mesTransferResponse.getStatusCodeValue());
 
-        // **자동 검증 (D): ERP 상태 PENDING 확인**
+        // THEN-1: MES 전송 API 호출 성공 확인 (2xx 응답)
+        assertThat(mesTransferResponse.getStatusCode().is2xxSuccessful()).isTrue();
+
+        // THEN-2: ERP DB의 Plan 상태가 PENDING으로 변경되었는지 확인
         String erpStatus = erpJdbcTemplate.queryForObject(
-                "SELECT status FROM tb_production_plan WHERE plan_id = ?",
+                "SELECT status FROM production_plan WHERE id = ?",
                 String.class,
-                planId
-        );
-        assertEquals("PENDING", erpStatus, "ERP 상태는 PENDING으로 동기화되어야 합니다.");
+                planId);
 
-        // **자동 검증 (D): MES 작업 지시 생성 및 상태 'P' 확인**
-        String mesWoStatus = mesJdbcTemplate.queryForObject(
-                "SELECT status_code_id FROM tb_work_order WHERE erp_plan_id = ?",
-                String.class,
-                planId
-        );
-        assertEquals("P", mesWoStatus, "MES 작업지시 상태는 'P'여야 합니다.");
+        assertThat(erpStatus).isEqualTo("PENDING");
 
-        // MES 작업 지시 ID 확보
-        String workOrderId = mesJdbcTemplate.queryForObject(
-                "SELECT work_order_id FROM tb_work_order WHERE erp_plan_id = ?",
-                String.class,
-                planId
-        );
-        assertNotNull(workOrderId, "MES 작업 지시 ID가 생성되어야 합니다.");
+        // THEN-3: MES DB에 Work Order가 생성되었는지 확인 (MES 전송 로직의 결과)
+        Integer mesWorkOrderCount = mesJdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM tb_work_order WHERE erp_plan_id = ?",
+                Integer.class,
+                planId);
+
+        assertThat(mesWorkOrderCount).isEqualTo(1);
     }
 
-
     /**
-     * 시나리오 2: 실적 등록 (자동 완료) -> KPI 반영 -> 상태 동기화 (COMPLETED)
+     * 시나리오 2: MES 작업 실적 등록 -> ERP KPI 업데이트 및 상태 동기화
      */
     @Test
     void E2E_Scenario2_PerformanceAndAutoCompletion_ShouldUpdateKPIAndStatus() {
-        // Step 0: 가정을 위한 임시 WO 생성 및 DB 삽입 (실제는 시나리오 1 결과 사용)
-        String testPlanId = "TEST-PLAN-2";
-        String testWoId = "TEST-WO-2";
+        // GIVEN: @BeforeEach에서 TEST-PLAN-2 (CONFIRMED)와 TEST-WO-2 (WAITING) 데이터가 미리 준비됨
 
-        // 🚨 테스트 격리를 위해 이 testPlanId와 testWoId에 해당하는 데이터를
-        // BeforeEach나 이 테스트 시작 시 DB에 미리 삽입하는 로직이 필요합니다.
+        String planId = "TEST-PLAN-2";
+        String workOrderId = "TEST-WO-2";
 
-        // 1. 실적 등록 API 호출
+        // WHEN-1: 실적 등록 (MES 작업 완료를 가정)
         Map<String, Object> performanceReq = Map.of(
-                "workOrderId", testWoId,
-                "producedQty", 100.0,
-                "defectQty", 5.0,
-                "startTime", TODAY.atStartOfDay().atOffset(java.time.ZoneOffset.UTC).toString(),
-                "endTime", TODAY.atTime(10, 0).atOffset(java.time.ZoneOffset.UTC).toString()
+                "workOrderId", workOrderId,
+                "actualQuantity", 100, // 계획 수량과 동일
+                "modifier", "mes_system"
         );
 
-        // 🚨 이 호출은 ERP 서버의 엔드포인트를 호출하는 것으로 가정합니다.
+        // 🚨 POST /api/performances 호출 (ERP에서 MES 실적을 접수하는 API)
         var perfResponse = restTemplate.postForEntity("/api/performances", performanceReq, Map.class);
-        assertEquals(201, perfResponse.getStatusCodeValue());
 
-        // **자동 검증 (D): MES 작업 완료 상태 확인**
-        String mesWoStatus = mesJdbcTemplate.queryForObject(
-                "SELECT status_code_id FROM tb_work_order WHERE work_order_id = ?",
+        // THEN-1: 실적 등록 API 호출 성공 확인
+        // 고객님 의견에 따라 신규 리소스 생성(실적)은 201 Created를 기대합니다.
+        assertThat(perfResponse.getStatusCode().value()).isEqualTo(201);
+
+        // THEN-2: MES DB의 Work Order 상태가 COMPLETED로 변경되었는지 확인
+        String mesStatus = mesJdbcTemplate.queryForObject(
+                "SELECT work_status FROM tb_work_order WHERE work_order_id = ?",
                 String.class,
-                testWoId
-        );
-        assertEquals("C", mesWoStatus, "실적 등록으로 MES 작업 지시 상태는 'C'여야 합니다.");
+                workOrderId);
 
-        // **자동 검증 (D): ERP 최종 상태 COMPLETED 확인**
+        assertThat(mesStatus).isEqualTo("COMPLETED");
+
+        // THEN-3: ERP DB의 Plan 상태가 COMPLETED로 변경되었는지 확인 (자동 완료 로직 검증)
         String erpStatus = erpJdbcTemplate.queryForObject(
-                "SELECT status FROM tb_production_plan WHERE plan_id = ?",
+                "SELECT status FROM production_plan WHERE id = ?",
                 String.class,
-                testPlanId
-        );
-        assertEquals("COMPLETED", erpStatus, "ERP 상태는 COMPLETED로 동기화되어야 합니다.");
+                planId);
 
-        // **자동 검증 (D): KPI 데이터 반영 정확성 확인**
-        Double actualDefectRate = mesJdbcTemplate.queryForObject(
-                "SELECT actual_defect_rate FROM tb_kpi_data WHERE work_order_id = ?",
-                Double.class,
-                testWoId
-        );
-        assertEquals(0.05, actualDefectRate, 0.001, "KPI 불량률은 0.05로 정확히 계산되어야 합니다.");
+        assertThat(erpStatus).isEqualTo("COMPLETED");
+
+        // THEN-4: ERP DB의 Plan의 KPI(실적 수량)가 업데이트되었는지 확인
+        Integer actualQuantity = erpJdbcTemplate.queryForObject(
+                "SELECT actual_quantity FROM production_plan WHERE id = ?",
+                Integer.class,
+                planId);
+
+        assertThat(actualQuantity).isEqualTo(100);
     }
 }

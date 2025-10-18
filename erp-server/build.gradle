@@ -44,6 +44,9 @@ dependencies {
 	testImplementation 'org.testcontainers:junit-jupiter:1.19.8'
 	// 🚨 2. Testcontainers MySQL 모듈 추가 (필수)
 	testImplementation 'org.testcontainers:mysql:1.19.8'
+	// 🚨 필수 추가: DBCP2 (BasicDataSource 사용을 위한 의존성)
+	// TestJdbcConfig에서 DataSource를 직접 정의하기 위해 필요합니다.
+	testImplementation 'org.apache.commons:commons-dbcp2:2.9.0'
 
 }
 
