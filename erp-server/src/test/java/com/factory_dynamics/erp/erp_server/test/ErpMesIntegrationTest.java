@@ -107,15 +107,14 @@ public class ErpMesIntegrationTest {
     @MockBean
     private MesApiClient mesApiClient;
 
-    // 🚨 핵심 수정 1: JPA 자동 구성 제외로 인해 누락된 EntityManagerFactory를 Mocking하여 종속성을 만족시킵니다.
-    @MockBean
-    private EntityManagerFactory entityManagerFactory;
+    // 🚨 JPA 관련 MockBean 제거: EntityManagerFactory 및 JpaTransactionManager는 TestJdbcConfig에 @Bean으로 정의됨.
+    // @MockBean
+    // private EntityManagerFactory entityManagerFactory;
 
-    // 🚨 핵심 수정 2: JPA 관련 Bean 의존성을 만족시키기 위해 JpaTransactionManager Mock을 다시 추가
-    @MockBean
-    private JpaTransactionManager jpaTransactionManager;
+    // @MockBean
+    // private JpaTransactionManager jpaTransactionManager;
 
-    // 🚨 핵심 수정 3: JpaVendorAdapter Mock을 추가하여 JPA 관련 설정 빈 누락 문제를 해결합니다.
+    // 🚨 JpaVendorAdapter Mock은 유지하여, 컨텍스트 초기화 과정에서 필요한 모든 JPA 관련 빈이 만족되도록 합니다.
     @MockBean
     private JpaVendorAdapter jpaVendorAdapter;
 
@@ -160,9 +159,26 @@ public class ErpMesIntegrationTest {
             return new JdbcTemplate(erpDataSource);
         }
 
-        // 🚨 Primary Transaction Manager (for ERP DB) Bean
-        // DataSourceAutoConfiguration을 제외했으므로, 트랜잭션 매니저를 수동으로 정의하여
-        // 애플리케이션의 트랜잭션 요구 사항을 충족시킵니다.
+        // 🚨 핵심 수정: JPA 관련 의존성을 만족시키기 위한 최소한의 Primary JPA Bean 정의 시작
+
+        @Bean
+        @Primary
+        public EntityManagerFactory entityManagerFactory() {
+            // 실제 JPA/Hibernate 초기화를 건너뛰고 Mock 객체를 반환하여 컨텍스트 로딩에 필요한 빈을 제공합니다.
+            return Mockito.mock(EntityManagerFactory.class);
+        }
+
+        @Bean
+        @Primary
+        public JpaTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory) {
+            // Mocking된 Factory를 사용하여 트랜잭션 매니저를 생성하여 컨텍스트에 Primary 트랜잭션 매니저를 제공합니다.
+            JpaTransactionManager transactionManager = new JpaTransactionManager();
+            transactionManager.setEntityManagerFactory(entityManagerFactory);
+            return transactionManager;
+        }
+
+        // 🚨 Primary Transaction Manager (for ERP DB) Bean (JDBC 트랜잭션 매니저를 별도로 정의)
+        // DataSourceAutoConfiguration을 제외했으므로, JDBC 트랜잭션 매니저도 수동으로 정의합니다.
         @Bean
         public DataSourceTransactionManager transactionManager(DataSource erpDataSource) {
             return new DataSourceTransactionManager(erpDataSource);
