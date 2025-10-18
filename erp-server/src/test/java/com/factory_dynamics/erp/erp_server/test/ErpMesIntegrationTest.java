@@ -107,12 +107,13 @@ public class ErpMesIntegrationTest {
     @MockBean
     private MesApiClient mesApiClient;
 
-    // 🚨 재수정: JPA 컨텍스트 로딩 오류 해결을 위해 핵심 JPA 빈 3가지를 모두 @MockBean으로 처리합니다.
+    // 🚨 JPA 컨텍스트 로딩 오류 해결을 위해 핵심 JPA 빈 3가지를 Mock 처리합니다.
+    // 🚨 JpaTransactionManager는 Primary JDBC TransactionManager로 대체됩니다.
     @MockBean
     private EntityManagerFactory entityManagerFactory;
 
-    @MockBean
-    private JpaTransactionManager jpaTransactionManager;
+    // @MockBean
+    // private JpaTransactionManager jpaTransactionManager; // 🚨 제거: Primary JDBC 트랜잭션 매니저를 사용하기 위해
 
     @MockBean
     private JpaVendorAdapter jpaVendorAdapter;
@@ -158,24 +159,11 @@ public class ErpMesIntegrationTest {
             return new JdbcTemplate(erpDataSource);
         }
 
-        // 🚨 이전 시도에서 충돌을 일으킨 JPA 관련 @Bean 정의를 제거합니다.
-        // @Bean
-        // @Primary
-        // public EntityManagerFactory entityManagerFactory() {
-        //     return Mockito.mock(EntityManagerFactory.class);
-        // }
-
-        // @Bean
-        // @Primary
-        // public JpaTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory) {
-        //     JpaTransactionManager transactionManager = new JpaTransactionManager();
-        //     transactionManager.setEntityManagerFactory(entityManagerFactory);
-        //     return transactionManager;
-        // }
-
-        // 🚨 Primary Transaction Manager (for ERP DB) Bean (JDBC 트랜잭션 매니저를 별도로 정의)
-        // DataSourceAutoConfiguration을 제외했으므로, JDBC 트랜잭션 매니저도 수동으로 정의합니다.
+        // 🚨 Primary Transaction Manager (for ERP DB) Bean
+        // JDBC 테스트에 사용되는 트랜잭션 매니저를 Primary로 설정하여,
+        // JPA 트랜잭션 매니저를 찾는 Spring의 시도를 우회합니다.
         @Bean
+        @Primary // 🚨 추가: 이 트랜잭션 매니저를 Primary로 설정
         public DataSourceTransactionManager transactionManager(DataSource erpDataSource) {
             return new DataSourceTransactionManager(erpDataSource);
         }
