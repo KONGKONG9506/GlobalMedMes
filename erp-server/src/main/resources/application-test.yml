@@ -1,0 +1,30 @@
+spring:
+  # 1. JPA 설정 재정의 (테스트를 위해 DDL-AUTO를 update로 변경 권장)
+  # Testcontainers가 띄운 빈 DB에 스키마를 생성해야 합니다.
+  jpa:
+    hibernate:
+      ddl-auto: update # CI 환경에서 DB 스키마를 자동으로 생성/업데이트
+
+  # 2. DataSource 설정은 DynamicPropertySource가 덮어쓰므로 여기에 DB URL은 제외
+
+  # 3. Flyway 비활성화 (선택적)
+  # Testcontainers 사용 시 Flyway가 DB 마이그레이션을 처리하게 두거나,
+  # JPA DDL-Auto를 사용한다면 Flyway를 끄는 것이 좋습니다.
+  # 여기서는 JPA ddl-auto: update를 사용하고, Flyway는 활성화 상태로 유지합니다 (기존 설정 유지)
+
+# 4. MES API 주소 재정의 (CI 환경에서 외부 호출 방지)
+# 이 주소를 CI/Mocking 환경에 맞게 재정의합니다.
+# 실제 MES 서버 대신 Mocking 서버 주소로 변경하거나,
+# TestRestTemplate이 테스트 코드 내의 엔드포인트를 호출하도록 설정합니다.
+mes:
+  api:
+    # 🚨 이 주소는 TestRestTemplate이 ERP 서버의 API를 호출하는 데 사용됩니다.
+    # 만약 ERP 서버가 내부적으로 MES API를 호출하는 로직이 있다면,
+    # 해당 MES API가 Mocking되도록 설정해야 합니다.
+    base-url: http://localhost:8080 # 테스트 환경에서 사용되는 MES Mock 서버 주소
+    # (MES Mock 서버가 없는 경우, 이 주소는 테스트 로직에 따라 Mocking 라이브러리로 처리해야 합니다.)
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
