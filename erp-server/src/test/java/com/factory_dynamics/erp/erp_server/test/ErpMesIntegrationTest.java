@@ -32,6 +32,7 @@ import org.testcontainers.utility.DockerImageName;
 import reactor.core.publisher.Mono;
 
 import javax.sql.DataSource;
+import jakarta.persistence.EntityManagerFactory; // 🚨 수정: Jakarta EE (JPA 3.0 이상) 네임스페이스 사용
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,6 +104,10 @@ public class ErpMesIntegrationTest {
     // 🚨 MES API 클라이언트를 Mocking하여 실제 HTTP 통신 실패 방지
     @MockBean
     private MesApiClient mesApiClient;
+
+    // 🚨 핵심 수정: JPA 자동 구성 제외로 인해 누락된 EntityManagerFactory를 Mocking하여 종속성을 만족시킵니다.
+    @MockBean
+    private EntityManagerFactory entityManagerFactory;
 
     // ----------------------------------------------------------------------
     // 4. 테스트 환경 설정 (모든 DataSource 및 JdbcTemplate Bean 정의)
