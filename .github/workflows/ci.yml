@@ -29,15 +29,14 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle' 
 
-    # 3. Gradle Wrapper 권한 부여 (필수)
+    # 3. Gradle Wrapper 권한 부여 (경로를 erp-server 내부로 정확히 지정)
     - name: Grant Execute Permission for gradlew
       run: chmod +x ./${{ env.ERP_SERVER_DIR }}/gradlew 
 
-    # 4. 핵심 통합 테스트 실행 및 리포트 생성
+    # 4. 핵심 통합 테스트 실행 및 리포트 생성 (erp-server 내부 gradlew 실행)
     - name: Run Integration Tests in ERP Server
-      # ERP 서버 디렉토리로 이동하지 않고 루트에서 실행하여 모듈별 테스트 실행
-      run: ./gradlew test --project-dir ${{ env.ERP_SERVER_DIR }}
-      # OR run: ./gradlew :erp-server:test (멀티 모듈 구성에 따라 다름. 위의 명령이 더 일반적)
+      # erp-server/gradlew를 직접 실행하여 테스트를 수행합니다.
+      run: ./${{ env.ERP_SERVER_DIR }}/gradlew test
       
     # 5. 테스트 결과 아티팩트 저장 (JUnit XML)
     - name: Upload Test Results (JUnit XML)
