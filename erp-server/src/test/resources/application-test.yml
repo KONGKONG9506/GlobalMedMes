@@ -4,6 +4,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update # CI 환경에서 DB 스키마를 자동으로 생성/업데이트
+  flyway:
+    enabled: false # 🚨 핵심: Flyway 비활성화
 
   # 2. DataSource 설정은 DynamicPropertySource가 덮어쓰므로 여기에 DB URL은 제외
 

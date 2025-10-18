@@ -54,7 +54,6 @@ class ErpMesIntegrationTest {
         registry.add("spring.datasource.url", erpMysqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", erpMysqlContainer::getUsername);
         registry.add("spring.datasource.password", erpMysqlContainer::getPassword);
-        registry.add("spring.flyway.url", erpMysqlContainer::getJdbcUrl);
 
         // MES DB 연결 설정 (두 번째 DataSource 설정을 위한 환경 변수 주입)
         registry.add("mes.datasource.url", mesMysqlContainer::getJdbcUrl);
