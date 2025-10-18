@@ -27,6 +27,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration; // 🚨 신규 Import 추가
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration; // 🚨 신규 Import 추가
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration; // 🚨 신규 Import 추가
+import org.apache.commons.dbcp2.BasicDataSource;
+
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -34,9 +36,9 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-@ActiveProfiles("test") // application-test.yml 로드
+@ActiveProfiles("test")
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
-@SpringBootTest(classes = {ErpServerApplication.class, ErpMesIntegrationTest.TestJdbcConfig.class},
+@SpringBootTest(classes = {ErpServerApplication.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ErpMesIntegrationTest {
@@ -65,6 +67,10 @@ public class ErpMesIntegrationTest {
     // 2. 동적 속성 주입 (Spring <-> Testcontainers 연결)
     // ----------------------------------------------------------------------
 
+    // 🚨 정적 필드로 DataSource 인스턴스 저장
+    private static DataSource erpDataSourceInstance;
+    private static DataSource mesDataSourceInstance;
+
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
         // ERP DataSource (Spring Boot 주 DB) 설정 주입
@@ -77,8 +83,31 @@ public class ErpMesIntegrationTest {
         registry.add("mes.datasource.username", mesMysqlContainer::getUsername);
         registry.add("mes.datasource.password", mesMysqlContainer::getPassword);
 
-        // MES API 호출 URL (테스트 환경에서는 WebClient가 사용하지 않으나, 설정은 필요)
+        // MES API 호출 URL (동일)
         registry.add("mes.api.base-url", () -> "http://localhost:8080");
+
+        // 🚨 Testcontainers 속성을 기반으로 정적 DataSource 인스턴스를 생성
+        erpDataSourceInstance = createDataSource(
+                erpMysqlContainer.getJdbcUrl(),
+                erpMysqlContainer.getUsername(),
+                erpMysqlContainer.getPassword()
+        );
+
+        mesDataSourceInstance = createDataSource(
+                mesMysqlContainer.getJdbcUrl(),
+                mesMysqlContainer.getUsername(),
+                mesMysqlContainer.getPassword()
+        );
+    }
+
+    // 🚨 DataSource 생성 헬퍼 메서드
+    private static DataSource createDataSource(String url, String username, String password) {
+        BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+        return dataSource;
     }
 
     // ----------------------------------------------------------------------
@@ -103,63 +132,36 @@ public class ErpMesIntegrationTest {
     // 4. 테스트 환경 설정 (DataSource Bean 정의)
     // ----------------------------------------------------------------------
 
-    @TestConfiguration
-    public static class TestJdbcConfig {
+    // 🚨 TestJdbcConfig를 대체하는 Bean 정의 메서드를 메인 클래스에 추가합니다.
 
-        // ERP DB 연결 정보 (Primary DataSource) - @Value를 통해 동적 주입된 속성 사용
-        @Value("${spring.datasource.url}")
-        private String erpDbUrl;
-        @Value("${spring.datasource.username}")
-        private String erpDbUsername;
-        @Value("${spring.datasource.password}")
-        private String erpDbPassword;
-
-        // MES DB 연결 정보 (Secondary DataSource) - @Value를 통해 동적 주입된 속성 사용
-        @Value("${mes.datasource.url}")
-        private String mesDbUrl;
-        @Value("${mes.datasource.username}")
-        private String mesDbUsername;
-        @Value("${mes.datasource.password}")
-        private String mesDbPassword;
-
-        // ERP DataSource Bean (Primary로 등록)
-        @Bean
-        @Primary
-        public DataSource erpDataSource() {
-            org.apache.commons.dbcp2.BasicDataSource dataSource = new org.apache.commons.dbcp2.BasicDataSource();
-            dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-            dataSource.setUrl(erpDbUrl);
-            dataSource.setUsername(erpDbUsername);
-            dataSource.setPassword(erpDbPassword);
-            return dataSource;
-        }
-
-        // ERP JdbcTemplate Bean
-        @Bean
-        @Primary
-        public JdbcTemplate erpJdbcTemplate(DataSource erpDataSource) {
-            return new JdbcTemplate(erpDataSource);
-        }
-
-        // MES DataSource Bean
-        @Bean
-        @Qualifier("mesDataSource")
-        public DataSource mesDataSource() {
-            org.apache.commons.dbcp2.BasicDataSource dataSource = new org.apache.commons.dbcp2.BasicDataSource();
-            dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
-            dataSource.setUrl(mesDbUrl);
-            dataSource.setUsername(mesDbUsername);
-            dataSource.setPassword(mesDbPassword);
-            return dataSource;
-        }
-
-        // MES JdbcTemplate Bean
-        @Bean
-        @Qualifier("mesJdbcTemplate")
-        public JdbcTemplate mesJdbcTemplate(@Qualifier("mesDataSource") DataSource mesDataSource) {
-            return new JdbcTemplate(mesDataSource);
-        }
+    // ERP DataSource Bean (Primary로 등록)
+    @Bean
+    @Primary
+    public DataSource erpDataSource() {
+        return erpDataSourceInstance;
     }
+
+    // ERP JdbcTemplate Bean
+    @Bean
+    @Primary
+    public JdbcTemplate erpJdbcTemplate(DataSource erpDataSource) {
+        return new JdbcTemplate(erpDataSource);
+    }
+
+    // MES DataSource Bean
+    @Bean
+    @Qualifier("mesDataSource")
+    public DataSource mesDataSource() {
+        return mesDataSourceInstance;
+    }
+
+    // MES JdbcTemplate Bean
+    @Bean
+    @Qualifier("mesJdbcTemplate")
+    public JdbcTemplate mesJdbcTemplate(@Qualifier("mesDataSource") DataSource mesDataSource) {
+        return new JdbcTemplate(mesDataSource);
+    }
+
 
     // ----------------------------------------------------------------------
     // 5. 테스트 전/후 처리 및 격리 설정
