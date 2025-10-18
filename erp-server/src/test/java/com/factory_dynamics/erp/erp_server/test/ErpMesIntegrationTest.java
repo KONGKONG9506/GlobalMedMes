@@ -110,8 +110,9 @@ public class ErpMesIntegrationTest {
     @MockBean
     private EntityManagerFactory entityManagerFactory;
 
-    // 🚨 핵심 수정 2: JpaTransactionManager Mock을 제거하고 DataSourceTransactionManager만 사용하여 컨텍스트 로딩 충돌 방지
-    // @MockBean private JpaTransactionManager jpaTransactionManager; // 제거됨
+    // 🚨 핵심 수정 2: JPA 관련 Bean 의존성을 만족시키기 위해 JpaTransactionManager Mock을 다시 추가
+    @MockBean
+    private JpaTransactionManager jpaTransactionManager;
 
     // ----------------------------------------------------------------------
     // 4. 테스트 환경 설정 (모든 DataSource 및 JdbcTemplate Bean 정의)
