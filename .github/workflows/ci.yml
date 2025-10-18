@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [ 251018_태영_통합테스트환경 ]
 
+# 🚨 워크플로우 레벨 권한 설정 블록 추가 🚨
+permissions:
+  checks: write        # Checks (테스트 결과 보고서)를 작성할 권한
+  contents: read       # 저장소 콘텐츠를 읽을 권한 (기본값)
+
 env:
   # 프로젝트의 ERP 모듈 디렉토리 경로 (루트 기준)
   ERP_SERVER_DIR: erp-server
