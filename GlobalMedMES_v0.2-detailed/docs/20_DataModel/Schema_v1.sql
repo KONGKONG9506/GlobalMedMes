@@ -217,9 +217,9 @@ CREATE TABLE `tb_user` (
   CONSTRAINT `ck_user_is_active`  CHECK (`is_active` IN (0,1)),
   CONSTRAINT `ck_user_is_deleted` CHECK (`is_deleted` IN (0,1)),
   CONSTRAINT `ck_user_failed_cnt` CHECK (`failed_login_count` >= 0)
+) ENGINE=InnoDB COMMENT='사용자 마스터: 로그인/상태/보안 메타. 해시는 필수, 평문 금지(UTC).';
   -- 선택: 자주 쓰면 인덱스 추가
   -- , KEY `idx_user_last_login` (`last_login_at`)
-) ENGINE=InnoDB COMMENT='사용자 마스터: 로그인/상태/보안 메타. 해시는 필수, 평문 금지(UTC).';
 
 -- tb_user_role (보수형: FK RESTRICT 유지)
 CREATE TABLE `tb_user_role` (

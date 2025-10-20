@@ -676,7 +676,7 @@ CREATE TABLE `tb_production_log` (
    CONSTRAINT `fk_prodlog_event_type` FOREIGN KEY (`event_type`) REFERENCES `tb_code` (`code_id`) ON DELETE RESTRICT,
    CONSTRAINT `ck_prodlog_time_order` CHECK ((`event_timestamp` is not null)),
    CONSTRAINT `ck_prodlog_value_nonneg` CHECK ((`event_value` >= 0))
- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='생산 공정에서 발생하는 원시 이벤트 로그';
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='생산 공정에서 발생하는 이벤트 로그';
 
  CREATE TABLE `tb_kpi_data` (
    `kpi_id` bigint NOT NULL AUTO_INCREMENT COMMENT 'KPI 기록 ID (PK)',
