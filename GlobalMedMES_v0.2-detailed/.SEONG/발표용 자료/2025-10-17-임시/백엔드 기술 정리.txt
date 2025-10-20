@@ -1,0 +1,75 @@
+1.Specification(줄여서 Specs)은 Spring Data JPA에서 제공하는 동적 쿼리(Dynamic Query) 기술.
+
+고급 ORM 설계 패턴
+
+if문 없이도 다양한 필터 조합이 가능해서, 유연하고 깔끔한 동적 검색 API
+
+specification의 장점
+가독성 향상: 복잡한 if문 대신 메서드 체이닝으로 조건 구성
+유지보수 용이: 조건을 메서드 단위로 분리하여 재사용 가능
+조합 가능성: .and(), .or() 등으로 동적 쿼리 조합
+JPA와 완벽 호환: Entity 기반으로 안전한 타입 추론
+QueryDSL 대체 가능: QueryDSL 설정이 복잡할 때 가벼운 대안으로 활용
+
+2.Idempotency & 중복 방지 설계
+
+중복된 지시번호가 있을 경우 예외 발생 → 멱등성(idempotent) 설계.
+생산지시 API를 여러 번 호출해도 중복 데이터가 발생하지 않도록 하는 안정화 로직.
+
+3.1트랜잭션 일관성 관리 (@Transactional)
+
+모든 주요 메서드가 @Transactional로 감싸져 있음.
+
+비즈니스 로직 내에서 여러 Repository 호출이 하나의 트랜잭션으로 묶임.
+
++트랜잭션이란 데이터베이스에 저장하는 도중 예상치 못한 오류가 발생했을때 실행을 취소함 = 모든 작업이 반드시 성공하거나 성공하지 않거나
+
+3.2상태 전이(Transition) 로직의 명확한 도메인 규칙화
+
+P → R → C 순서로만 상태 전이 허용 
+
+4.
+RDB 기본 키 대신 UUID 사용 → 글로벌 환경에서도 충돌 없는 식별자 관리 가능.
+
++ 만약 다른 프로그램과 합병할 일이 있을떄 UUID의 정보는 중복될 확률이 극히 낮음
+5.
+JOIN FETCH를 사용해 연관 엔티티(item, process, equipment, statusCode)를 한 번의 SQL로 로딩 → N+1 쿼리 문제 방지.
+
+대규모 MES 시스템에서 성능 최적화에 필수적인 부분
+
+6.1 
+Lombok : 보일러 플레이트 코드를 줄이고 의존성 주입(DI)을 간결하게 처리합니다.
+
+6.2 
+Spring Security
+
+@PreAuthorize와 **SpEL(Expression Language)**을 사용한 권한 제어.
+
+permChecker는 커스텀 권한 검증 Bean으로, 경로 기반 접근제어를 수행.
+
+hasAnyRole('ADMIN','OP') → 관리자 및 운영자 전용 권한 부여.
+
+7.
+io.jsonwebtoken 라이브러리를 이용한 JWT 검증 및 Claims 파싱
+
+서버 세션 없이 사용자 인증을 처리하는 Stateless 구조
+
+JWT 내부 roles 값을 자동 파싱 → GrantedAuthority로 변환
+
+인증 결과를 SecurityContextHolder에 저장해 전역 접근 가능
+
+JWT 기반 인증 필터를 구현하여 세션리스(stateless) 구조로
+사용자 인증을 처리하고, 역할(Role) 정보를 Security Context에 주입
+
+8.
+tb_user_role, tb_role_menu, tb_menu 테이블을 조합해 메뉴별 접근권한 확인
+
+SpEL(@permChecker.has(...))로 Controller 단 @PreAuthorize와 연동
+
+Path + Action(read/write/exec) 단위로 접근 제어 가능
+
+예외 발생 시에도 false 반환 → 안정적인 SecurityContext 유지
+
+
+
+

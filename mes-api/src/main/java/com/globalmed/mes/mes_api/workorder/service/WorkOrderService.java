@@ -2,6 +2,7 @@
 package com.globalmed.mes.mes_api.workorder.service;
 
 
+import com.globalmed.mes.mes_api.code.CodeEntity;
 import com.globalmed.mes.mes_api.code.CodeRepo;
 import com.globalmed.mes.mes_api.process.repository.ProcessRepo;
 import com.globalmed.mes.mes_api.item.ItemRepo;
@@ -80,11 +81,11 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrderEntity transition(String workOrderId, String toStatus, OffsetDateTime now) {
-        var wo = woRepo.findById(workOrderId)
+        WorkOrderEntity wo = woRepo.findById(workOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
 
-        var cur = wo.getStatusCode().getCode();         // 현재 P/R/C
-        var to  = toStatus != null ? toStatus.trim() : "";
+        String cur = wo.getStatusCode().getCode();         // 현재 P/R/C
+        String to  = toStatus != null ? toStatus.trim() : "";
         if(now == null) now = OffsetDateTime.now();
 
         // 허용 전이만 통과
@@ -95,11 +96,13 @@ public class WorkOrderService {
         }
         if(now == null) now = OffsetDateTime.now();
         if(cur.equals("P")&&to.equals("R")){
-//             processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
         }
 
+//            공정 자격 체크는 일단 제외
+//             processCertCheckService.check(wo.getEquipmentId().getEquipmentId(),wo.getProcessId().getProcessId(), now);
+
         // 상태 코드(P/R/C) 조회(use_yn='Y'), group_code는 네 DB 기준으로(소문자/대문자)
-        var next = codeRepo.findByGroupCodeAndCodeAndUseYn("wo_status", to, 'Y')
+        CodeEntity next = codeRepo.findByGroupCodeAndCodeAndUseYn("wo_status", to, 'Y')
                 .orElseThrow(() -> new IllegalStateException("WO_STATUS_"+to+"_NOT_FOUND"));
         wo.setStatusCode(next);           // status_code_id 매핑
 
@@ -135,7 +138,7 @@ public class WorkOrderService {
     // @Transactional로 플러시
     @Transactional
     public WorkOrderDetailDto findById(String workOrderId) {
-        var wo = woRepo.findByIdWithDetails(workOrderId)
+        WorkOrderEntity wo = woRepo.findByIdWithDetails(workOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("NOT_FOUND"));
         return WorkOrderDetailDto.fromEntity(wo);
     }
