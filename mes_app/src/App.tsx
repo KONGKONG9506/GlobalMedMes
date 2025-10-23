@@ -101,7 +101,7 @@ export default function App() {
             <Route
               index
               element={
-                <PermRoute require="read">
+                <PermRoute require="write">
                   <Shift />
                   
                 </PermRoute>

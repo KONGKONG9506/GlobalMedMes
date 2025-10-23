@@ -76,7 +76,7 @@ export default function Dashboards() {
       const toIso = new Date(`${today}T23:59:59Z`).toISOString().replace(/\.\d{3}Z$/, "Z");
 console.log(fromIso+"////////////////"+toIso);
       const res = await fetchEquipStatus({
-        equipmentId: "ETC-001", // 전체 설비 조회
+        equipmentId: "BLS-001", // 전체 설비 조회
         from: fromIso,
         to: toIso,
         page: 0,
